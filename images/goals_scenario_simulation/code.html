@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface":"#faf8ff","on-tertiary":"#ffffff","tertiary":"#002162","secondary-fixed":"#d5e3ff","on-primary-container":"#86af99","secondary-container":"#bbd3fd","tertiary-container":"#003490","surface-container-low":"#f2f3ff","error":"#ba1a1a","surface-dim":"#d2d9f4","surface-bright":"#faf8ff","on-background":"#131b2e","tertiary-fixed":"#dbe1ff","background":"#faf8ff","primary-fixed-dim":"#a5d0b9","surface-container":"#eaedff","on-surface-variant":"#414844","on-primary":"#ffffff","on-primary-fixed-variant":"#274e3d","outline":"#717973","primary":"#012d1d","surface-variant":"#dae2fd","on-secondary":"#ffffff","on-tertiary-fixed-variant":"#003ea8","secondary":"#485f84","surface-tint":"#3f6653","outline-variant":"#c1c8c2","on-secondary-fixed-variant":"#30476a","on-error-container":"#93000a","on-primary-fixed":"#002114","on-surface":"#131b2e","surface-container-high":"#e2e7ff","inverse-surface":"#283044","inverse-primary":"#a5d0b9","primary-container":"#1b4332","secondary-fixed-dim":"#b0c7f1","on-secondary-fixed":"#001b3c","on-tertiary-container":"#84a3ff","error-container":"#ffdad6","surface-container-highest":"#dae2fd","inverse-on-surface":"#eef0ff","on-secondary-container":"#445a7f","surface-container-lowest":"#ffffff","on-error":"#ffffff","primary-fixed":"#c1ecd4","tertiary-fixed-dim":"#b4c5ff","on-tertiary-fixed":"#00174b"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin-mobile":"1rem","gutter-mobile":"1rem","space-xs":"0.25rem","gutter":"1.5rem","space-lg":"1.5rem","space-xl":"2.5rem","space-sm":"0.5rem","space-md":"1rem","margin-desktop":"3rem","margin":"2rem"},fontFamily:{"metric-md":["Inter"],"headline-sm":["Manrope"],"display-lg":["Manrope"],"label-code":["JetBrains Mono"],"title-md":["Inter"],"headline-md":["Manrope"],"headline-lg":["Manrope"],"display-lg-mobile":["Manrope"],"label-caps":["Inter"],"body-sm":["Inter"],"body-lg":["Inter"],"headline-lg-mobile":["Manrope"],"body-md":["Inter"],"metric-xl":["Manrope"]},fontSize:{"metric-md":["20px",{"lineHeight":"26px","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-code":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"500"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.06em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["15px",{"lineHeight":"22px","fontWeight":"400"}],"metric-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="p-space-lg flex items-start gap-space-sm"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shrink-0 shadow-sm"><span class="material-symbols-outlined text-headline-sm">query_stats</span></div><div class="flex flex-col overflow-hidden"><span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold leading-tight">PlanWise AI</span><span class="font-label-code text-label-code text-on-surface-variant leading-tight truncate">Financial Planning Prototype • Draft</span></div></div><div class="px-space-md py-space-xs"><div class="bg-surface-container-low rounded-xl p-space-sm flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-secondary text-body-sm">labs</span><div class="flex flex-col"><span class="font-label-caps text-label-caps text-on-surface uppercase">Example Data Mode</span><span class="font-label-code text-label-code text-on-surface-variant">Synthetic Portfolio</span></div></div><button class="w-9 h-5 bg-primary-container rounded-full relative flex items-center p-0.5 cursor-pointer transition-colors" type="button"><span class="w-4 h-4 bg-surface-container-lowest rounded-full shadow-sm transform translate-x-4 transition-transform"></span></button></div></div><div class="px-space-md pt-space-md"><span class="px-space-sm font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider block mb-space-xs">Navigation</span><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-title-md"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a><a aria-current="page" class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg transition-all bg-primary-container text-on-primary font-title-md" data-path="goals" href="#"><span class="material-symbols-outlined">flag</span><span>Goals</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="plan-and-assistant" href="#"><span class="material-symbols-outlined">psychology</span><span>Plan &amp; Assistant</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="settings-and-privacy" href="#"><span class="material-symbols-outlined">shield_person</span><span>Settings &amp; Privacy</span></a></nav></div></div><div class="p-space-md bg-surface-container-low/60 m-space-md rounded-xl flex flex-col gap-space-sm"><div class="flex items-center justify-between"><div class="flex items-center gap-space-sm overflow-hidden"><img alt="Alex Morgan" class="w-9 h-9 rounded-full object-cover shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WsBLvpKp7A28fNF0yhWdpgbvAj10pDlle9YShabPJlK2Gk4nz0XRV1Oge3e05-BRgnz-TASH97hUWORdxO_utursrfp2N5gBBWIr5dbESho3e2MudPK8kw4dd5mOA2HbdqoGoLaMCeb6YaGYsUjH4v-y04weRytINKCBvc68-zH0fzFIB_dVhJw2yHfofdAxwsE_mVrWQ-PKGHhBF_6-x2A6WXg25l5Y6rBAWdk_g_sxsBqJUxgU8KBvY"/><div class="flex flex-col truncate"><span class="font-title-md text-title-md text-on-surface leading-snug truncate">Alex Morgan</span><span class="font-label-code text-label-code text-on-surface-variant">Private Wealth Tier</span></div></div></div><div class="flex items-center justify-between pt-space-xs"><div class="flex items-center gap-space-xs text-on-surface-variant"><span class="material-symbols-outlined text-body-sm">visibility_off</span><span class="font-label-code text-label-code">Mask Values</span></div><button class="w-8 h-4.5 bg-primary-container rounded-full relative flex items-center p-0.5 cursor-pointer" type="button"><span class="w-3.5 h-3.5 bg-surface-container-lowest rounded-full transform translate-x-3.5 transition-transform"></span></button></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">Advisory Workspace</span><div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-code text-label-code"><span class="material-symbols-outlined text-body-sm text-secondary">lock</span><span>Client Data Masked</span></div></div><div class="flex items-center gap-space-md"><a class="inline-flex items-center gap-space-xs text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="glossary" href="#"><span class="material-symbols-outlined text-body-sm">help_center</span><span>Help &amp; Glossary</span></a><div class="w-px h-5 bg-outline-variant/40"></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WsBLvpKp7A28fNF0yhWdpgbvAj10pDlle9YShabPJlK2Gk4nz0XRV1Oge3e05-BRgnz-TASH97hUWORdxO_utursrfp2N5gBBWIr5dbESho3e2MudPK8kw4dd5mOA2HbdqoGoLaMCeb6YaGYsUjH4v-y04weRytINKCBvc68-zH0fzFIB_dVhJw2yHfofdAxwsE_mVrWQ-PKGHhBF_6-x2A6WXg25l5Y6rBAWdk_g_sxsBqJUxgU8KBvY"/></div></header><main class="relative pt-16 w-full min-h-screen bg-surface"><div class="flex flex-col w-full">
+<div class="p-space-lg max-w-7xl mx-auto w-full flex flex-col gap-space-lg">
+<!-- Header Section with Multi-Dimensional Stats & Controls -->
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-space-md">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider">Capital Milestones</span>
+<span class="w-1.5 h-1.5 rounded-full bg-primary-container"></span>
+<span class="font-label-code text-label-code text-on-primary-container font-semibold">2 Active Target Pools</span>
+</div>
+<div class="flex flex-wrap items-baseline gap-x-space-md gap-y-space-xs">
+<h1 class="font-headline-lg text-headline-lg text-primary tracking-tight font-bold">Financial Goals</h1>
+<span class="font-metric-md text-metric-md text-on-surface-variant font-normal">
+<span class="text-primary font-semibold">$63,000</span> saved across 2 active goals
+          </span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">
+          Track progress, simulate timelines, and inspect calculation parameters against institutional forecasting standards.
+        </p>
+</div>
+<!-- Action Cluster -->
+<div class="flex items-center gap-space-sm shrink-0">
+<!-- Filter Tabs -->
+<div class="inline-flex p-1 bg-surface-container-high rounded-lg text-on-surface-variant">
+<button class="px-3 py-1.5 rounded-DEFAULT bg-surface-container-lowest text-primary font-title-md text-body-sm shadow-sm transition-all flex items-center gap-1.5" type="button">
+<span>Active</span>
+<span class="px-1.5 py-0.2 bg-primary-fixed text-on-primary-fixed rounded-full text-label-code font-bold">2</span>
+</button>
+<button class="px-3 py-1.5 rounded-DEFAULT text-on-surface-variant hover:text-on-surface font-body-sm transition-colors flex items-center gap-1.5" type="button">
+<span>Paused</span>
+<span class="text-label-code opacity-60">0</span>
+</button>
+<button class="px-3 py-1.5 rounded-DEFAULT text-on-surface-variant hover:text-on-surface font-body-sm transition-colors flex items-center gap-1.5" type="button">
+<span>Archived</span>
+<span class="px-1.5 py-0.2 bg-surface-variant text-on-surface-variant rounded-full text-label-code font-bold">1</span>
+</button>
+</div>
+<!-- Create Button -->
+<button class="inline-flex items-center gap-space-xs px-4 py-2 bg-primary text-on-primary rounded-lg font-title-md text-body-sm shadow-sm hover:bg-primary-container transition-colors focus:ring-2 focus:ring-primary focus:ring-offset-2" id="open-drawer-btn" type="button">
+<span class="material-symbols-outlined text-body-md">add_task</span>
+<span>Create New Goal</span>
+</button>
+</div>
+</div>
+<!-- Aggregate Progress Banner (Institutional Overview) -->
+<div class="bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col md:flex-row items-center justify-between gap-space-md">
+<div class="flex items-center gap-space-md w-full md:w-auto">
+<div class="w-12 h-12 rounded-xl bg-secondary-fixed text-on-secondary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-headline-sm">savings</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Portfolio Target Velocity</span>
+<div class="flex items-center gap-2">
+<span class="font-title-md text-title-md text-on-surface font-bold">$1,200 / month</span>
+<span class="text-label-code font-label-code text-on-surface-variant bg-surface-container-low px-2 py-0.5 rounded-full">Aggregated Auto-Debit</span>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-xl w-full md:w-auto justify-between md:justify-end">
+<div class="flex flex-col items-start md:items-end">
+<span class="font-label-code text-label-code text-on-surface-variant">Combined Target</span>
+<span class="font-title-md text-title-md text-primary tabular-nums font-bold">$114,000.00</span>
+</div>
+<div class="h-8 w-px bg-surface-container-high hidden md:block"></div>
+<div class="flex flex-col items-start md:items-end">
+<span class="font-label-code text-label-code text-on-surface-variant">Aggregate Funded</span>
+<span class="font-title-md text-title-md text-on-primary-container tabular-nums font-bold">55.2%</span>
+</div>
+<div class="w-32 bg-surface-container-high h-2.5 rounded-full overflow-hidden shrink-0">
+<div class="bg-primary-container h-full rounded-full" style="width: 55.2%"></div>
+</div>
+</div>
+</div>
+<!-- Main Grid: Goals List and Incomplete Showcase -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg items-start">
+<!-- Primary Goal Cards (Columns 1-8) -->
+<div class="lg:col-span-8 flex flex-col gap-space-md">
+<!-- Goal 1: Emergency Fund (On Track) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col gap-space-md">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-primary-fixed text-on-primary-fixed flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-headline-sm">shield</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Emergency Fund</h3>
+<!-- Provenance Badge -->
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-low font-label-code text-label-code text-primary font-semibold">
+<span class="material-symbols-outlined text-label-code">lock</span>
+                    Liquidity Tier 1
+                  </span>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant">Allocated to High Yield Liquidity Pool</span>
+</div>
+</div>
+<!-- Multi-cue Status Indicator & Action Menu -->
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-code text-label-code font-bold">
+<span class="material-symbols-outlined text-body-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+<span>ON TRACK</span>
+</span>
+<div class="relative group">
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-body-md">more_vert</span>
+</button>
+<div class="hidden group-hover:flex group-focus-within:flex absolute right-0 top-9 w-40 flex-col bg-surface-container-lowest rounded-lg shadow-xl p-1 z-30">
+<button class="w-full text-left px-3 py-1.5 text-body-sm font-body-sm rounded-DEFAULT text-on-surface hover:bg-surface-container-low" type="button">Edit Parameters</button>
+<button class="w-full text-left px-3 py-1.5 text-body-sm font-body-sm rounded-DEFAULT text-on-surface hover:bg-surface-container-low" type="button">Pause Allocation</button>
+<button class="w-full text-left px-3 py-1.5 text-body-sm font-body-sm rounded-DEFAULT text-secondary hover:bg-surface-container-low" type="button">View Ledger Breakdown</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Progress Ring + Primary Figures -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md py-space-xs bg-surface-container-low/50 rounded-lg p-space-md">
+<!-- Progress Radial Display -->
+<div class="flex items-center gap-space-md">
+<div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background circle -->
+<circle class="stroke-surface-container-high" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3.2"></circle>
+<!-- Stroke progress: 75% = 75 dash, 25 space -->
+<circle class="stroke-primary-container" cx="18" cy="18" fill="none" r="15.9155" stroke-dasharray="75 25" stroke-linecap="round" stroke-width="3.2"></circle>
+</svg>
+<span class="absolute font-title-md text-title-md font-bold text-primary">75%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Current Status</span>
+<span class="font-metric-md text-metric-md text-primary font-bold tabular-nums">$18,000</span>
+<span class="font-label-code text-label-code text-on-surface-variant">of $24,000 Target</span>
+</div>
+</div>
+<!-- Contribution Cadence -->
+<div class="flex flex-col justify-center border-l-0 md:border-l border-surface-container-high md:pl-space-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Monthly Contribution</span>
+<div class="flex items-baseline gap-1">
+<span class="font-metric-md text-metric-md text-on-surface font-semibold tabular-nums">$400</span>
+<span class="font-label-code text-label-code text-on-surface-variant">/ month</span>
+</div>
+<span class="font-label-code text-label-code text-on-primary-container font-medium">Automatic debit (1st of mo)</span>
+</div>
+<!-- Target Horizon -->
+<div class="flex flex-col justify-center border-l-0 md:border-l border-surface-container-high md:pl-space-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Target Date</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">October 2027</span>
+<div class="flex items-center gap-1 text-on-primary-container font-label-code text-label-code">
+<span class="material-symbols-outlined text-label-code">schedule</span>
+<span>On Schedule (15 mos remaining)</span>
+</div>
+</div>
+</div>
+<!-- Sparkline / Timeline Track -->
+<div class="flex flex-col gap-space-xs pt-1">
+<div class="flex items-center justify-between text-label-code font-label-code text-on-surface-variant">
+<span>Origin: Jan 2024 ($0)</span>
+<span class="text-primary font-semibold">Current Pace (+3.8% above plan)</span>
+<span>Maturity: Oct 2027 ($24k)</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden relative">
+<div class="bg-primary-container h-full rounded-full transition-all duration-500" style="width: 75%"></div>
+</div>
+</div>
+<!-- Bottom Meta Strip -->
+<div class="flex flex-wrap items-center justify-between pt-space-xs text-label-code font-label-code text-on-surface-variant">
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-label-code">account_balance</span>
+<span>Custody: Morgan Stanley Private Wealth</span>
+</span>
+<span>•</span>
+<span>Assumed Yield: 4.2% APY</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="text-secondary hover:text-primary font-semibold transition-colors flex items-center gap-1" type="button">
+<span>View Schedule</span>
+<span class="material-symbols-outlined text-label-code">arrow_forward</span>
+</button>
+</div>
+</div>
+</article>
+<!-- Goal 2: Home Down Payment (Needs Attention) -->
+<article class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm hover:shadow-md transition-shadow relative overflow-hidden flex flex-col gap-space-md">
+<div class="flex items-start justify-between gap-space-md">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-secondary-container text-on-secondary-container flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-headline-sm">real_estate_agent</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-2">
+<h3 class="font-headline-sm text-headline-sm text-primary font-bold">Home Down Payment</h3>
+<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-surface-container-low font-label-code text-label-code text-secondary font-semibold">
+<span class="material-symbols-outlined text-label-code">domain</span>
+                    Real Estate
+                  </span>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant">Primary Residence Acquisition Fund</span>
+</div>
+</div>
+<!-- Multi-cue Alert Badge -->
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-error-container text-on-error-container font-label-code text-label-code font-bold">
+<span class="material-symbols-outlined text-body-sm" style="font-variation-settings: 'FILL' 1;">warning</span>
+<span>Behind pace by 3 months</span>
+</span>
+<div class="relative group">
+<button class="w-8 h-8 rounded-lg flex items-center justify-center text-on-surface-variant hover:bg-surface-container-high transition-colors" type="button">
+<span class="material-symbols-outlined text-body-md">more_vert</span>
+</button>
+<div class="hidden group-hover:flex group-focus-within:flex absolute right-0 top-9 w-44 flex-col bg-surface-container-lowest rounded-lg shadow-xl p-1 z-30">
+<button class="w-full text-left px-3 py-1.5 text-body-sm font-body-sm rounded-DEFAULT text-on-surface hover:bg-surface-container-low" type="button">Edit Parameters</button>
+<button class="w-full text-left px-3 py-1.5 text-body-sm font-body-sm rounded-DEFAULT text-primary font-semibold hover:bg-surface-container-low" type="button">Adjust Pace Simulation</button>
+<button class="w-full text-left px-3 py-1.5 text-body-sm font-body-sm rounded-DEFAULT text-error hover:bg-error-container" type="button">Pause Allocations</button>
+</div>
+</div>
+</div>
+</div>
+<!-- Progress Ring + Primary Figures -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-md py-space-xs bg-surface-container-low/50 rounded-lg p-space-md">
+<!-- Progress Radial Display -->
+<div class="flex items-center gap-space-md">
+<div class="relative w-16 h-16 shrink-0 flex items-center justify-center">
+<svg class="w-full h-full -rotate-90" viewbox="0 0 36 36">
+<!-- Background circle -->
+<circle class="stroke-surface-container-high" cx="18" cy="18" fill="none" r="15.9155" stroke-width="3.2"></circle>
+<!-- Stroke progress: 50% = 50 dash, 50 space -->
+<circle class="stroke-secondary" cx="18" cy="18" fill="none" r="15.9155" stroke-dasharray="50 50" stroke-linecap="round" stroke-width="3.2"></circle>
+</svg>
+<span class="absolute font-title-md text-title-md font-bold text-secondary">50%</span>
+</div>
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Current Status</span>
+<span class="font-metric-md text-metric-md text-primary font-bold tabular-nums">$45,000</span>
+<span class="font-label-code text-label-code text-on-surface-variant">of $90,000 Target</span>
+</div>
+</div>
+<!-- Monthly Contribution -->
+<div class="flex flex-col justify-center border-l-0 md:border-l border-surface-container-high md:pl-space-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Monthly Contribution</span>
+<div class="flex items-baseline gap-1">
+<span class="font-metric-md text-metric-md text-on-surface font-semibold tabular-nums">$800</span>
+<span class="font-label-code text-label-code text-on-surface-variant">/ month</span>
+</div>
+<span class="font-label-code text-label-code text-error font-medium">Deficit: +$150/mo recommended</span>
+</div>
+<!-- Target Horizon -->
+<div class="flex flex-col justify-center border-l-0 md:border-l border-surface-container-high md:pl-space-md">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Target Date</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">June 2029</span>
+<div class="flex items-center gap-1 text-error font-label-code text-label-code">
+<span class="material-symbols-outlined text-label-code">update</span>
+<span>Projected slippage: Sept 2029</span>
+</div>
+</div>
+</div>
+<!-- Alert Box / Remediation Insight -->
+<div class="bg-surface-container-high/40 rounded-lg p-space-sm flex items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm text-body-sm text-on-surface">
+<span class="material-symbols-outlined text-secondary shrink-0">insights</span>
+<span>Rebalance recommendation: Increase monthly deposit to <strong>$950/mo</strong> or extend target horizon by 90 days.</span>
+</div>
+<button class="shrink-0 px-3 py-1 bg-surface-container-lowest text-primary font-title-md text-label-caps rounded-DEFAULT shadow-sm hover:bg-secondary-fixed transition-colors" type="button">
+              Adjust Pace
+            </button>
+</div>
+<!-- Bottom Meta Strip -->
+<div class="flex flex-wrap items-center justify-between pt-space-xs text-label-code font-label-code text-on-surface-variant">
+<div class="flex items-center gap-space-sm">
+<span class="inline-flex items-center gap-1">
+<span class="material-symbols-outlined text-label-code">trending_up</span>
+<span>Blended Index Portfolio</span>
+</span>
+<span>•</span>
+<span>Assumed Return: 6.8%</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<span class="text-label-code text-on-surface-variant">Last re-forecasted: 2 days ago</span>
+</div>
+</div>
+</article>
+<!-- Empty / Incomplete Goal state card preview to fulfill FR-FE-011 -->
+<div class="bg-surface-container-low/70 border-dashed rounded-xl p-space-lg flex flex-col gap-space-md">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<div class="w-10 h-10 rounded-xl bg-surface-container-high text-on-surface-variant flex items-center justify-center shrink-0">
+<span class="material-symbols-outlined text-headline-sm">edit_calendar</span>
+</div>
+<div class="flex flex-col">
+<div class="flex items-center gap-space-xs">
+<h4 class="font-title-md text-title-md text-on-surface font-semibold">Custom Goal Draft (Incomplete)</h4>
+<span class="px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant font-label-code text-label-code uppercase">FR-FE-011 Incomplete State</span>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant">Created yesterday by Alex Morgan • Lacks target amortization schedule</span>
+</div>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-primary text-body-sm font-title-md hover:bg-surface-container transition-colors shadow-sm" type="button">
+              Resume Setup
+            </button>
+</div>
+<!-- Visual Checklist & Missing Parameters Indicator -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-space-sm pt-space-xs">
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col gap-1">
+<div class="flex items-center justify-between text-label-code font-label-code">
+<span class="text-on-surface-variant">1. Title &amp; Cat</span>
+<span class="material-symbols-outlined text-primary text-label-code">check</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium truncate">Post-Grad Fund</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col gap-1">
+<div class="flex items-center justify-between text-label-code font-label-code">
+<span class="text-on-surface-variant">2. Target Capital</span>
+<span class="material-symbols-outlined text-primary text-label-code">check</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface font-medium">$35,000</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col gap-1">
+<div class="flex items-center justify-between text-label-code font-label-code">
+<span class="text-error font-medium">3. Contribution Cadence</span>
+<span class="material-symbols-outlined text-error text-label-code">error</span>
+</div>
+<span class="font-body-sm text-body-sm text-error font-medium">Missing Value</span>
+</div>
+<div class="bg-surface-container-lowest p-space-sm rounded-lg flex flex-col gap-1">
+<div class="flex items-center justify-between text-label-code font-label-code">
+<span class="text-on-surface-variant">4. Strategy Risk</span>
+<span class="material-symbols-outlined text-on-surface-variant text-label-code">pending</span>
+</div>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Unselected</span>
+</div>
+</div>
+<div class="flex items-center justify-between pt-space-xs">
+<p class="font-label-code text-label-code text-on-surface-variant">
+              Incomplete goals do not participate in active net-worth forecasting or automated ledger transfers.
+            </p>
+<button class="text-label-code font-label-code text-error hover:underline" type="button">
+              Discard Draft
+            </button>
+</div>
+</div>
+</div>
+<!-- Detail / Interactive Simulation Drawer Panel (Columns 9-12) -->
+<aside class="lg:col-span-4 flex flex-col gap-space-md">
+<!-- Persistent Interactive Drawer / Form Container -->
+<div class="bg-surface-container-lowest rounded-xl p-space-lg shadow-sm flex flex-col gap-space-md relative">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Interactive Modal / Drawer</span>
+<h2 class="font-headline-sm text-headline-sm text-primary font-bold">Create Goal (Prototype Step)</h2>
+</div>
+<span class="material-symbols-outlined text-primary-container">science</span>
+</div>
+<form class="flex flex-col gap-space-md" id="goal-form" onsubmit="event.preventDefault(); validateForm();">
+<!-- Goal Name -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-code text-label-code text-on-surface font-semibold flex items-center justify-between" for="goal-name">
+<span>Goal Name</span>
+<span class="text-primary-container font-normal">Required</span>
+</label>
+<input class="w-full h-10 px-3 bg-surface-container-lowest rounded-DEFAULT text-on-surface font-body-md shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1" id="goal-name" placeholder="e.g. Sabbatical, Down Payment" type="text" value="New Vehicle Acquisition"/>
+</div>
+<!-- Category Dropdown -->
+<div class="flex flex-col gap-1.5">
+<label class="font-label-code text-label-code text-on-surface font-semibold" for="goal-category">
+                Category
+              </label>
+<div class="relative">
+<select class="w-full h-10 px-3 bg-surface-container-lowest rounded-DEFAULT text-on-surface font-body-md shadow-sm appearance-none focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1 pr-8" id="goal-category">
+<option value="emergency">Emergency</option>
+<option value="real-estate">Real Estate</option>
+<option value="education">Education</option>
+<option value="retirement">Retirement</option>
+<option selected="" value="custom">Custom</option>
+</select>
+<span class="material-symbols-outlined absolute right-2.5 top-2.5 text-on-surface-variant pointer-events-none text-body-md">
+                  expand_more
+                </span>
+</div>
+</div>
+<!-- Target Amount & Initial Deposit Inputs -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-code text-label-code text-on-surface font-semibold" for="target-amount">
+                  Target Amount ($)
+                </label>
+<div class="relative">
+<span class="absolute left-3 top-2.5 text-on-surface-variant font-label-code">$</span>
+<input class="w-full h-10 pl-7 pr-2 bg-surface-container-lowest rounded-DEFAULT text-on-surface font-body-md tabular-nums shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary focus:ring-offset-1" id="target-amount" type="number" value="15000"/>
+</div>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-code text-label-code text-on-surface font-semibold" for="initial-deposit">
+                  Initial Deposit ($)
+                </label>
+<div class="relative">
+<span class="absolute left-3 top-2.5 text-on-surface-variant font-label-code">$</span>
+<input class="w-full h-10 pl-7 pr-2 bg-surface-container-lowest rounded-DEFAULT text-on-surface font-body-md tabular-nums shadow-sm focus:outline-none focus:ring-2 focus:ring-error focus:ring-offset-1" id="initial-deposit" type="number" value="20000"/>
+</div>
+</div>
+</div>
+<!-- Inline Validation Feedback Example (Active Triggered State) -->
+<div class="bg-error-container text-on-error-container p-space-sm rounded-lg flex items-start gap-2" id="validation-notice">
+<span class="material-symbols-outlined text-body-md shrink-0">error</span>
+<div class="flex flex-col">
+<span class="font-label-code text-label-code font-bold">Validation Error</span>
+<span class="font-body-sm text-body-sm leading-tight">Target amount must be greater than initial deposit ($15,000 vs $20,000).</span>
+</div>
+</div>
+<!-- Target Date & Monthly Contribution -->
+<div class="grid grid-cols-2 gap-space-sm">
+<div class="flex flex-col gap-1.5">
+<label class="font-label-code text-label-code text-on-surface font-semibold" for="target-date">
+                  Target Date
+                </label>
+<input class="w-full h-10 px-2 bg-surface-container-lowest rounded-DEFAULT text-on-surface font-body-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary" id="target-date" type="date" value="2026-11-30"/>
+</div>
+<div class="flex flex-col gap-1.5">
+<label class="font-label-code text-label-code text-on-surface font-semibold" for="monthly-contribution">
+                  Monthly Contribution
+                </label>
+<div class="relative">
+<span class="absolute left-3 top-2.5 text-on-surface-variant font-label-code">$</span>
+<input class="w-full h-10 pl-7 pr-2 bg-surface-container-lowest rounded-DEFAULT text-on-surface font-body-md tabular-nums shadow-sm focus:outline-none focus:ring-2 focus:ring-secondary" id="monthly-contribution" type="number" value="500"/>
+</div>
+</div>
+</div>
+<!-- Real-time Interactive Simulation Widget -->
+<div class="bg-surface-container-low p-space-sm rounded-lg flex flex-col gap-2">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Projected Horizon</span>
+<span class="font-label-code text-label-code text-primary font-bold">28 Months</span>
+</div>
+<div class="w-full bg-surface-container-high h-2 rounded-full overflow-hidden">
+<div class="bg-secondary h-full rounded-full" style="width: 45%"></div>
+</div>
+<div class="flex items-center justify-between text-label-code font-label-code text-on-surface-variant">
+<span>Start: Tomorrow</span>
+<span>Target: Nov 2026</span>
+</div>
+</div>
+<!-- Source of Calculation Disclosure -->
+<div class="p-space-sm rounded-lg bg-surface-container-high/60 flex items-start gap-space-xs text-on-surface-variant">
+<span class="material-symbols-outlined text-body-sm text-secondary shrink-0 mt-0.5">info</span>
+<p class="font-label-code text-label-code leading-relaxed">
+                Source of calculation disclosure: Timeline calculations rely on backend projection rules (Pending team approval OP-006). Visual estimate only.
+              </p>
+</div>
+<!-- Buttons -->
+<div class="flex items-center justify-end gap-space-sm pt-space-xs">
+<button class="px-4 py-2 bg-transparent text-secondary hover:bg-surface-container font-title-md text-body-sm rounded-DEFAULT transition-colors" id="cancel-drawer-btn" type="button">
+                Cancel
+              </button>
+<button class="px-5 py-2 bg-primary text-on-primary font-title-md text-body-sm rounded-DEFAULT shadow-sm hover:bg-primary-container transition-colors" type="submit">
+                Save Goal
+              </button>
+</div>
+</form>
+</div>
+<!-- Quick Advisory Notes Card -->
+<div class="bg-surface-container-lowest rounded-xl p-space-md shadow-sm flex flex-col gap-space-sm">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-body-md">psychology</span>
+<span class="font-title-md text-title-md text-primary font-semibold">Advisory Guideline</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant leading-relaxed">
+            Per the Morgan Wealth Framework, cash reserve goals should maintain a liquidity variance under 1.5% while real estate goals should absorb index drawdown simulations of up to 12%.
+          </p>
+<div class="flex items-center justify-between pt-1">
+<span class="font-label-code text-label-code text-on-surface-variant">Guideline Rev: Q3-2025</span>
+<a class="font-label-code text-label-code text-secondary hover:underline font-semibold" href="#">View Allocation Policy</a>
+</div>
+</div>
+</aside>
+</div>
+</div>
+</div>
+<script>
+  // Simple interactive prototype logic for field validation display
+  function validateForm() {
+    const targetInput = document.getElementById('target-amount');
+    const initialInput = document.getElementById('initial-deposit');
+    const notice = document.getElementById('validation-notice');
+
+    if (!targetInput || !initialInput || !notice) return;
+
+    const targetVal = parseFloat(targetInput.value) || 0;
+    const initialVal = parseFloat(initialInput.value) || 0;
+
+    if (initialVal >= targetVal) {
+      notice.classList.remove('hidden');
+      notice.innerHTML = `
+        <span class="material-symbols-outlined text-body-md shrink-0">error</span>
+        <div class="flex flex-col">
+          <span class="font-label-code text-label-code font-bold">Validation Error</span>
+          <span class="font-body-sm text-body-sm leading-tight">Target amount must be greater than initial deposit ($${targetVal.toLocaleString()} vs $${initialVal.toLocaleString()}).</span>
+        </div>
+      `;
+    } else {
+      notice.classList.add('hidden');
+      alert('Goal prototype validated successfully! Ready for backend OP-006 ingest.');
+    }
+  }
+
+  // Interactive drawer focus toggling
+  const openBtn = document.getElementById('open-drawer-btn');
+  const cancelBtn = document.getElementById('cancel-drawer-btn');
+  const nameInput = document.getElementById('goal-name');
+
+  if (openBtn && nameInput) {
+    openBtn.addEventListener('click', () => {
+      nameInput.focus();
+      nameInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener('click', () => {
+      const form = document.getElementById('goal-form');
+      if (form) form.reset();
+      const notice = document.getElementById('validation-notice');
+      if (notice) notice.classList.add('hidden');
+    });
+  }
+</script></main></div></body></html>

@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+
+<html lang="en"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@400;500&amp;family=Manrope:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config={darkMode:"class",theme:{extend:{colors:{"surface":"#faf8ff","on-tertiary":"#ffffff","tertiary":"#002162","secondary-fixed":"#d5e3ff","on-primary-container":"#86af99","secondary-container":"#bbd3fd","tertiary-container":"#003490","surface-container-low":"#f2f3ff","error":"#ba1a1a","surface-dim":"#d2d9f4","surface-bright":"#faf8ff","on-background":"#131b2e","tertiary-fixed":"#dbe1ff","background":"#faf8ff","primary-fixed-dim":"#a5d0b9","surface-container":"#eaedff","on-surface-variant":"#414844","on-primary":"#ffffff","on-primary-fixed-variant":"#274e3d","outline":"#717973","primary":"#012d1d","surface-variant":"#dae2fd","on-secondary":"#ffffff","on-tertiary-fixed-variant":"#003ea8","secondary":"#485f84","surface-tint":"#3f6653","outline-variant":"#c1c8c2","on-secondary-fixed-variant":"#30476a","on-error-container":"#93000a","on-primary-fixed":"#002114","on-surface":"#131b2e","surface-container-high":"#e2e7ff","inverse-surface":"#283044","inverse-primary":"#a5d0b9","primary-container":"#1b4332","secondary-fixed-dim":"#b0c7f1","on-secondary-fixed":"#001b3c","on-tertiary-container":"#84a3ff","error-container":"#ffdad6","surface-container-highest":"#dae2fd","inverse-on-surface":"#eef0ff","on-secondary-container":"#445a7f","surface-container-lowest":"#ffffff","on-error":"#ffffff","primary-fixed":"#c1ecd4","tertiary-fixed-dim":"#b4c5ff","on-tertiary-fixed":"#00174b"},borderRadius:{"DEFAULT":"0.125rem","lg":"0.25rem","xl":"0.5rem","full":"0.75rem"},spacing:{"margin-mobile":"1rem","gutter-mobile":"1rem","space-xs":"0.25rem","gutter":"1.5rem","space-lg":"1.5rem","space-xl":"2.5rem","space-sm":"0.5rem","space-md":"1rem","margin-desktop":"3rem","margin":"2rem"},fontFamily:{"metric-md":["Inter"],"headline-sm":["Manrope"],"display-lg":["Manrope"],"label-code":["JetBrains Mono"],"title-md":["Inter"],"headline-md":["Manrope"],"headline-lg":["Manrope"],"display-lg-mobile":["Manrope"],"label-caps":["Inter"],"body-sm":["Inter"],"body-lg":["Inter"],"headline-lg-mobile":["Manrope"],"body-md":["Inter"],"metric-xl":["Manrope"]},fontSize:{"metric-md":["20px",{"lineHeight":"26px","fontWeight":"600"}],"headline-sm":["20px",{"lineHeight":"28px","fontWeight":"600"}],"display-lg":["48px",{"lineHeight":"56px","letterSpacing":"-0.02em","fontWeight":"700"}],"label-code":["11px",{"lineHeight":"16px","letterSpacing":"0.04em","fontWeight":"500"}],"title-md":["16px",{"lineHeight":"24px","fontWeight":"600"}],"headline-md":["24px",{"lineHeight":"32px","letterSpacing":"-0.005em","fontWeight":"600"}],"headline-lg":["32px",{"lineHeight":"40px","letterSpacing":"-0.01em","fontWeight":"600"}],"display-lg-mobile":["36px",{"lineHeight":"44px","letterSpacing":"-0.015em","fontWeight":"700"}],"label-caps":["11px",{"lineHeight":"16px","letterSpacing":"0.06em","fontWeight":"600"}],"body-sm":["13px",{"lineHeight":"18px","fontWeight":"400"}],"body-lg":["18px",{"lineHeight":"28px","fontWeight":"400"}],"headline-lg-mobile":["26px",{"lineHeight":"34px","letterSpacing":"-0.01em","fontWeight":"600"}],"body-md":["15px",{"lineHeight":"22px","fontWeight":"400"}],"metric-xl":["36px",{"lineHeight":"44px","letterSpacing":"-0.02em","fontWeight":"700"}]}}}};</script></head><body class="bg-surface font-body-md text-on-surface antialiased"><aside class="fixed left-0 top-0 h-full w-72 bg-surface-container-lowest shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-50 flex flex-col justify-between"><div class="flex flex-col"><div class="p-space-lg flex items-start gap-space-sm"><div class="w-10 h-10 rounded-xl bg-primary-container flex items-center justify-center text-on-primary shrink-0 shadow-sm"><span class="material-symbols-outlined text-headline-sm">query_stats</span></div><div class="flex flex-col overflow-hidden"><span class="font-headline-sm text-headline-sm text-primary tracking-tight font-bold leading-tight">PlanWise AI</span><span class="font-label-code text-label-code text-on-surface-variant leading-tight truncate">Financial Planning Prototype • Draft</span></div></div><div class="px-space-md py-space-xs"><div class="bg-surface-container-low rounded-xl p-space-sm flex items-center justify-between"><div class="flex items-center gap-space-xs"><span class="material-symbols-outlined text-secondary text-body-sm">labs</span><div class="flex flex-col"><span class="font-label-caps text-label-caps text-on-surface uppercase">Example Data Mode</span><span class="font-label-code text-label-code text-on-surface-variant">Synthetic Portfolio</span></div></div><button class="w-9 h-5 bg-primary-container rounded-full relative flex items-center p-0.5 cursor-pointer transition-colors" type="button"><span class="w-4 h-4 bg-surface-container-lowest rounded-full shadow-sm transform translate-x-4 transition-transform"></span></button></div></div><div class="px-space-md pt-space-md"><span class="px-space-sm font-label-caps text-label-caps text-on-surface-variant uppercase tracking-wider block mb-space-xs">Navigation</span><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-title-md"><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="dashboard" href="#"><span class="material-symbols-outlined">dashboard</span><span>Dashboard</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="goals" href="#"><span class="material-symbols-outlined">flag</span><span>Goals</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="plan-and-assistant" href="#"><span class="material-symbols-outlined">psychology</span><span>Plan &amp; Assistant</span></a><a class="flex items-center gap-space-sm px-space-md py-space-sm rounded-lg text-on-surface-variant font-body-md hover:bg-surface-container-high hover:text-on-surface transition-all" data-path="settings-and-privacy" href="#"><span class="material-symbols-outlined">shield_person</span><span>Settings &amp; Privacy</span></a></nav></div></div><div class="p-space-md bg-surface-container-low/60 m-space-md rounded-xl flex flex-col gap-space-sm"><div class="flex items-center justify-between"><div class="flex items-center gap-space-sm overflow-hidden"><img alt="Alex Morgan" class="w-9 h-9 rounded-full object-cover shrink-0" src="https://lh3.googleusercontent.com/aida/AEtjO1WsBLvpKp7A28fNF0yhWdpgbvAj10pDlle9YShabPJlK2Gk4nz0XRV1Oge3e05-BRgnz-TASH97hUWORdxO_utursrfp2N5gBBWIr5dbESho3e2MudPK8kw4dd5mOA2HbdqoGoLaMCeb6YaGYsUjH4v-y04weRytINKCBvc68-zH0fzFIB_dVhJw2yHfofdAxwsE_mVrWQ-PKGHhBF_6-x2A6WXg25l5Y6rBAWdk_g_sxsBqJUxgU8KBvY"/><div class="flex flex-col truncate"><span class="font-title-md text-title-md text-on-surface leading-snug truncate">Alex Morgan</span><span class="font-label-code text-label-code text-on-surface-variant">Private Wealth Tier</span></div></div></div><div class="flex items-center justify-between pt-space-xs"><div class="flex items-center gap-space-xs text-on-surface-variant"><span class="material-symbols-outlined text-body-sm">visibility_off</span><span class="font-label-code text-label-code">Mask Values</span></div><button class="w-8 h-4.5 bg-primary-container rounded-full relative flex items-center p-0.5 cursor-pointer" type="button"><span class="w-3.5 h-3.5 bg-surface-container-lowest rounded-full transform translate-x-3.5 transition-transform"></span></button></div></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/85 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-lg"><div class="flex items-center gap-space-md"><span class="font-headline-sm text-headline-sm text-on-surface tracking-tight font-semibold">Advisory Workspace</span><div class="inline-flex items-center gap-space-xs px-2.5 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed font-label-code text-label-code"><span class="material-symbols-outlined text-body-sm text-secondary">lock</span><span>Client Data Masked</span></div></div><div class="flex items-center gap-space-md"><a class="inline-flex items-center gap-space-xs text-on-surface-variant hover:text-on-surface transition-colors font-body-sm text-body-sm" data-path="glossary" href="#"><span class="material-symbols-outlined text-body-sm">help_center</span><span>Help &amp; Glossary</span></a><div class="w-px h-5 bg-outline-variant/40"></div><img alt="Profile" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida/AEtjO1WsBLvpKp7A28fNF0yhWdpgbvAj10pDlle9YShabPJlK2Gk4nz0XRV1Oge3e05-BRgnz-TASH97hUWORdxO_utursrfp2N5gBBWIr5dbESho3e2MudPK8kw4dd5mOA2HbdqoGoLaMCeb6YaGYsUjH4v-y04weRytINKCBvc68-zH0fzFIB_dVhJw2yHfofdAxwsE_mVrWQ-PKGHhBF_6-x2A6WXg25l5Y6rBAWdk_g_sxsBqJUxgU8KBvY"/></div></header><main class="relative pt-16 w-full min-h-screen bg-surface"><div class="flex flex-col w-full">
+<div class="px-space-lg py-space-sm bg-surface-container-low flex flex-wrap items-center justify-between gap-space-sm">
+<div class="flex items-center gap-space-sm min-w-0">
+<span class="material-symbols-outlined text-secondary text-headline-sm shrink-0">info</span>
+<p class="font-body-sm text-body-sm text-on-surface truncate">
+<strong class="font-title-md text-title-md text-primary font-semibold">AI Agent Assistant</strong> — Generated guidance with visible assumptions. Not certified financial advice (OP-008).
+      </p>
+</div>
+<div class="flex items-center gap-space-xs shrink-0">
+<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-surface-container-lowest font-label-code text-label-code text-on-surface-variant shadow-sm">
+<span class="w-2 h-2 rounded-full bg-primary-container"></span>
+        Scenario: Baseline Plan (Home + Buffer)
+      </span>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface font-title-md text-body-sm shadow-sm hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-body-md text-secondary">add_comment</span>
+<span>New</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-title-md text-body-sm shadow-sm hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-body-md">download_for_offline</span>
+<span>Export</span>
+</button>
+<button class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface-variant font-title-md text-body-sm shadow-sm hover:bg-surface-container-high transition-all" type="button">
+<span class="material-symbols-outlined text-body-md text-secondary">delete_sweep</span>
+<span>Clear</span>
+</button>
+</div>
+</div>
+<div class="p-space-lg grid grid-cols-12 gap-space-lg">
+<div class="col-span-12 xl:col-span-8 flex flex-col gap-space-lg">
+<div class="flex flex-col gap-space-xs">
+<div class="flex items-center justify-between">
+<span class="font-label-caps text-label-caps uppercase text-on-surface-variant">Recommended Analytical Inquiries</span>
+<span class="font-label-code text-label-code text-secondary flex items-center gap-1">
+<span class="material-symbols-outlined text-body-sm">bolt</span> Auto-Tailored to Goals
+          </span>
+</div>
+<div class="flex items-center gap-space-xs overflow-x-auto pb-1">
+<button class="shrink-0 text-left px-3 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container text-on-surface font-body-sm text-body-sm shadow-sm transition-all flex items-center gap-2 group" type="button">
+<span class="material-symbols-outlined text-body-sm text-secondary group-hover:text-primary transition-colors">lightbulb</span>
+<span>How does an extra $200/mo impact my down payment goal?</span>
+</button>
+<button class="shrink-0 text-left px-3 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container text-on-surface font-body-sm text-body-sm shadow-sm transition-all flex items-center gap-2 group" type="button">
+<span class="material-symbols-outlined text-body-sm text-secondary group-hover:text-primary transition-colors">tune</span>
+<span>What assumptions are used for inflation?</span>
+</button>
+<button class="shrink-0 text-left px-3 py-2 rounded-full bg-surface-container-lowest hover:bg-surface-container text-on-surface font-body-sm text-body-sm shadow-sm transition-all flex items-center gap-2 group" type="button">
+<span class="material-symbols-outlined text-body-sm text-secondary group-hover:text-primary transition-colors">stacked_line_chart</span>
+<span>Compare aggressive vs conservative savings pace</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-space-lg">
+<div class="flex items-start justify-end gap-space-sm pl-space-xl">
+<div class="flex flex-col items-end gap-space-xs max-w-2xl">
+<div class="flex items-center gap-space-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">You • Financial Planner Client</span>
+<span class="font-label-code text-label-code text-secondary">Today, 10:42 AM</span>
+</div>
+<div class="p-space-md rounded-xl bg-primary text-on-primary shadow-sm font-body-md text-body-md">
+              If I reallocate $250 from discretionary spending into my home down payment fund, when can I realistically reach $90k?
+            </div>
+</div>
+<div class="w-9 h-9 rounded-full bg-secondary-fixed flex items-center justify-center text-on-secondary-fixed shrink-0 font-title-md text-title-md font-bold shadow-sm">
+            AM
+          </div>
+</div>
+<div class="flex items-start gap-space-sm pr-space-md">
+<div class="w-9 h-9 rounded-full bg-primary-container text-on-primary flex items-center justify-center shrink-0 shadow-sm mt-1">
+<span class="material-symbols-outlined text-headline-sm">neurology</span>
+</div>
+<div class="flex flex-col gap-space-md flex-1 bg-surface-container-lowest p-space-lg rounded-xl shadow-md">
+<div class="flex flex-wrap items-center justify-between gap-space-sm pb-space-sm bg-surface-container-low -mx-space-lg -mt-space-lg px-space-lg pt-space-md rounded-t-xl">
+<div class="flex items-center gap-space-xs">
+<span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-fixed text-on-primary-fixed font-label-code text-label-code font-semibold uppercase tracking-wider shadow-sm">
+<span class="material-symbols-outlined text-body-sm">verified_user</span>
+                  Generated Guidance • Verification Needed
+                </span>
+<span class="font-label-code text-label-code text-on-surface-variant">Model Rev. 4.2 • Deterministic Forecast</span>
+</div>
+<div class="flex items-center gap-space-xs">
+<button class="p-1 rounded text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Copy Output" type="button">
+<span class="material-symbols-outlined text-body-md">content_copy</span>
+</button>
+<button class="p-1 rounded text-secondary hover:text-on-surface hover:bg-surface-container-high transition-colors" title="Flag or Challenge" type="button">
+<span class="material-symbols-outlined text-body-md">flag</span>
+</button>
+</div>
+</div>
+<div class="flex flex-col gap-space-sm">
+<p class="font-headline-sm text-headline-sm text-primary font-semibold leading-snug">
+                Reallocating $250/month accelerates your completion by <span class="text-tertiary-container underline decoration-secondary decoration-2 underline-offset-4">8 months</span>.
+              </p>
+<p class="font-body-md text-body-md text-on-surface leading-relaxed">
+                Reallocating $250/month increases your combined monthly allocation to <strong class="text-on-surface font-title-md font-semibold">$1,050</strong>. Under your current model inputs, you would reach your $90,000 down payment target approximately 8 months earlier: <strong class="text-primary font-title-md font-semibold">October 2028</strong> instead of June 2029.
+              </p>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-3 gap-space-sm">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Accelerated Date</span>
+<span class="font-headline-sm text-headline-sm text-primary font-bold">Oct 2028</span>
+<span class="font-label-code text-label-code text-on-primary-container font-medium">8 Mo Advantage</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">New Monthly Pacing</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">$1,050<span class="text-body-sm font-normal text-on-surface-variant">/mo</span></span>
+<span class="font-label-code text-label-code text-secondary font-medium">+$250 Discretionary Shift</span>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Compounded Interest</span>
+<span class="font-headline-sm text-headline-sm text-tertiary font-bold">$5,840</span>
+<span class="font-label-code text-label-code text-secondary font-medium">At 4.0% Benchmark APY</span>
+</div>
+</div>
+<div class="p-space-md rounded-xl bg-surface-container-low flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-body-md text-tertiary">data_object</span>
+<span class="font-title-md text-title-md text-on-surface font-semibold">Assumptions &amp; Data Sources</span>
+</div>
+<span class="font-label-code text-label-code text-on-surface-variant">Traceability: 100% Deterministic</span>
+</div>
+<div class="grid grid-cols-1 sm:grid-cols-3 gap-space-xs font-body-sm text-body-sm">
+<div class="p-space-xs bg-surface-container-lowest rounded-lg flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Current Balance</span>
+<div class="flex items-center justify-between mt-1">
+<span class="font-metric-md text-title-md font-bold text-on-surface tabular-nums">$45,000</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-code text-label-code">User-Entered</span>
+</div>
+</div>
+<div class="p-space-xs bg-surface-container-lowest rounded-lg flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Monthly Deposit</span>
+<div class="flex items-center justify-between mt-1">
+<span class="font-metric-md text-title-md font-bold text-on-surface tabular-nums">$800 + $250</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-secondary-fixed text-on-secondary-fixed font-label-code text-label-code">Hypothetical</span>
+</div>
+</div>
+<div class="p-space-xs bg-surface-container-lowest rounded-lg flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Annual Benchmark Yield</span>
+<div class="flex items-center justify-between mt-1">
+<span class="font-metric-md text-title-md font-bold text-on-surface tabular-nums">4.0% APY</span>
+<span class="inline-flex items-center px-1.5 py-0.5 rounded bg-surface-container text-on-surface-variant font-label-code text-label-code">Editable</span>
+</div>
+</div>
+</div>
+<div class="flex items-start gap-space-xs p-space-xs rounded bg-surface-container-lowest text-on-surface-variant font-label-code text-label-code">
+<span class="material-symbols-outlined text-body-sm text-secondary shrink-0 mt-0.5">warning</span>
+<span>Caveat: Taxes on interest earnings are not deducted in this baseline snapshot. Real estate asset price inflation in target zip codes is not dynamically forecasted.</span>
+</div>
+</div>
+<div class="flex flex-col gap-space-xs">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Rationale &amp; Recommended Next Steps</span>
+<ul class="flex flex-col gap-space-xs text-body-sm font-body-sm text-on-surface">
+<li class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-body-md text-primary-container shrink-0 mt-0.5">check_circle</span>
+<span><strong>Discretionary Audit:</strong> Dining and entertainment expenses averaged $610/mo over the past 90 days, confirming the $250 reallocation maintains a safe discretionary buffer.</span>
+</li>
+<li class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-body-md text-primary-container shrink-0 mt-0.5">check_circle</span>
+<span><strong>Reserve Preservation:</strong> This increase does not touch the 6-month core liquid emergency cushion ($24,000 kept inviolate).</span>
+</li>
+<li class="flex items-start gap-space-xs">
+<span class="material-symbols-outlined text-body-md text-secondary shrink-0 mt-0.5">arrow_forward</span>
+<span><strong>Actionable Step:</strong> Update auto-transfer schedule from Primary Checking to High-Yield Vault on the 1st of each month.</span>
+</li>
+</ul>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-sm pt-space-sm">
+<div class="flex items-center gap-space-xs">
+<button class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary-container text-on-primary font-title-md text-body-sm shadow hover:bg-primary transition-all" type="button">
+<span class="material-symbols-outlined text-body-md">sync_alt</span>
+<span>Apply to Simulation</span>
+</button>
+<button class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-surface-container-high text-on-surface font-title-md text-body-sm hover:bg-surface-container-highest transition-all" type="button">
+<span class="material-symbols-outlined text-body-md text-secondary">tune</span>
+<span>Challenge Assumption</span>
+</button>
+</div>
+<div class="flex items-center gap-space-xs text-on-surface-variant font-label-code text-label-code">
+<span>Was this response helpful?</span>
+<button class="p-1 rounded hover:bg-surface-container hover:text-on-surface transition-colors" title="Helpful" type="button">
+<span class="material-symbols-outlined text-body-md">thumb_up</span>
+</button>
+<button class="p-1 rounded hover:bg-surface-container hover:text-on-surface transition-colors" title="Not Helpful" type="button">
+<span class="material-symbols-outlined text-body-md">thumb_down</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+<div class="flex items-center gap-space-sm pl-2">
+<div class="w-8 h-8 rounded-full bg-surface-container-high flex items-center justify-center text-secondary shrink-0">
+<span class="material-symbols-outlined text-body-md animate-spin">progress_activity</span>
+</div>
+<div class="flex items-center gap-space-xs px-3 py-1.5 rounded-full bg-surface-container-low font-label-code text-label-code text-on-surface-variant">
+<span class="w-1.5 h-1.5 rounded-full bg-secondary animate-pulse"></span>
+<span>Agent synthesizing financial impact with conservative safety margins...</span>
+</div>
+</div>
+</div>
+<div class="sticky bottom-4 z-20 flex flex-col gap-space-xs bg-surface-container-lowest p-space-md rounded-xl shadow-xl">
+<div class="relative flex items-center">
+<textarea class="w-full pl-space-md pr-14 py-space-sm rounded-lg bg-surface-container-low text-on-surface placeholder:text-on-surface-variant/60 font-body-md text-body-md focus:bg-surface-container-lowest focus:ring-2 focus:ring-secondary focus:outline-none resize-none transition-all" placeholder="Ask about retirement pacing, adjusting allocations, or stress-testing tax projections..." rows="2"></textarea>
+<button class="absolute right-2.5 top-1/2 -translate-y-1/2 w-10 h-10 rounded-lg bg-primary-container text-on-primary flex items-center justify-center hover:bg-primary shadow-sm transition-all" title="Submit Query" type="button">
+<span class="material-symbols-outlined text-headline-sm">arrow_upward</span>
+</button>
+</div>
+<div class="flex flex-wrap items-center justify-between gap-space-xs px-1">
+<span class="font-label-code text-label-code text-error flex items-center gap-1">
+<span class="material-symbols-outlined text-body-sm">shield</span>
+            Do not input account numbers, passwords, or SSNs (NFR-FE-004)
+          </span>
+<span class="font-label-code text-label-code text-on-surface-variant">
+            Shift + Return for line breaks • Markdown supported
+          </span>
+</div>
+</div>
+</div>
+<div class="col-span-12 xl:col-span-4 flex flex-col gap-space-lg">
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-md">
+<div class="flex items-center justify-between pb-space-xs">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-secondary">tune</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-semibold">Model Inputs</span>
+</div>
+<span class="font-label-code text-label-code text-primary-container px-2 py-0.5 rounded bg-primary-fixed font-semibold">Live Parameters</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant">
+          Transparency parameters mandated per <strong class="text-on-surface">OBJ-003</strong>. Modify rates to observe real-time delta on projections.
+        </p>
+<div class="flex flex-col gap-space-sm">
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between hover:bg-surface-container transition-colors">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Inflation Assumption</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">2.80% <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">annually</span></span>
+<span class="font-label-code text-label-code text-secondary">Fed Target Baseline</span>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high text-body-sm font-title-md transition-all shadow-sm" type="button">
+              Edit
+            </button>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between hover:bg-surface-container transition-colors">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">High-Yield Cash APY</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">4.00% <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">liquid yield</span></span>
+<span class="font-label-code text-label-code text-secondary">Treasury-Linked Index</span>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high text-body-sm font-title-md transition-all shadow-sm" type="button">
+              Edit
+            </button>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between hover:bg-surface-container transition-colors">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Investment Growth</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">6.50% <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">nominal</span></span>
+<span class="font-label-code text-label-code text-secondary">Conservative 60/40 Equity Mix</span>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high text-body-sm font-title-md transition-all shadow-sm" type="button">
+              Edit
+            </button>
+</div>
+<div class="p-space-sm rounded-lg bg-surface-container-low flex items-center justify-between hover:bg-surface-container transition-colors">
+<div class="flex flex-col">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Tax Bracket Estimate</span>
+<span class="font-headline-sm text-headline-sm text-on-surface font-bold">22.0% <span class="font-body-sm text-body-sm text-on-surface-variant font-normal">marginal</span></span>
+<span class="font-label-code text-label-code text-secondary">Single Filer Tier</span>
+</div>
+<button class="px-3 py-1.5 rounded-lg bg-surface-container-lowest text-on-surface hover:bg-surface-container-high text-body-sm font-title-md transition-all shadow-sm" type="button">
+              Edit
+            </button>
+</div>
+</div>
+<div class="p-space-sm rounded-lg bg-secondary-fixed/50 flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-secondary">
+<span class="material-symbols-outlined text-body-sm">history_edu</span>
+<span class="font-title-md text-body-sm font-semibold">Audit Provenance</span>
+</div>
+<p class="font-label-code text-label-code text-on-secondary-fixed leading-tight">
+            Last calibrated: 3 days ago via Federal Reserve Economic Data (FRED). All simulation iterations are logged with cryptographic verification hashes.
+          </p>
+</div>
+</div>
+<div class="bg-surface-container-lowest p-space-lg rounded-xl shadow-md flex flex-col gap-space-sm">
+<div class="flex items-center justify-between">
+<span class="font-title-md text-title-md text-on-surface font-semibold">Goal Target Summary</span>
+<span class="material-symbols-outlined text-secondary text-body-md">pie_chart</span>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex justify-between items-baseline font-body-sm">
+<span class="text-on-surface-variant">Down Payment Goal</span>
+<span class="font-metric-md text-title-md font-bold text-on-surface">$90,000</span>
+</div>
+<div class="w-full bg-surface-container-high h-2.5 rounded-full overflow-hidden flex">
+<div class="bg-primary-container h-full rounded-full transition-all" style="width: 50%"></div>
+<div class="bg-secondary-container h-full rounded-r-full transition-all" style="width: 14%"></div>
+</div>
+<div class="flex justify-between font-label-code text-label-code text-on-surface-variant">
+<span>Funded: $45,000 (50%)</span>
+<span>Target Oct '28</span>
+</div>
+</div>
+<div class="pt-2 flex flex-col gap-1">
+<span class="font-label-caps text-label-caps text-on-surface-variant uppercase">Portfolio Impact Graphic</span>
+<div class="w-full h-32 rounded-lg bg-surface-container-low flex items-center justify-center p-2 relative overflow-hidden">
+<svg class="w-full h-full" preserveaspectratio="none" viewbox="0 0 200 80">
+<path class="text-outline-variant" d="M0,60 Q50,55 100,45 T200,20" fill="none" stroke="currentColor" stroke-dasharray="4,4" stroke-width="2"></path>
+<path class="text-primary-container" d="M0,60 Q50,50 100,32 T200,8" fill="none" stroke="currentColor" stroke-width="2.5"></path>
+<circle class="fill-primary text-primary" cx="100" cy="32" r="3.5"></circle>
+<circle class="fill-primary-container text-primary-container" cx="200" cy="8" r="4"></circle>
+</svg>
+<div class="absolute bottom-2 left-2 text-[10px] font-label-code text-on-surface-variant bg-surface-container-lowest/80 px-1 rounded">
+              Green = Reallocated ($1,050/mo)
+            </div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div></main></div></body></html>
