@@ -12,7 +12,7 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 Read `../OVERVIEW.md` (product direction) and `frontend-requirements.md` (screen
 scope + acceptance criteria) before changing screens or flows. This is a
-**frontend-only prototype** on mock data; there is no backend yet.
+**prototype** on mock data. A minimal auth + investor-profile backend lives in `../Backend` (see its README); dashboard data is still mock.
 
 ## Commands
 

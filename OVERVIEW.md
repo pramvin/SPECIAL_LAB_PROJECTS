@@ -1,170 +1,170 @@
 # OVERVIEW — An Intelligent Personalized Agent for Individual Financial Planning
 
-> **Dokumen kerja yang dapat diubah.** Ini adalah ringkasan ide dan arah awal proyek untuk dibaca oleh tim dan Opencode. Fitur, prioritas, dan pilihan teknologi yang diberi label **Usulan** belum menjadi keputusan final. Perbarui bagian yang relevan ketika hasil diskusi tim sudah tersedia.
+> **Working Draft (Subject to Change).** This document provides an overview of the initial project ideas and directions for the team and Opencode. Features, priorities, and technology stack labeled as **Proposed** are not final decisions yet. Update the relevant sections once the results of team discussions are available.
 
-## 1. Ringkasan ide
+## 1. Executive Summary
 
-**An Intelligent Personalized Agent for Individual Financial Planning** adalah ide aplikasi yang membantu seseorang memahami kondisi keuangannya, menetapkan tujuan, dan memperoleh panduan perencanaan yang disesuaikan dengan informasi yang ia berikan.
+**An Intelligent Personalized Agent for Individual Financial Planning** is a product concept designed to help individuals understand their financial condition, set goals, and receive tailored planning guidance based on the information they provide.
 
-Pengalaman yang diusulkan menggabungkan tampilan ringkasan keuangan, pengelolaan tujuan, rencana atau langkah berikutnya, dan—jika disetujui tim—assistant percakapan. Sistem harus menjelaskan informasi atau asumsi yang mendasari panduannya. Pengguna tetap memegang kendali untuk memeriksa, mengoreksi, atau mengabaikan suatu saran.
+The proposed user experience combines a financial overview dashboard, goal management, next-step plans, and—if approved by the team—a conversational assistant. The system must explain the underlying information or assumptions behind its guidance. Users remain in full control to review, correct, or ignore any recommendations.
 
-**Versi satu kalimat:** aplikasi perencanaan keuangan pribadi yang membantu pengguna mengubah informasi dan tujuan keuangannya menjadi gambaran yang lebih jelas serta langkah-langkah yang mudah ditinjau.
+**One-sentence version:** A personal financial planning application that helps users transform their financial information and goals into a clearer picture with easy-to-review actionable steps.
 
-## 2. Status informasi proyek
+## 2. Project Status & Information
 
-### Yang sudah diketahui
+### What Is Known
 
-- Nama/ide proyek: **An Intelligent Personalized Agent For Individual Financial Planning**.
-- Tim masih mendiskusikan fitur apa yang akan dimasukkan.
-- Pengerjaan dimulai dari frontend: rancangan dibuat menggunakan Stitch AI, lalu diimplementasikan dengan bantuan Opencode.
-- Dokumen ini adalah gambaran awal, bukan spesifikasi final yang sudah disetujui.
+- Project name/concept: **An Intelligent Personalized Agent For Individual Financial Planning**.
+- The team is currently discussing which features to include.
+- Initial development begins on the frontend: designs are created using Stitch AI and implemented with the assistance of Opencode.
+- This document serves as an initial overview, not an approved final specification.
 
-### Usulan yang perlu dikonfirmasi
+### Proposals Requiring Confirmation
 
-- **Pengguna utama:** individu yang ingin memahami keuangan dan mengelola satu atau lebih tujuan.
-- **Platform awal:** aplikasi web responsif, bukan aplikasi native iOS/Android.
-- **Fokus MVP:** dashboard, tujuan, alur input/onboarding yang minimal, serta tampilan rencana atau assistant jika itu memang fitur inti proyek.
-- **Perhitungan keuangan:** menjadi tanggung jawab backend/domain logic yang ditinjau tim; frontend menampilkan hasil dan membantu validasi input, bukan menjadi sumber kebenaran perhitungan.
-- **Sumber data awal:** kemungkinan input manual atau data demo yang jelas diberi label. Integrasi rekening belum diasumsikan.
+- **Primary Users:** Individuals who want to understand their finances and manage one or more financial goals.
+- **Initial Platform:** Responsive web application, not a native iOS/Android app.
+- **MVP Focus:** Dashboard, financial goals, a minimal input/onboarding flow, and a plan view or assistant if deemed a core project feature.
+- **Financial Calculations:** Owned and processed by the backend/domain logic and reviewed by the team; the frontend only renders results and assists with input validation, rather than serving as the source of truth for calculations.
+- **Initial Data Source:** Likely manual input or clearly labeled demo data. Financial account integrations are not assumed.
 
-### Belum diputuskan
+### Undecided Items
 
-Target pengguna dan negara; mata uang; metrik keuangan yang ditampilkan; rumus perhitungan; fitur final; batasan panduan AI; autentikasi; privasi/retensi data; brand; serta stack final.
+Target audience and country/region; currency; displayed financial metrics; calculation formulas; final feature set; boundaries of AI guidance; authentication; privacy/data retention; branding; and final tech stack.
 
-## 3. Masalah dan peluang — hipotesis proyek
+## 3. Problem and Opportunity — Project Hypothesis
 
-Sebagai hipotesis awal, sebagian orang mungkin kesulitan menyatukan informasi keuangan, melihat kemajuan terhadap tujuan, dan menentukan langkah selanjutnya. Aplikasi ini dapat membantu dengan menyajikan informasi secara terstruktur dan menjelaskan panduan berdasarkan data yang tersedia.
+As an initial hypothesis, many people struggle to aggregate their financial information, track progress toward goals, and determine clear next steps. This application aims to help by presenting information in a structured manner and offering actionable guidance based on available data.
 
-Hipotesis ini **belum tervalidasi melalui riset pengguna**. Jangan menganggapnya sebagai temuan penelitian atau menambahkan klaim pemasaran tentang pengguna tanpa bukti.
+This hypothesis **has not been validated through user research**. Do not treat it as research findings or add unverified marketing claims about users.
 
-## 4. Tujuan produk — usulan
+## 4. Product Goals — Proposed
 
-1. Membantu pengguna mengatur dan memahami informasi keuangan pribadinya.
-2. Membantu pengguna menetapkan dan memantau tujuan keuangan.
-3. Menyajikan panduan yang relevan, transparan, dan dapat ditinjau pengguna.
-4. Membangun pengalaman yang mudah dipahami, inklusif, dan menghormati sensitivitas data keuangan.
+1. Help users organize and understand their personal financial information.
+2. Assist users in setting and tracking financial goals.
+3. Provide relevant, transparent, and user-reviewable guidance.
+4. Build an easy-to-understand, inclusive experience that respects the sensitivity of financial data.
 
-Keberhasilan produk dan metrik pengukurannya masih perlu ditentukan bersama tim.
+Product success criteria and evaluation metrics remain to be determined with the team.
 
-## 5. Pengalaman pengguna yang dibayangkan
+## 5. Envisioned User Experience
 
-1. Pengguna memahami tujuan aplikasi sebelum diminta mengisi data pribadi.
-2. Pengguna masuk atau mencoba mode demo, sesuai keputusan tim.
-3. Pengguna mengatur preferensi dasar dan mengisi data minimum yang diperlukan untuk fitur yang dipilih.
-4. Dashboard menunjukkan informasi yang tersedia serta data yang belum lengkap—tanpa menganggap data yang hilang sebagai nol.
-5. Pengguna membuat atau meninjau satu tujuan.
-6. Pengguna membaca rencana atau berinteraksi dengan assistant jika fitur tersebut termasuk dalam MVP.
-7. Pengguna dapat melihat penjelasan/asumsi yang disediakan sistem, memperbaiki input, dan memilih sendiri apakah akan mengikuti langkah yang disarankan.
-8. Pengguna dapat mengelola preferensi dan kontrol privasi yang benar-benar didukung aplikasi.
+1. Users understand the application's purpose before being prompted for personal data.
+2. Users sign in or explore a demo mode, depending on the team's decision.
+3. Users configure basic preferences and enter the minimum required data for selected features.
+4. The dashboard presents available information along with missing data indicators—without defaulting missing data to zero.
+5. Users create or review a goal.
+6. Users review a plan or interact with the conversational assistant if included in the MVP.
+7. Users view system-provided explanations/assumptions, correct inputs, and decide whether to follow suggested steps.
+8. Users manage preference settings and privacy controls supported by the application.
 
-## 6. Kandidat area produk
+## 6. Candidate Product Areas
 
-Daftar berikut adalah **ide untuk dibahas**, bukan daftar fitur yang sudah disetujui.
+The following list contains **ideas for discussion**, not an approved feature backlog.
 
-| Area | Tujuan | Status awal |
+| Area | Objective | Initial Status |
 |---|---|---|
-| Onboarding dan preferensi | Menjelaskan produk, memilih preferensi dasar, dan meminta data yang memang diperlukan. | Usulan MVP; field dan consent belum ditentukan. |
-| Dashboard | Menampilkan ringkasan, kemajuan tujuan, dan tindakan yang relevan. | Usulan MVP; metrik/rumus TBD. |
-| Tujuan keuangan | Membuat, melihat, dan memperbarui tujuan. | Usulan MVP; kategori dan aturan belum ditentukan. |
-| Rencana personal | Menampilkan rekomendasi/langkah berikutnya beserta konteks yang tersedia. | Kandidat MVP; perlu keputusan batas panduan dan aturan domain. |
-| Assistant percakapan | Memungkinkan pengguna bertanya dan menerima respons yang terkait dengan konteksnya. | Kandidat MVP; konfirmasi apakah ini fitur inti. |
-| Profil dan privasi | Mengelola preferensi dan kontrol atas informasi pengguna sesuai kemampuan backend. | Usulan jika akun/data personal disimpan. |
-| Anggaran/transaksi | Melihat pengeluaran dan aktivitas terperinci. | Belum termasuk sampai sumber data dan manfaatnya dikonfirmasi. |
-| Koneksi bank/investasi | Mengimpor data dari lembaga keuangan. | Tidak diasumsikan untuk MVP; memerlukan keputusan dan tinjauan terpisah. |
+| Onboarding & Preferences | Explain the product, set basic preferences, and request only necessary data. | Proposed MVP; required fields and consent TBD. |
+| Dashboard | Display financial summaries, goal progress, and relevant actions. | Proposed MVP; metrics/formulas TBD. |
+| Financial Goals | Create, view, and update goals. | Proposed MVP; categories and rules TBD. |
+| Personalized Plan | Show recommendations/next steps with available context. | MVP Candidate; boundary rules and domain logic need approval. |
+| Conversational Assistant | Allow users to ask questions and receive context-aware responses. | MVP Candidate; pending confirmation as a core feature. |
+| Profile & Privacy | Manage user preferences and information controls supported by backend capabilities. | Proposed if accounts/personal data are stored. |
+| Budgeting & Transactions | Track detailed expenses and financial activity. | Not included until data sources and benefits are confirmed. |
+| Bank/Investment Connections | Import data directly from financial institutions. | Excluded from MVP; requires separate review and approval. |
 
-## 7. Batasan produk dan prinsip kepercayaan
+## 7. Product Boundaries and Trust Principles
 
-- Jangan menjanjikan hasil keuangan, imbal hasil, penghematan, atau keberhasilan tujuan.
-- Jangan mengarang saldo, metrik, formula, sumber data, atau alasan rekomendasi.
-- Bedakan dengan jelas **fakta**, **input pengguna**, **data contoh**, dan **panduan yang dihasilkan AI**.
-- Jika data atau asumsi tidak tersedia, tampilkan status tidak diketahui atau minta klarifikasi; jangan menutupinya dengan angka contoh.
-- Semua angka pada mockup harus ditandai sebagai **Data contoh** atau label setara.
-- Jangan membuat klaim seperti “terenkripsi”, “dihapus permanen”, atau “tidak digunakan untuk AI” sebelum perilaku sistem dan kata-katanya dikonfirmasi.
-- Jangan menambahkan integrasi bank, pembelian/penjualan produk keuangan, pembayaran, atau eksekusi transaksi tanpa keputusan eksplisit tim.
-- Naskah privasi, disclaimer, dan batas penggunaan AI harus disetujui pemilik produk serta pihak yang sesuai sebelum dipakai sebagai teks final.
+- Do not guarantee financial outcomes, returns, savings, or goal success.
+- Do not fabricate balances, metrics, formulas, data sources, or rationale for recommendations.
+- Clearly distinguish between **facts**, **user inputs**, **sample data**, and **AI-generated guidance**.
+- If data or assumptions are missing, display an "unknown" status or request clarification; do not mask gaps with placeholder numbers.
+- All figures in mockups must be clearly marked as **Sample Data** or an equivalent label.
+- Avoid security/privacy claims such as "encrypted," "permanently deleted," or "not used for AI training" until system behavior and exact wording are confirmed.
+- Do not include bank integrations, buying/selling financial products, payment processing, or transaction execution without explicit team approval.
+- Privacy copy, disclaimers, and AI usage boundaries must be approved by the product owner and relevant stakeholders before being used as final text.
 
-## 8. Rekomendasi teknologi awal
+## 8. Initial Technology Recommendations
 
-Pilihan berikut mengikuti rekomendasi diskusi awal dan **belum dianggap keputusan final**.
+The following stack reflects initial discussions and **should not be considered a final decision**.
 
-| Bagian | Rekomendasi awal | Catatan |
+| Layer | Initial Recommendation | Notes |
 |---|---|---|
-| Frontend | **Next.js + React + TypeScript** | Cocok sebagai fondasi web yang dapat berkembang. Gunakan komponen yang dapat dipakai ulang dan desain responsif. React + TypeScript SPA juga masuk akal bila tim ingin prototipe yang lebih sederhana. |
-| Styling/UI | Design tokens dan komponen aksesibel; Tailwind CSS opsional | Pilih pendekatan yang paling dikuasai tim. Jangan menganggap library UI tertentu wajib. |
-| Backend | **Python + FastAPI** | Rekomendasi awal untuk produktivitas dan kemungkinan integrasi data/AI. Rust dapat dipilih jika pengalaman tim atau kebutuhan performa memang mendukungnya. |
-| Database | **PostgreSQL** | Rekomendasi awal untuk aplikasi multi-user dengan data terstruktur. MySQL juga pilihan valid bila lebih sesuai pengalaman tim. SQLite lebih cocok untuk prototipe lokal atau penggunaan sederhana, bukan asumsi default untuk layanan multi-user produksi. |
-| Arsitektur | Mulai dari satu aplikasi backend modular | Hindari microservices sebelum ada kebutuhan nyata. Perhitungan yang penting harus punya aturan jelas dan pengujian. |
+| Frontend | **Next.js + React + TypeScript** | Suitable foundation for a scalable web app. Use reusable components and responsive design. A React + TypeScript SPA is also viable for a simpler prototype. |
+| Styling/UI | Design tokens & accessible components; Tailwind CSS optional | Choose the approach the team is most familiar with. No specific UI library is mandatory. |
+| Backend | **Python + FastAPI** | Initial recommendation for productivity and seamless data/AI integration. Rust can be selected if team experience or performance demands justify it. |
+| Database | **PostgreSQL** | Initial recommendation for multi-user apps with structured data. MySQL is also valid. SQLite is suited for local prototyping, not as a default assumption for production. |
+| Architecture | Start with a single modular backend service | Avoid microservices before a clear need arises. Critical financial calculations must have clear domain rules and test coverage. |
 
-**Catatan:** Untuk tahap frontend sekarang, jangan membangun integrasi backend atau menetapkan kontrak API yang belum disepakati. Gunakan data mock yang ditandai jelas dan dapat diganti dengan data API nantinya.
+**Note:** For the current frontend phase, do not build backend integrations or establish unagreed API contracts. Use clearly labeled mock data that can be easily swapped for real API data later.
 
-## 9. Panduan kerja untuk Opencode
+## 9. Guidelines for Opencode
 
-Saat mengerjakan repository proyek ini:
+When working on this project repository:
 
-1. Gunakan file ini sebagai konteks arah produk, dan baca `frontend-requirements.md` sebelum membangun layar atau alur frontend.
-2. Anggap label **Usulan**, **TBD**, **Kandidat**, dan **Open point** sebagai hal yang belum disetujui. Jangan diam-diam mengubahnya menjadi keputusan produk.
-3. Jika diperlukan agar prototipe bisa berjalan, pilih asumsi teknis yang paling sederhana dan mudah diganti; catat asumsi tersebut di dokumentasi atau komentar yang relevan.
-4. Jangan membuat rumus, rekomendasi finansial, atau data personal fiktif seolah-olah nyata. Untuk demo, gunakan data sintetis dengan label yang terlihat.
-5. Jangan menyimpan secret/API key di kode frontend atau mengirim data ke layanan eksternal yang belum dipilih tim.
-6. Pisahkan tampilan dari sumber data dan aturan domain agar mock data dapat diganti tanpa menulis ulang seluruh UI.
-7. Implementasikan komponen reusable, state loading/empty/error/success, layout responsif, serta aksesibilitas dasar sejak awal.
-8. Buat perubahan secara bertahap: jelaskan file/fitur yang akan disentuh, implementasikan satu bagian kecil, lalu jalankan pemeriksaan yang tersedia (lint, typecheck, test, atau build).
-9. Hindari menambahkan scope baru, dependensi besar, atau integrasi eksternal tanpa alasan dan catatan yang jelas.
-10. Perbarui dokumen ini dan/atau `frontend-requirements.md` ketika keputusan tim mengubah arah atau scope; jangan menghapus penanda TBD sebelum keputusan benar-benar dibuat.
+1. Use this file for product context and read `frontend-requirements.md` before building screens or frontend flows.
+2. Treat labels like **Proposed**, **TBD**, **Candidate**, and **Open point** as unapproved items. Do not silently convert them into product decisions.
+3. If technical assumptions are necessary to make the prototype functional, choose the simplest, easily replaceable options and document them in comments or documentation.
+4. Do not generate fake financial formulas, advice, or personal data presented as real. Use clearly labeled synthetic data for demos.
+5. Do not store secrets/API keys in frontend code or transmit data to unvetted external services.
+6. Decouple UI components from data sources and domain logic so mock data can be swapped without rewriting the UI.
+7. Implement reusable components, loading/empty/error/success states, responsive layouts, and basic accessibility from the start.
+8. Make incremental changes: explain affected files/features, implement a small portion, and run available checks (lint, typecheck, test, or build).
+9. Avoid introducing unnecessary scope, large dependencies, or external integrations without explicit justification.
+10. Update this document and/or `frontend-requirements.md` whenever team decisions alter scope or direction; do not remove TBD markers prematurely.
 
-## 10. Tahapan pengembangan yang disarankan
+## 10. Suggested Development Phases
 
-### Tahap 1 — Konfirmasi arah
+### Phase 1 — Alignment & Confirmation
 
-- Sepakati target pengguna, negara/locale, tujuan MVP, dan apakah hasilnya prototipe atau aplikasi fungsional.
-- Tentukan data yang diminta, metrik yang ditampilkan, dan batas assistant.
-- Pilih layar yang benar-benar masuk ke versi pertama.
+- Agree on target users, country/locale, MVP goals, and whether the deliverable is a prototype or functional app.
+- Define required user inputs, displayed metrics, and assistant boundaries.
+- Select the specific screens for the initial release.
 
-### Tahap 2 — Desain Stitch
+### Phase 2 — Stitch Design
 
-- Buat alur dan layar utama, termasuk variasi desktop dan mobile.
-- Gunakan placeholder dan data contoh berlabel.
-- Tinjau struktur navigasi, formulir, visualisasi, dan state bersama tim.
+- Create primary flows and key screens, including mobile and desktop variants.
+- Use placeholders and labeled sample data.
+- Review navigation structure, forms, data visualizations, and UI states with the team.
 
-### Tahap 3 — Implementasi frontend
+### Phase 3 — Frontend Implementation
 
-- Siapkan fondasi project, routing, design tokens, komponen, dan layout responsif.
-- Implementasikan layar yang telah disepakati menggunakan mock data.
-- Tambahkan validasi input dan state loading, empty, error, dan success.
+- Set up project foundation, routing, design tokens, core components, and responsive layouts.
+- Implement agreed-upon screens using mock data.
+- Implement input validation and UI states (loading, empty, error, and success).
 
-### Tahap 4 — Integrasi backend dan pengujian
+### Phase 4 — Backend Integration & Testing
 
-- Sepakati kontrak API dan kepemilikan perhitungan sebelum integrasi.
-- Ganti data mock dengan data backend secara bertahap.
-- Uji alur utama, aksesibilitas, format mata uang/tanggal, keamanan tampilan, dan responsivitas.
+- Define API contracts and calculation ownership prior to integration.
+- Progressively replace mock data with backend API endpoints.
+- Test primary user journeys, accessibility, currency/date formatting, UI security, and responsiveness.
 
-## 11. Keputusan tim yang paling penting
+## 11. Key Decisions Required from the Team
 
-Sebelum scope MVP dibekukan, tim sebaiknya memutuskan:
+Before freezing the MVP scope, the team should decide on:
 
-1. Siapa pengguna utama dan di negara/region mana aplikasi akan digunakan?
-2. Apakah target pertama adalah prototype Stitch, prototype frontend interaktif, atau produk dengan backend?
-3. Data apa yang dimasukkan pengguna dan dari mana data tersebut berasal?
-4. Metrik keuangan apa yang ditampilkan, serta siapa yang menetapkan dan menguji rumusnya?
-5. Apakah tujuan keuangan termasuk fitur inti? Apa field dan aturan progresnya?
-6. Apakah assistant percakapan inti produk? Panduan jenis apa yang boleh diberikannya?
-7. Apakah produk berbasis akun atau menyediakan mode demo?
-8. Apa persyaratan privasi, retensi, penghapusan, dan consent yang berlaku?
-9. Bahasa, brand, mata uang, browser, dan target aksesibilitas apa yang harus didukung?
+1. Who is the primary user, and in which country/region will the app launch?
+2. Is the immediate target a Stitch prototype, an interactive frontend prototype, or a fully backed product?
+3. What data must users provide, and where does it originate?
+4. Which financial metrics will be displayed, and who defines/tests the calculation logic?
+5. Are financial goals a core feature? What are their required fields and progress rules?
+6. Is the conversational assistant a core feature? What boundaries govern its advice?
+7. Will the product require user accounts or offer a guest/demo mode?
+8. What privacy, data retention, deletion, and consent requirements apply?
+9. What languages, branding, currencies, browsers, and accessibility standards must be supported?
 
-Rincian pertanyaan dapat diperluas atau dipangkas setelah diskusi tim. Untuk persyaratan frontend dan acceptance criteria yang lebih lengkap, lihat `frontend-requirements.md`.
+These questions can be expanded or refined following team discussions. For complete frontend requirements and acceptance criteria, refer to `frontend-requirements.md`.
 
 ---
 
-## Cara memperbarui dokumen ini
+## Document Maintenance
 
-- Ganti teks di bagian **Usulan** setelah tim menyepakatinya.
-- Ubah status menjadi **Diputuskan** hanya jika ada keputusan nyata.
-- Hapus atau pindahkan fitur yang ditolak ke bagian “Tidak termasuk”.
-- Catat tanggal/versi dan keputusan penting di bawah ini agar perubahan arah mudah dilacak.
+- Replace **Proposed** text once agreed upon by the team.
+- Update status to **Decided** only when a concrete decision has been made.
+- Remove rejected features or relocate them to an "Out of Scope" section.
+- Record dates/versions and key decisions below to track changes over time.
 
-### Riwayat perubahan
+### Change Log
 
-| Versi | Tanggal | Perubahan |
+| Version | Date | Description |
 |---|---|---|
-| 0.1 | 2026-10-02 | Draft awal untuk memberi konteks proyek kepada tim dan Opencode. |
+| 0.1 | 2026-10-02 | Initial draft providing project context for the team and Opencode. |

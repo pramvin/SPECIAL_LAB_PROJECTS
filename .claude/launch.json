@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "backend",
+      "runtimeExecutable": "/Users/fais/Desktop/SPECIAL_LAB_PROJECTS/Backend/.venv/bin/uvicorn",
+      "runtimeArgs": ["app.main:app", "--port", "8000", "--app-dir", "/Users/fais/Desktop/SPECIAL_LAB_PROJECTS/Backend"],
+      "port": 8000
+    },
+    {
+      "name": "frontend",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["--prefix", "/Users/fais/Desktop/SPECIAL_LAB_PROJECTS/frontend", "run", "dev"],
+      "port": 3000
+    }
+  ]
+}
