@@ -1,7 +1,7 @@
 """Pipeline step 5 (AI): structured impact analysis of recent headlines per ticker, by an LLM on Kaggle.
 
 The model is NOT run locally. LLM_URL and LLM_TOKEN (Backend/.env or environment) point at the Kaggle
-notebook `experiments/llm_server_kaggle.ipynb` (Ollama behind a Cloudflare tunnel); the URL changes every restart.
+notebook `experiments/kaggle_gateways.ipynb` (Ollama behind a Cloudflare tunnel); the URL changes every restart.
 Output is display-only. It never changes the score, entry, stop or target.
 Input today is every non-noise headline of the last 7 days; stages 3 and 4 (source tier, event/rumor/filler)
 are not built yet, so credibility is NOT filtered here. Every call is logged in `llm_analysis`.
@@ -94,17 +94,17 @@ def validate(out: dict, allowed_ids: set[int]) -> dict:
     return out
 
 
-def call(url: str, token: str, prompt: str) -> dict:
+def call(url: str, token: str, prompt: str, think: bool = False) -> dict:
     r = requests.post(
         f"{url.rstrip('/')}/chat",
         json={"messages": [{"role": "system", "content": SYSTEM}, {"role": "user", "content": prompt}],
-              "format": OUT_SCHEMA, "options": {"temperature": 0, "num_ctx": 4096}},
+              "format": OUT_SCHEMA, "options": {"temperature": 0, "num_ctx": 4096}, "think": think},
         headers={"Authorization": f"Bearer {token}"}, timeout=300)
     r.raise_for_status()
     return r.json()
 
 
-def analyse(url: str, token: str, ticker: str, name: str, rows: list[tuple]) -> dict:
+def analyse(url: str, token: str, ticker: str, name: str, rows: list[tuple], think: bool = False) -> dict:
     """One ticker. Retries once on invalid output; always returns a dict ready to log."""
     ids = {r[0] for r in rows}
     prompt = build_prompt(ticker, name, rows)
@@ -112,7 +112,7 @@ def analyse(url: str, token: str, ticker: str, name: str, rows: list[tuple]) -> 
     for _ in range(2):
         t0 = time.time()
         try:
-            j = call(url, token, prompt)
+            j = call(url, token, prompt, think)
             res["model"] = j["model"]
             res["tokens_in"] += j.get("tokens_in") or 0
             res["tokens_out"] += j.get("tokens_out") or 0

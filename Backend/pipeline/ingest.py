@@ -1,4 +1,4 @@
-"""Pipeline steps 1-3: S&P 500 universe -> yfinance daily prices -> validate -> SQLite.
+"""Pipeline steps 1-3: S&P 500 universe (FMP, Wikipedia fallback) -> yfinance daily prices -> validate -> SQLite.
 
 Run from Backend/:  .venv/bin/python -m pipeline.ingest [--limit N] [--period 2y]
 Only rows that pass validation are written to `prices`; everything rejected is
@@ -16,6 +16,7 @@ import yfinance as yf
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+FMP_URL = "https://financialmodelingprep.com/stable/sp500-constituent"
 BATCH = 100
 MAX_DAILY_MOVE = 0.5  # |close/prev_close - 1| above this is flagged as suspect
 MIN_ROWS = 60  # fewer valid daily bars than this -> ticker is rejected
@@ -29,6 +30,12 @@ SECTOR_MAP = {
     "Energy": "energy",
     "Consumer Discretionary": "consumer",
     "Consumer Staples": "consumer",
+    # FMP's own sector names
+    "Technology": "tech",
+    "Healthcare": "healthcare",
+    "Financial Services": "finance",
+    "Consumer Cyclical": "consumer",
+    "Consumer Defensive": "consumer",
 }
 
 SCHEMA = """
@@ -49,7 +56,48 @@ CREATE TABLE IF NOT EXISTS data_issues (
 """
 
 
+def load_env() -> None:
+    path = os.path.join(os.path.dirname(__file__), "..", ".env")
+    if not os.path.exists(path):
+        return
+    for line in open(path):
+        line = line.strip()
+        if line and not line.startswith("#") and "=" in line:
+            k, v = line.split("=", 1)
+            os.environ.setdefault(k.strip(), v.strip().strip('"').strip("'"))
+
+
+def fetch_universe_fmp(key: str) -> pd.DataFrame:
+    r = requests.get(FMP_URL, params={"apikey": key}, timeout=30)
+    r.raise_for_status()
+    data = r.json()
+    if not isinstance(data, list) or not data:
+        raise RuntimeError(f"FMP returned no constituents: {str(data)[:200]}")
+    t = pd.DataFrame(data)
+    df = pd.DataFrame({
+        "ticker": t["symbol"].str.replace(".", "-", regex=False).str.strip(),
+        "name": t["name"],
+        "gics_sector": t["sector"],
+    })
+    df["sector"] = df["gics_sector"].map(SECTOR_MAP).fillna("other")
+    return df.drop_duplicates("ticker").reset_index(drop=True)
+
+
 def fetch_universe() -> pd.DataFrame:
+    load_env()
+    key = os.environ.get("FMP_API_KEY")
+    if key:
+        try:
+            return fetch_universe_fmp(key)
+        except (requests.HTTPError, RuntimeError) as e:
+            # 402 = endpoint not in this FMP plan; don't print the URL (it holds the key)
+            print(f"FMP failed ({type(e).__name__}) -> falling back to Wikipedia")
+    else:
+        print("FMP_API_KEY not set -> falling back to Wikipedia")
+    return fetch_universe_wiki()
+
+
+def fetch_universe_wiki() -> pd.DataFrame:
     html = requests.get(WIKI_URL, headers={"User-Agent": "PlanWiseAI-student-project/0.1"}, timeout=30)
     html.raise_for_status()
     t = pd.read_html(StringIO(html.text))[0]

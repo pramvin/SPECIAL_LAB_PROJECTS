@@ -3,7 +3,7 @@ type: Progress
 title: Stage and task status
 description: Status of the 8 pipeline stages, DB size, task list T0-T10.
 tags: [status]
-timestamp: 2026-10-18T20:00:00Z
+timestamp: 2026-10-26T21:30:00Z
 ---
 
 สถานะ: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (ผู้ใช้เรียกเอง) · ❌ Dropped
@@ -38,5 +38,6 @@ timestamp: 2026-10-18T20:00:00Z
 | T8 | Backtest, event study, latency (ระบุ survivorship bias) | ⬜ |
 | T9 | รวมไฟล์ LLM-server ซ้ำ | ⬜ |
 | T10 | ลบบัญชีทดสอบ + ตัดสินใจ `SocialSentiment` | ⬜ |
+| T11 | ชั้นตัวเลขยืนยัน: เทียบป้าย Laya/LLM กับผลราคาจริง (ดู activeContext) | ⬜ รอผู้ใช้อนุมัติแผน |
 
 ผลทดลอง: [experiments/results](experiments/results.md)

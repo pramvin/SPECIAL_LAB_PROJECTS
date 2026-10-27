@@ -1,0 +1,3622 @@
+{
+ "arm": "anon",
+ "inputs": {
+  "A": {
+   "A": [
+    1178,
+    1177,
+    1173,
+    1176,
+    1180,
+    1175,
+    1169,
+    1170,
+    1172,
+    1171,
+    1179,
+    1174
+   ],
+   "B": [
+    1178,
+    1177,
+    1173,
+    1176,
+    1180,
+    1175,
+    1169,
+    1170,
+    1172,
+    1171,
+    1179,
+    1174
+   ]
+  },
+  "AAPL": {
+   "A": [
+    1061,
+    1101,
+    1060,
+    1114,
+    1091,
+    1065,
+    1109,
+    1030,
+    1097,
+    1022,
+    1046,
+    1058,
+    1076,
+    1074,
+    1087
+   ],
+   "B": [
+    1061,
+    1101,
+    1060,
+    1114,
+    1091,
+    1065,
+    1109,
+    1030,
+    1097,
+    1022,
+    1046,
+    1058,
+    1076,
+    1074,
+    1087
+   ]
+  },
+  "ABBV": {
+   "A": [
+    148,
+    166,
+    164,
+    160,
+    184,
+    152,
+    155,
+    170,
+    161,
+    179,
+    169,
+    150,
+    175,
+    176,
+    178
+   ],
+   "B": [
+    148,
+    166,
+    164,
+    160,
+    184,
+    152,
+    155,
+    170,
+    161,
+    179,
+    169,
+    150,
+    175,
+    176,
+    178
+   ]
+  },
+  "ACN": {
+   "A": [
+    488,
+    486,
+    482,
+    484,
+    471,
+    474,
+    477,
+    455,
+    458,
+    469,
+    462,
+    463,
+    470,
+    478,
+    487
+   ],
+   "B": [
+    488,
+    486,
+    482,
+    484,
+    471,
+    474,
+    477,
+    455,
+    458,
+    469,
+    462,
+    463,
+    470,
+    478,
+    487
+   ]
+  },
+  "ADP": {
+   "A": [
+    931,
+    929,
+    917,
+    921,
+    916,
+    924,
+    928,
+    923,
+    927,
+    920,
+    926,
+    922,
+    919,
+    925,
+    930
+   ],
+   "B": [
+    931,
+    929,
+    917,
+    921,
+    916,
+    924,
+    928,
+    923,
+    927,
+    920,
+    926,
+    922,
+    919,
+    925,
+    930
+   ]
+  },
+  "BDX": {
+   "A": [
+    1165,
+    1163,
+    1161,
+    1166,
+    1167,
+    1162,
+    1168,
+    1164
+   ],
+   "B": [
+    1165,
+    1163,
+    1161,
+    1166,
+    1167,
+    1162,
+    1168,
+    1164
+   ]
+  },
+  "BF-B": {
+   "A": [
+    37,
+    36
+   ],
+   "B": [
+    37,
+    36
+   ]
+  },
+  "CBOE": {
+   "A": [
+    3510,
+    333,
+    347,
+    326,
+    334,
+    3513,
+    3511,
+    335,
+    314,
+    331,
+    346,
+    345,
+    3512,
+    323,
+    320
+   ],
+   "B": [
+    3510,
+    333,
+    347,
+    326,
+    334,
+    3513,
+    3511,
+    335,
+    314,
+    331,
+    346,
+    345,
+    3512,
+    323,
+    320
+   ]
+  },
+  "CCI": {
+   "A": [
+    279,
+    289,
+    290,
+    310,
+    285,
+    304,
+    297,
+    295,
+    301,
+    296,
+    298,
+    286,
+    273,
+    284,
+    287
+   ],
+   "B": [
+    279,
+    289,
+    290,
+    310,
+    285,
+    304,
+    297,
+    295,
+    301,
+    296,
+    298,
+    286,
+    273,
+    284,
+    287
+   ]
+  },
+  "CME": {
+   "A": [
+    396,
+    452,
+    411,
+    435,
+    438,
+    414,
+    440,
+    441,
+    443,
+    420,
+    431,
+    419,
+    4016,
+    432,
+    418
+   ],
+   "B": [
+    396,
+    452,
+    411,
+    435,
+    438,
+    414,
+    440,
+    441,
+    443,
+    420,
+    431,
+    419,
+    4016,
+    432,
+    418
+   ]
+  },
+  "COP": {
+   "A": [
+    1157,
+    1158,
+    1149,
+    1144,
+    1152,
+    1151,
+    1154,
+    1156,
+    1146,
+    1143,
+    1148,
+    1150,
+    1153,
+    1147,
+    1155
+   ],
+   "B": [
+    1157,
+    1158,
+    1149,
+    1144,
+    1152,
+    1151,
+    1154,
+    1156,
+    1146,
+    1143,
+    1148,
+    1150,
+    1153,
+    1147,
+    1155
+   ]
+  },
+  "CTAS": {
+   "A": [
+    1186,
+    1191,
+    1183,
+    3861
+   ],
+   "B": [
+    1186,
+    1191,
+    1183,
+    3861
+   ]
+  },
+  "CVX": {
+   "A": [
+    953,
+    974,
+    951,
+    980,
+    959,
+    957,
+    987,
+    976,
+    982,
+    956,
+    960,
+    988,
+    971,
+    946,
+    970
+   ],
+   "B": [
+    953,
+    974,
+    951,
+    980,
+    959,
+    957,
+    987,
+    976,
+    982,
+    956,
+    960,
+    988,
+    971,
+    946,
+    970
+   ]
+  },
+  "DHR": {
+   "A": [
+    777,
+    776,
+    771,
+    783,
+    778,
+    781,
+    782,
+    775,
+    769,
+    774,
+    780,
+    772,
+    779,
+    770,
+    768
+   ],
+   "B": [
+    777,
+    776,
+    771,
+    783,
+    778,
+    781,
+    782,
+    775,
+    769,
+    774,
+    780,
+    772,
+    779,
+    770,
+    768
+   ]
+  },
+  "EMR": {
+   "A": [
+    826,
+    830,
+    821,
+    827,
+    816,
+    820,
+    822,
+    825,
+    829,
+    817,
+    823,
+    824,
+    819,
+    818
+   ],
+   "B": [
+    826,
+    830,
+    821,
+    827,
+    816,
+    820,
+    822,
+    825,
+    829,
+    817,
+    823,
+    824,
+    819,
+    818
+   ]
+  },
+  "EXPD": {
+   "A": [
+    943,
+    945,
+    944,
+    941,
+    942
+   ],
+   "B": [
+    943,
+    945,
+    944,
+    941,
+    942
+   ]
+  },
+  "FAST": {
+   "A": [
+    367,
+    378,
+    387,
+    382,
+    371,
+    384,
+    379,
+    391,
+    360,
+    364,
+    392,
+    375,
+    383,
+    372,
+    390
+   ],
+   "B": [
+    367,
+    378,
+    387,
+    382,
+    371,
+    384,
+    379,
+    391,
+    360,
+    364,
+    392,
+    375,
+    383,
+    372,
+    390
+   ]
+  },
+  "GEHC": {
+   "A": [
+    356,
+    6190,
+    355,
+    354,
+    357,
+    353
+   ],
+   "B": [
+    356,
+    6190,
+    355,
+    354,
+    357,
+    353
+   ]
+  },
+  "HUM": {
+   "A": [
+    230,
+    251,
+    256,
+    221,
+    250,
+    6866,
+    209,
+    239,
+    229,
+    240,
+    245,
+    219,
+    220,
+    254,
+    234
+   ],
+   "B": [
+    230,
+    251,
+    256,
+    221,
+    250,
+    6866,
+    209,
+    239,
+    229,
+    240,
+    245,
+    219,
+    220,
+    254,
+    234
+   ]
+  },
+  "IEX": {
+   "A": [
+    815,
+    811,
+    814,
+    812,
+    813
+   ],
+   "B": [
+    815,
+    811,
+    814,
+    812,
+    813
+   ]
+  },
+  "IFF": {
+   "A": [
+    502,
+    500,
+    7187,
+    498,
+    492,
+    501,
+    505,
+    497,
+    494,
+    506,
+    507,
+    495,
+    499,
+    496,
+    504
+   ],
+   "B": [
+    502,
+    500,
+    7187,
+    498,
+    492,
+    501,
+    505,
+    497,
+    494,
+    506,
+    507,
+    495,
+    499,
+    496,
+    504
+   ]
+  },
+  "KDP": {
+   "A": [
+    604,
+    599,
+    597,
+    598,
+    602,
+    603,
+    596,
+    589,
+    595,
+    601,
+    593,
+    588,
+    590,
+    591,
+    594
+   ],
+   "B": [
+    604,
+    599,
+    597,
+    598,
+    602,
+    603,
+    596,
+    589,
+    595,
+    601,
+    593,
+    588,
+    590,
+    591,
+    594
+   ]
+  },
+  "KMI": {
+   "A": [
+    611,
+    614,
+    613,
+    615,
+    609,
+    608,
+    612,
+    610
+   ],
+   "B": [
+    611,
+    614,
+    613,
+    615,
+    609,
+    608,
+    612,
+    610
+   ]
+  },
+  "KO": {
+   "A": [
+    902,
+    904,
+    911,
+    908,
+    903,
+    877,
+    907,
+    894,
+    882,
+    872,
+    885,
+    881,
+    888,
+    880,
+    893
+   ],
+   "B": [
+    902,
+    904,
+    911,
+    908,
+    903,
+    877,
+    907,
+    894,
+    882,
+    872,
+    885,
+    881,
+    888,
+    880,
+    893
+   ]
+  },
+  "MA": {
+   "A": [
+    11,
+    21,
+    3,
+    32,
+    30,
+    20,
+    16,
+    15,
+    29,
+    8,
+    18,
+    14,
+    17,
+    4,
+    24
+   ],
+   "B": [
+    11,
+    21,
+    3,
+    32,
+    30,
+    20,
+    16,
+    15,
+    29,
+    8,
+    18,
+    14,
+    17,
+    4,
+    24
+   ]
+  },
+  "MSFT": {
+   "A": [
+    625,
+    641,
+    644,
+    651,
+    696,
+    688,
+    649,
+    692,
+    666,
+    643,
+    8664,
+    650,
+    659,
+    687,
+    629
+   ],
+   "B": [
+    625,
+    641,
+    644,
+    651,
+    696,
+    688,
+    649,
+    692,
+    666,
+    643,
+    8664,
+    650,
+    659,
+    687,
+    629
+   ]
+  },
+  "MTD": {
+   "A": [
+    269,
+    268,
+    262,
+    270,
+    265,
+    263,
+    258,
+    266,
+    267,
+    264,
+    260,
+    261
+   ],
+   "B": [
+    269,
+    268,
+    262,
+    270,
+    265,
+    263,
+    258,
+    266,
+    267,
+    264,
+    260,
+    261
+   ]
+  },
+  "NDSN": {
+   "A": [
+    832,
+    834,
+    833,
+    836,
+    831,
+    835
+   ],
+   "B": [
+    832,
+    834,
+    833,
+    836,
+    831,
+    835
+   ]
+  },
+  "PFE": {
+   "A": [
+    764,
+    739,
+    744,
+    752,
+    9924,
+    751,
+    756,
+    758,
+    743,
+    759,
+    754,
+    761,
+    9925,
+    763,
+    748
+   ],
+   "B": [
+    764,
+    739,
+    744,
+    752,
+    9924,
+    751,
+    756,
+    758,
+    743,
+    759,
+    754,
+    761,
+    9925,
+    763,
+    748
+   ]
+  },
+  "PG": {
+   "A": [
+    543,
+    541,
+    524,
+    549,
+    578,
+    536,
+    539,
+    577,
+    547,
+    569,
+    570,
+    540,
+    525,
+    542,
+    532
+   ],
+   "B": [
+    543,
+    541,
+    524,
+    549,
+    578,
+    536,
+    539,
+    577,
+    547,
+    569,
+    570,
+    540,
+    525,
+    542,
+    532
+   ]
+  },
+  "PLTR": {
+   "A": [
+    138,
+    105,
+    116,
+    94,
+    100,
+    102,
+    140,
+    81,
+    120,
+    129,
+    145,
+    107,
+    139,
+    130,
+    83
+   ],
+   "B": [
+    138,
+    105,
+    116,
+    94,
+    100,
+    102,
+    140,
+    81,
+    120,
+    129,
+    145,
+    107,
+    139,
+    130,
+    83
+   ]
+  },
+  "PM": {
+   "A": [
+    1125,
+    1134,
+    1127,
+    1135,
+    1132,
+    1130,
+    1124,
+    1136,
+    1138,
+    1129,
+    1122,
+    1121,
+    1131,
+    1123,
+    1118
+   ],
+   "B": [
+    1125,
+    1134,
+    1127,
+    1135,
+    1132,
+    1130,
+    1124,
+    1136,
+    1138,
+    1129,
+    1122,
+    1121,
+    1131,
+    1123,
+    1118
+   ]
+  },
+  "PNW": {
+   "A": [
+    9979,
+    585,
+    582,
+    583
+   ],
+   "B": [
+    9979,
+    585,
+    582,
+    583
+   ]
+  },
+  "SNPS": {
+   "A": [
+    790,
+    797,
+    807,
+    796,
+    802,
+    787,
+    800,
+    794,
+    803,
+    792,
+    810,
+    804,
+    806,
+    791,
+    799
+   ],
+   "B": [
+    790,
+    797,
+    807,
+    796,
+    802,
+    787,
+    800,
+    794,
+    803,
+    792,
+    810,
+    804,
+    806,
+    791,
+    799
+   ]
+  },
+  "TECH": {
+   "A": [
+    1006,
+    1007,
+    1005,
+    1004,
+    1003
+   ],
+   "B": [
+    1006,
+    1007,
+    1005,
+    1004,
+    1003
+   ]
+  },
+  "TRV": {
+   "A": [
+    1011,
+    1016,
+    1010,
+    11757,
+    1009,
+    1008,
+    1012,
+    1014,
+    1015,
+    1018,
+    1013,
+    1017
+   ],
+   "B": [
+    1011,
+    1016,
+    1010,
+    11757,
+    1009,
+    1008,
+    1012,
+    1014,
+    1015,
+    1018,
+    1013,
+    1017
+   ]
+  },
+  "ULTA": {
+   "A": [
+    516,
+    514,
+    517,
+    519,
+    509,
+    510,
+    508,
+    515,
+    513,
+    511,
+    518
+   ],
+   "B": [
+    516,
+    514,
+    517,
+    519,
+    509,
+    510,
+    508,
+    515,
+    513,
+    511,
+    518
+   ]
+  },
+  "V": {
+   "A": [
+    62,
+    61,
+    59,
+    12291,
+    70,
+    66,
+    40,
+    63,
+    39,
+    46,
+    60,
+    42,
+    49,
+    69,
+    56
+   ],
+   "B": [
+    62,
+    61,
+    59,
+    12291,
+    70,
+    66,
+    40,
+    63,
+    39,
+    46,
+    60,
+    42,
+    49,
+    69,
+    56
+   ]
+  },
+  "VEEV": {
+   "A": [
+    733,
+    723,
+    706,
+    727,
+    716,
+    735,
+    710,
+    722,
+    712,
+    714,
+    12105,
+    718,
+    707,
+    12106,
+    725
+   ],
+   "B": [
+    733,
+    723,
+    706,
+    727,
+    716,
+    735,
+    710,
+    722,
+    712,
+    714,
+    12105,
+    718,
+    707,
+    12106,
+    725
+   ]
+  },
+  "XOM": {
+   "A": [
+    847,
+    853,
+    843,
+    855,
+    852,
+    858,
+    837,
+    838,
+    859,
+    871,
+    857,
+    870,
+    862,
+    860,
+    851
+   ],
+   "B": [
+    847,
+    853,
+    843,
+    855,
+    852,
+    858,
+    837,
+    838,
+    859,
+    871,
+    857,
+    870,
+    862,
+    860,
+    851
+   ]
+  },
+  "YUM": {
+   "A": [
+    191,
+    200,
+    199,
+    202,
+    203,
+    207,
+    201,
+    196,
+    197,
+    192,
+    186,
+    206,
+    194,
+    188,
+    204
+   ],
+   "B": [
+    191,
+    200,
+    199,
+    202,
+    203,
+    207,
+    201,
+    196,
+    197,
+    192,
+    186,
+    206,
+    194,
+    188,
+    204
+   ]
+  },
+  "ZBRA": {
+   "A": [
+    937,
+    934,
+    932,
+    938,
+    939,
+    940,
+    935,
+    933,
+    936
+   ],
+   "B": [
+    937,
+    934,
+    932,
+    938,
+    939,
+    940,
+    935,
+    933,
+    936
+   ]
+  }
+ },
+ "results": {
+  "A": {
+   "A": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Recent acquisitions and investments in AI pathology specialists suggest positive growth momentum",
+      "Positive sentiment around the company's performance relative to competitors and its role in regulated labs",
+      "Analyst has raised price target indicating potential upside"
+     ],
+     "cited_news_ids": [
+      1178,
+      1173,
+      1176,
+      1180,
+      1175
+     ],
+     "caveats": [
+      "No specific financial results or earnings guidance is mentioned in the headlines",
+      "The impact of the acquisitions on future performance is not quantified",
+      "The price target is based on analyst opinion, not confirmed market movement"
+     ]
+    },
+    "tokens_in": 681,
+    "tokens_out": 161,
+    "ms": 95969,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "AAPL": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [1091] suggests Apple is facing a consumer problem, which could indicate underlying issues, but the overall tone of the article is positive, suggesting potential for growth.",
+      "Headline [1097] indicates Apple is retesting 2026 peaks and winning the AI ecosystem stories, which supports a potential upward move.",
+      "Headline [1076] mentions Apple joining Nvidia in the $5T club with a record close, indicating strong market performance and investor confidence."
+     ],
+     "cited_news_ids": [
+      1091,
+      1097,
+      1076
+     ],
+     "caveats": [
+      "Headline [1091] focuses on a consumer problem, which could be a negative factor, but the article does not clearly explain how this issue impacts the stock price.",
+      "Headline [1097] mentions retesting 2026 peaks, but it does not specify whether this is a bullish or bearish signal.",
+      "Headline [1076] refers to joining Nvidia in the $5T club, but it does not provide details on how this affects Apple's stock price directly."
+     ]
+    },
+    "tokens_in": 807,
+    "tokens_out": 277,
+    "ms": 10336,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ABBV": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.8,
+     "reasons": [
+      "Positive Phase 3 Skyrizi trial results for Crohn's Disease [175]",
+      "Phase 3 induction therapy data on injectable Skyrizi for Crohn's [176]",
+      "Promising Phase 3 AFFIRM Trial Results for Skyrizi in Crohn's Disease [178]"
+     ],
+     "cited_news_ids": [
+      175,
+      176,
+      178
+     ],
+     "caveats": [
+      "No mention of regulatory approval timeline",
+      "No indication of earnings report impact",
+      "No mention of broader market conditions affecting the stock"
+     ]
+    },
+    "tokens_in": 851,
+    "tokens_out": 154,
+    "ms": 6792,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ACN": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Recent gains on dividend sustainability and AI deals",
+      "Positive momentum from strong dividend outlook and growth targets",
+      "Positive sentiment from new AI deals with Dell and Workday"
+     ],
+     "cited_news_ids": [
+      486,
+      469,
+      462
+     ],
+     "caveats": [
+      "Uncertain how long the positive momentum will last",
+      "Potential headwinds from BNP's analysis not yet offsetting tailwinds",
+      "Need for further confirmation from upcoming investor day insights"
+     ]
+    },
+    "tokens_in": 830,
+    "tokens_out": 134,
+    "ms": 5848,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ADP": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "ADP expands Lyric HCM in Europe: BMO raised target for ADP stock",
+      "ADP stock pre-market at EUR 244.70 on October 13, 2026",
+      "Strong Execution Lifted Automatic Data Processing (ADP) in Q3"
+     ],
+     "cited_news_ids": [
+      929,
+      928,
+      920
+     ],
+     "caveats": [
+      "No recent earnings report or revenue guidance provided",
+      "Mixed sentiment on stock performance with some headlines showing declines",
+      "Target prices are not directly tied to recent financial results"
+     ]
+    },
+    "tokens_in": 844,
+    "tokens_out": 158,
+    "ms": 7303,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "BDX": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [1165] mentions Barclays setting a USD 165.00 target for Becton Dickinson stock, which is above the recent price level.",
+      "Headline [1163] states that Becton Dickinson stock hit a 52-week high at 193.1 USD, indicating strong recent performance.",
+      "Headline [1161] suggests there is potential for a change in the stock narrative due to a U.S. manufacturing deal, which could drive further gains."
+     ],
+     "cited_news_ids": [
+      1165,
+      1163,
+      1161
+     ],
+     "caveats": [
+      "The target price from Barclays is based on future expectations and may not materialize.",
+      "The 52-week high may not be sustainable if underlying fundamentals do not improve.",
+      "The potential change in the stock narrative is speculative and depends on the outcome of the U.S. manufacturing deal."
+     ]
+    },
+    "tokens_in": 546,
+    "tokens_out": 232,
+    "ms": 10177,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "BF-B": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headline 37 discusses forecasts but does not specify a clear upward or downward trend"
+     ],
+     "cited_news_ids": [
+      37,
+      36
+     ],
+     "caveats": [
+      "No specific earnings or performance data is provided in the headlines",
+      "Headline 36 focuses on dividend questions without indicating stock price direction"
+     ]
+    },
+    "tokens_in": 277,
+    "tokens_out": 101,
+    "ms": 4336,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CBOE": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [3510] mentions Cboe Global Markets Inc. stock outperforms competitors on a strong trading day, suggesting positive momentum.",
+      "Headline [334] and [11] indicate Cboe plans to extend options trading hours for major stocks and ETFs, which could increase trading volume and demand for its services.",
+      "Headline [333] states Robinhood and Cboe expand prediction market offerings after an SEC win, implying regulatory progress and potential growth in their offerings."
+     ],
+     "cited_news_ids": [
+      3510,
+      334,
+      333
+     ],
+     "caveats": [
+      "Headline [347] mentions a target cut to USD 329.00, which could indicate some bearish sentiment, but it's a single analyst opinion and may not reflect broader market views.",
+      "Headline [3511] and [335] both mention Goldman Sachs maintaining a Hold rating, which is neutral and does not support a clear price direction.",
+      "Headline [326] refers to an earnings release, but no details are provided about the earnings results or guidance, making it hard to assess the impact on the stock."
+     ]
+    },
+    "tokens_in": 822,
+    "tokens_out": 288,
+    "ms": 11669,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CCI": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [284] suggests Crown Castle (CCI) surged 15.6% and may indicate further gains",
+      "Headline [310] mentions Barclays lifted target to USD 86.00 for Crown Castle stock",
+      "Headline [279] indicates Crown Castle (CCI) stock may be 32% undervalued following AI demand news"
+     ],
+     "cited_news_ids": [
+      284,
+      310,
+      279
+     ],
+     "caveats": [
+      "No specific details on the AI demand news or its impact on Crown Castle's operations",
+      "The target price from Barclays is not accompanied by a rationale or analysis",
+      "The surge mentioned in headline [284] is not explained by the headlines provided"
+     ]
+    },
+    "tokens_in": 767,
+    "tokens_out": 194,
+    "ms": 8271,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CME": {
+    "output": {
+     "direction": "up",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Headline 441 mentions Wells Fargo lifts target for CME Group stock to USD 315 from USD 301, suggesting positive analyst sentiment.",
+      "Headline 443 states CME Group Inc. stock holds near highs as analyst targets signal limited upside, indicating potential for further gains.",
+      "Headline 414 discusses how Baseball Futures Launch At CME Group (CME) Has Changed Its Investment Story, implying ongoing innovation and relevance in the market."
+     ],
+     "cited_news_ids": [
+      441,
+      443,
+      414
+     ],
+     "caveats": [
+      "Headline 396 indicates CME Group Inc. Cl A stock underperforms Thursday when compared to competitors despite daily gains, which could suggest mixed market sentiment.",
+      "Headline 452 mentions CME Group introduces four new E-mini Equity Index futures: Will CME hold $286.59 support? This is speculative and does not confirm a clear direction.",
+      "Headlines 435, 438, 420, 431, 419, 4016, 432, and 418 are primarily about futures and charts, which do not directly indicate stock price movement."
+     ]
+    },
+    "tokens_in": 835,
+    "tokens_out": 301,
+    "ms": 12470,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "COP": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [1155] mentions analyst optimism and a $7 billion asset offer which could boost COP stock in the short term.",
+      "Headline [1156] states analysts are bullish on COP, indicating positive sentiment from financial experts.",
+      "Headline [1151] notes COP ascended while the market fell, suggesting relative strength in COP's performance."
+     ],
+     "cited_news_ids": [
+      1155,
+      1156,
+      1151
+     ],
+     "caveats": [
+      "The asset offer details are not specified, so the actual impact on COP's price is uncertain.",
+      "The bullish analyst sentiment may not translate into actual price movement if other market factors change.",
+      "The short-term price movement may not be sustained without further positive developments."
+     ]
+    },
+    "tokens_in": 834,
+    "tokens_out": 196,
+    "ms": 8845,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CTAS": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Institutional investors like CoreCap Advisors LLC, Sanders Morris Harris LLC, and the State of Alaska Department of Revenue are increasing their stakes in Cintas Corporation $CTAS",
+      "The recent institutional buying activity suggests positive sentiment among professional investors",
+      "The presence of a stock forecast and price target indicates some level of market attention"
+     ],
+     "cited_news_ids": [
+      1186,
+      1191,
+      1183,
+      3861
+     ],
+     "caveats": [
+      "The stock forecast and price target do not provide specific price guidance",
+      "The impact of institutional buying on stock price is not guaranteed",
+      "There is no information on the broader market conditions or company performance"
+     ]
+    },
+    "tokens_in": 368,
+    "tokens_out": 178,
+    "ms": 7487,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CVX": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [951] mentions analysts lifting oil and project views, which could support a price move up.",
+      "Headline [959] indicates Chevron Corporation (CVX) hits a fresh high, suggesting positive momentum.",
+      "Headline [976] states Chevron (CVX) gets a buy from Wells Fargo, indicating institutional confidence."
+     ],
+     "cited_news_ids": [
+      951,
+      959,
+      976
+     ],
+     "caveats": [
+      "Headline [953] reports a stock fall, which could indicate short-term negative sentiment.",
+      "Headline [960] mentions a stock sale, which could introduce uncertainty.",
+      "Headline [971] discusses leadership reshuffling, which may affect investor confidence."
+     ]
+    },
+    "tokens_in": 757,
+    "tokens_out": 193,
+    "ms": 8394,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "DHR": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [771] and [782] suggest a potential 6.2% move up on the earnings release next week.",
+      "Headline [779] indicates DHR could be 6% below fair value due to its NVIDIA AI tie-up, implying potential for upward movement.",
+      "Headline [780] and [770] highlight a partnership with NVIDIA to link AI with lab experiments, which could drive positive sentiment."
+     ],
+     "cited_news_ids": [
+      771,
+      782,
+      779,
+      780,
+      770
+     ],
+     "caveats": [
+      "The exact timing and magnitude of the earnings impact are not specified in the headlines.",
+      "The fair value calculation in [779] is based on assumptions not detailed in the text.",
+      "The partnership with NVIDIA is mentioned but the specific benefits or impact on stock price are not elaborated."
+     ]
+    },
+    "tokens_in": 826,
+    "tokens_out": 228,
+    "ms": 9764,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "EMR": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [821] mentions a price target bump from Royal Bank Of Canada, suggesting positive outlook.",
+      "Headline [820] states J.P. Morgan gave a Buy rating, indicating confidence in the stock.",
+      "Headline [817] reports a consensus target price of $171.00, showing analyst optimism."
+     ],
+     "cited_news_ids": [
+      821,
+      820,
+      817
+     ],
+     "caveats": [
+      "No specific earnings figures or revenue details are provided in the headlines to confirm the price target bump.",
+      "The headlines do not mention any specific catalysts or events that could drive the stock price up.",
+      "The headlines include both positive and negative news, such as stake cuts and shares unloaded, which could affect the stock price."
+     ]
+    },
+    "tokens_in": 752,
+    "tokens_out": 200,
+    "ms": 8510,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "EXPD": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline 941 suggests the stock has hit a fresh high and asks if there is still room to run, indicating positive momentum."
+     ],
+     "cited_news_ids": [
+      941
+     ],
+     "caveats": [
+      "No recent earnings data is provided to confirm the sustainability of the price move."
+     ]
+    },
+    "tokens_in": 410,
+    "tokens_out": 97,
+    "ms": 4290,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "FAST": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headlines [367] and [382] present conflicting views, with one highlighting margin power behind a stock dip and the other flashing a bullish signal despite margin pressure"
+     ],
+     "cited_news_ids": [
+      367,
+      382
+     ],
+     "caveats": [
+      "No clear consensus on the impact of Q3 results on future performance",
+      "Uncertainty around how margin pressure will affect stock price movement"
+     ]
+    },
+    "tokens_in": 788,
+    "tokens_out": 121,
+    "ms": 5432,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "GEHC": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Recent stock performance shows a rise of 3.0% (355), suggesting positive investor sentiment.",
+      "Investors are weighing the SOFIE acquisition and steady operating momentum, which could support further gains (354).",
+      "Analysts are highlighting M&A activity and execution as drivers for a value re-rating, indicating potential for upward movement (353)."
+     ],
+     "cited_news_ids": [
+      353,
+      354,
+      355
+     ],
+     "caveats": [
+      "No specific earnings results or financial metrics are mentioned in the headlines.",
+      "The analysis is based on analyst predictions and market sentiment rather than concrete data.",
+      "The headlines do not provide information on potential risks or market conditions that could affect the stock negatively."
+     ]
+    },
+    "tokens_in": 444,
+    "tokens_out": 189,
+    "ms": 7951,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "HUM": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [251] mentions Humana partners with BlackRock to expand senior care clinics, which could drive growth.",
+      "Headline [239] notes Humana advances 2% after UnitedHealth rises, suggesting positive market sentiment.",
+      "Headline [229] forecasts strong price appreciation for HUM, indicating optimism."
+     ],
+     "cited_news_ids": [
+      251,
+      239,
+      229
+     ],
+     "caveats": [
+      "No specific financial metrics or earnings guidance are provided in the headlines to quantify the potential upside."
+     ]
+    },
+    "tokens_in": 831,
+    "tokens_out": 151,
+    "ms": 6886,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "IEX": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.8,
+     "reasons": [
+      "Positive analyst ratings from Mizuho, Royal Bank Of Canada, and KeyCorp suggest confidence in IDEX's growth potential",
+      "MarketBeat highlights strong price appreciation forecasts which indicate positive sentiment",
+      "IDEX outperformed competitors on a strong trading day indicating favorable market reception"
+     ],
+     "cited_news_ids": [
+      815,
+      811,
+      814,
+      812,
+      813
+     ],
+     "caveats": []
+    },
+    "tokens_in": 382,
+    "tokens_out": 128,
+    "ms": 5514,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "IFF": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.8,
+     "reasons": [
+      "Headline [498] and [492] indicate IFF shares closed at a 52-week high and hit a new 1-year high, suggesting strong price momentum.",
+      "Headline [501] confirms IFF stock reached a 52-week high at 89.32 USD, reinforcing the upward trend.",
+      "Headline [505] mentions IFF shares advanced 3.81% despite an EPS miss, showing investor confidence despite financial underperformance."
+     ],
+     "cited_news_ids": [
+      498,
+      492,
+      501,
+      505
+     ],
+     "caveats": [
+      "Headline [502] refers to a future event (November 3, 2026) and does not provide current market sentiment.",
+      "Headline [500] mentions a share acquisition but does not directly link to price movement.",
+      "Headline [7187] indicates underperformance against competitors, which could suggest mixed market sentiment."
+     ]
+    },
+    "tokens_in": 815,
+    "tokens_out": 247,
+    "ms": 10701,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "KDP": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [597] mentions Keurig Dr Pepper (KDP) hits a new 1-year high, suggesting positive momentum.",
+      "Headline [598] states the stock hits a 52-week high at 33.89 USD, reinforcing the upward trend.",
+      "Headline [596] notes the stock rises 1.1% after Piper Sandler upgrades, indicating institutional confidence."
+     ],
+     "cited_news_ids": [
+      597,
+      598,
+      596
+     ],
+     "caveats": [
+      "No specific volume or trading activity is mentioned to confirm the strength of the price move.",
+      "The headlines focus on recent price action and analyst upgrades but do not provide detailed financial results or future earnings guidance."
+     ]
+    },
+    "tokens_in": 826,
+    "tokens_out": 193,
+    "ms": 8453,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "KMI": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headline [611] mentions KMI stock dipped while the market gained, suggesting short-term weakness but not enough to confirm a clear direction.",
+      "Headline [613] provides mixed signals with 2 reasons to like KMI and 1 to stay skeptical, indicating uncertainty in the outlook.",
+      "Headline [615] refers to options market signals but does not specify whether they indicate bullish or bearish sentiment."
+     ],
+     "cited_news_ids": [
+      611,
+      613,
+      615
+     ],
+     "caveats": [
+      "No specific earnings report or revenue guidance is mentioned in the headlines.",
+      "The sentiment from the headlines is mixed without clear consensus.",
+      "The options market signal is not detailed, leaving uncertainty about its implications."
+     ]
+    },
+    "tokens_in": 499,
+    "tokens_out": 192,
+    "ms": 8281,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "KO": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.8,
+     "reasons": [
+      "Headline [904] mentions KFC switching to Coca-Cola products in the U.S., which could boost demand for KO.",
+      "Headline [907] states KO hits a record high, suggesting strong market sentiment.",
+      "Headline [911] highlights KO outperforming the Magnificent 7, indicating positive investor interest."
+     ],
+     "cited_news_ids": [
+      904,
+      907,
+      911
+     ],
+     "caveats": [
+      "No specific details on the scale of KFC's switch to Coca-Cola products.",
+      "Record high does not necessarily indicate future performance.",
+      "Outperforming the Magnificent 7 does not guarantee continued outperformance."
+     ]
+    },
+    "tokens_in": 806,
+    "tokens_out": 177,
+    "ms": 7857,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "MA": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [3] suggests Mastercard stock has passed its buy point and is moving higher",
+      "Headline [21] highlights Mastercard unveiling a global money platform targeting 40 currencies by 2027, indicating growth potential",
+      "Headline [29] mentions Mastercard launching a global money platform integrating stablecoins, which could drive demand"
+     ],
+     "cited_news_ids": [
+      3,
+      21,
+      29
+     ],
+     "caveats": [
+      "Headline [4] suggests the stock may be below fair value, which could indicate potential for upward movement but lacks confirmation of actual valuation metrics",
+      "Headline [11] mentions the stock could be undervalued, but does not specify the basis for this valuation",
+      "Headline [16] raises a question about whether investors should take action, which is not a clear endorsement or indication of price direction"
+     ]
+    },
+    "tokens_in": 771,
+    "tokens_out": 216,
+    "ms": 9749,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "MSFT": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [688] mentions Microsoft Stock Notches Up After It Releases Defender For Linux Desktop",
+      "Headline [687] states Sony and Microsoft (MSFT) Stocks Rally Despite Falling PlayStation and Xbox Sales",
+      "Headline [651] reports Microsoft (MSFT) Gets a Buy from Jefferies"
+     ],
+     "cited_news_ids": [
+      688,
+      687,
+      651
+     ],
+     "caveats": [
+      "Headline [643] suggests Anthropic Is Growing 50%, Microsoft Isn\u2019t, which could indicate potential concerns about growth relative to competitors",
+      "Headline [659] indicates Microsoft (MSFT) Could Be 27% Overvalued, which introduces a potential downside risk",
+      "Headline [625] discusses How Earnings Beat Will Impact Microsoft (MSFT) Stock, but does not specify the outcome of the earnings report"
+     ]
+    },
+    "tokens_in": 808,
+    "tokens_out": 226,
+    "ms": 9753,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "MTD": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.8,
+     "reasons": [
+      "Recent price targets from Morgan Stanley and TradingView suggest positive momentum",
+      "The stock has hit new 52-week and 12-month highs in recent days",
+      "Upgrades and positive analyst commentary indicate strong market sentiment"
+     ],
+     "cited_news_ids": [
+      262,
+      270,
+      265,
+      263,
+      258
+     ],
+     "caveats": [
+      "No specific details on the reasons for the price targets or upgrades",
+      "Unclear if the recent gains are sustainable or based on fundamental improvements"
+     ]
+    },
+    "tokens_in": 732,
+    "tokens_out": 145,
+    "ms": 6422,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "NDSN": {
+    "output": {
+     "direction": "down",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Headline 834 and 836 indicate insider selling activity, which often signals negative sentiment or lack of confidence in the stock's near-term outlook.",
+      "Headline 831 reinforces the insider selling trend, suggesting possible concerns about the stock's performance.",
+      "Headline 833 is a forecast page and does not provide specific directional insight."
+     ],
+     "cited_news_ids": [
+      834,
+      836,
+      831,
+      833
+     ],
+     "caveats": [
+      "Headlines 834, 836, and 831 only reflect selling actions and do not provide direct evidence of future price movement.",
+      "Headline 833 is a forecast page and lacks specific analysis or data to support a directional view."
+     ]
+    },
+    "tokens_in": 436,
+    "tokens_out": 198,
+    "ms": 8148,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PFE": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "PFE stock hit 52-week high as market dips",
+      "PFE stock moved up by 3.14% on Oct 14",
+      "PFE and Moderna edged higher as money rotated into healthcare"
+     ],
+     "cited_news_ids": [
+      739,
+      743,
+      764
+     ],
+     "caveats": [
+      "No details on the specific reason for the 52-week high",
+      "No details on the specific reason for the 3.14% movement",
+      "No details on the specific reason for the edge higher"
+     ]
+    },
+    "tokens_in": 858,
+    "tokens_out": 151,
+    "ms": 6714,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PG": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headlines mention dividend payments and earnings expectations, but no clear indication of price movement",
+      "There are conflicting signals about earnings and investor sentiment",
+      "No specific news about product launches, market expansion, or strategic moves"
+     ],
+     "cited_news_ids": [
+      524,
+      536,
+      539,
+      577,
+      547
+     ],
+     "caveats": [
+      "No details on the actual earnings results or their impact on the stock",
+      "No information on how the dividend compares to historical trends or industry standards",
+      "No context on the ETF selling activity or its significance"
+     ]
+    },
+    "tokens_in": 906,
+    "tokens_out": 156,
+    "ms": 7244,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PLTR": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headlines [138] and [81] suggest positive momentum with AI execution and potential military contracts, but these are offset by [105] and [130] which highlight bearish sentiment and a potential worst month for PLTR.",
+      "Headlines [116] and [107] indicate insider selling, which could be a negative signal, but [140] and [120] show positive developments like revenue sharing and strong earnings performance.",
+      "There is no clear consensus on the stock's direction, with conflicting signals from both bullish and bearish headlines."
+     ],
+     "cited_news_ids": [
+      105,
+      116,
+      130,
+      138,
+      140,
+      145,
+      120,
+      81
+     ],
+     "caveats": [
+      "Lack of specific details on the scale or impact of the Japan military contract in [138].",
+      "Uncertainty around the significance of the insider sales in [116] and [107].",
+      "Conflicting signals between positive AI execution in [81] and negative analyst sentiment in [130]."
+     ]
+    },
+    "tokens_in": 889,
+    "tokens_out": 280,
+    "ms": 12172,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PM": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [1134] suggests PM stock is at a 52-week high, indicating strong investor sentiment",
+      "Headline [1135] highlights PM as part of the Dividend Kings with payout hikes, supporting long-term value",
+      "Headline [1138] mentions Bank of America reaffirmed its Buy rating, adding institutional confidence"
+     ],
+     "cited_news_ids": [
+      1134,
+      1135,
+      1138
+     ],
+     "caveats": [
+      "Headline [1132] shows a GF Value lower than current price, suggesting potential overvaluation",
+      "Headline [1122] indicates PM stock looks richly valued after a $16b investment, which could limit upside",
+      "Headline [1118] raises concerns about rising Treasury yields potentially impacting the rally"
+     ]
+    },
+    "tokens_in": 824,
+    "tokens_out": 212,
+    "ms": 9580,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PNW": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Headline [585] suggests Pinnacle West Capital Corp. stock outperforms competitors on a strong trading day, indicating positive momentum.",
+      "Headline [583] raises the question of whether rising customer demand can support long-term earnings growth, which may signal optimism about future performance.",
+      "Headline [582] notes underperformance on Monday despite daily gains, which could indicate short-term volatility but not a clear downward trend."
+     ],
+     "cited_news_ids": [
+      585,
+      583,
+      582
+     ],
+     "caveats": [
+      "The outperformance mentioned in [585] is only on a single trading day and may not be sustained.",
+      "Headline [583] is a question rather than a confirmed fact, so the potential for growth is speculative.",
+      "Headline [582] highlights underperformance on a specific day, which may not reflect the overall trend."
+     ]
+    },
+    "tokens_in": 353,
+    "tokens_out": 226,
+    "ms": 9306,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "SNPS": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [797] mentions Synopsys Signals Confidence With $1B Accelerated Buyback, Analysts Raise Targets, which suggests positive sentiment and potential price increase.",
+      "Headline [800] states Synopsys (SNPS) Adopts AI Chipmaking Libraries For Semiconductor Workflows, indicating innovation and possible growth.",
+      "Headline [792] notes Synopsys (SNPS) Stock May Be 15% Undervalued Following Fresh AI Deal News, suggesting potential for price appreciation."
+     ],
+     "cited_news_ids": [
+      797,
+      800,
+      792
+     ],
+     "caveats": [
+      "Headline [790] mentions a stake cut by the State of Alaska Department of Revenue, which could be a negative factor, but it is not clear if this is a significant event.",
+      "Headline [787] asks What Would It Take For Synopsys Stock To Move Higher? which is speculative and does not provide concrete information.",
+      "Headline [794] states Synopsys (SNPS) Stock Looks Cheap Relative To Future Cash Flow, which is a valuation metric but does not directly indicate future price movement."
+     ]
+    },
+    "tokens_in": 805,
+    "tokens_out": 282,
+    "ms": 11991,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "TECH": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headline [1006] indicates the stock is near its 52-week high but slightly below, suggesting no clear direction"
+     ],
+     "cited_news_ids": [
+      1006
+     ],
+     "caveats": [
+      "No headline confirms positive or negative momentum",
+      "Headline [1007] mentions an investigation into a potential sale, which could impact the stock but lacks confirmation",
+      "Headline [1004] and [1003] provide operational and analytical interest but do not indicate a clear price direction"
+     ]
+    },
+    "tokens_in": 396,
+    "tokens_out": 145,
+    "ms": 6205,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "TRV": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [1009] mentions a new $341.00 price target at Wells Fargo, suggesting positive outlook.",
+      "Headline [1015] indicates a price target was raised to $352.00, showing increased confidence.",
+      "Headline [1014] states that Travelers Companies stock holds firm as underwriting metrics support results, implying positive performance."
+     ],
+     "cited_news_ids": [
+      1009,
+      1015,
+      1014
+     ],
+     "caveats": [
+      "Headline [1018] mentions a trough earnings signal despite an EPS surprise, which could indicate mixed signals.",
+      "Headline [11757] provides a sell rating from Bank of America, which contradicts the positive sentiment in other headlines.",
+      "Headline [1010] asks if Travelers can retain its surprise streak, indicating uncertainty about future performance."
+     ]
+    },
+    "tokens_in": 716,
+    "tokens_out": 230,
+    "ms": 9932,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ULTA": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [514] mentions that Ulta Beauty raised its 2026 outlook and sets a target price of USD 627.83, which suggests positive expectations for the stock.",
+      "Headline [510] states that Ulta Beauty Inc. stock outperformed competitors on a strong trading day, indicating strong market performance.",
+      "Headline [515] notes that Ulta Beauty's shares ticked up 1.09% and pushed toward the upper trading range, showing positive short-term movement."
+     ],
+     "cited_news_ids": [
+      514,
+      510,
+      515
+     ],
+     "caveats": [
+      "Headline [518] mentions that Ulta Beauty stock dipped after strong earnings and guidance, which could indicate mixed market sentiment."
+     ]
+    },
+    "tokens_in": 665,
+    "tokens_out": 203,
+    "ms": 8827,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "V": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [61] mentions Visa stock jumped 2.1% with positive reasons",
+      "Headline [59] states Visa shares are near 52-week high due to stablecoin payments expansion",
+      "Headline [66] highlights Visa Direct launching stablecoin-powered money movement"
+     ],
+     "cited_news_ids": [
+      61,
+      59,
+      66
+     ],
+     "caveats": [
+      "Headline [39] mentions Visa stock slipped after-hours due to job cut-related costs, which could offset gains",
+      "Headline [46] suggests Visa stock fell 1.3% and advises caution",
+      "Headline [70] indicates Visa stock is trading within a defined range, which may limit upward momentum"
+     ]
+    },
+    "tokens_in": 790,
+    "tokens_out": 186,
+    "ms": 8268,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "VEEV": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [733] indicates Veeva Systems has reached a fresh 52-week high, suggesting positive momentum.",
+      "Headline [707] highlights Veeva Stock breaking out as big money grabs exposure to the AI software play, indicating strong investor interest.",
+      "Headline [735] mentions Oppenheimer keeps a USD 325 target for Veeva Systems stock, showing continued analyst confidence."
+     ],
+     "cited_news_ids": [
+      733,
+      707,
+      735
+     ],
+     "caveats": [
+      "No specific volume or duration of the price move is mentioned in the headlines.",
+      "The impact of the IQVIA partnership on valuation is not quantified in the headlines."
+     ]
+    },
+    "tokens_in": 871,
+    "tokens_out": 187,
+    "ms": 8713,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "XOM": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [853] mentions a price target boost from Morgan Stanley, suggesting positive outlook.",
+      "Headline [855] and [858] indicate recent stock jumps and new 52-week high, showing strength.",
+      "Headline [852] and [851] show stock rising despite market dips, indicating resilience."
+     ],
+     "cited_news_ids": [
+      853,
+      855,
+      858,
+      852,
+      851
+     ],
+     "caveats": [
+      "Headline [843] suggests the stock may not be worth 29x P/E, which could indicate overvaluation, but it's a single analyst view."
+     ]
+    },
+    "tokens_in": 811,
+    "tokens_out": 183,
+    "ms": 8292,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "YUM": {
+    "output": {
+     "direction": "down",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.4,
+     "reasons": [
+      "Headline [207] mentions Jefferies cuts forecasts for YUM as Taco Bell sales weaken, suggesting negative outlook.",
+      "Headline [194] reports YUM stock slides overnight due to questions about Taco Bell's expansion in a cyclosporiasis investigation, indicating concern.",
+      "Headline [206] states Yum! Brands cuts earnings forecast as weaker Taco Bell performance is reported, adding to the downward pressure."
+     ],
+     "cited_news_ids": [
+      207,
+      194,
+      206
+     ],
+     "caveats": [
+      "No specific details on the extent of sales weakness or the impact of the cyclosporiasis investigation on Taco Bell's operations.",
+      "The forecast cuts and stock slides are not accompanied by clear data on future performance or recovery plans.",
+      "The headlines are mixed with some suggesting undervaluation and positive potential, which could offset the negative signals."
+     ]
+    },
+    "tokens_in": 826,
+    "tokens_out": 220,
+    "ms": 9717,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ZBRA": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1m",
+     "confidence": 0.6,
+     "reasons": [
+      "Headline [932] suggests ZBRA could be 28% undervalued on cash flow, indicating potential for price increase.",
+      "Headline [935] asks if ZBRA is a good buy after a 71% rally, implying positive sentiment and possible further gains.",
+      "Headline [939] discusses earnings momentum, which can support upward price movement."
+     ],
+     "cited_news_ids": [
+      932,
+      935,
+      939
+     ],
+     "caveats": [
+      "Headline [934] mentions valuation leaves little room for error, which could limit upside potential.",
+      "Headline [938] questions if ZBRA is fairly valued, suggesting uncertainty about future performance.",
+      "Headline [933] asks if the stock is still cheap, indicating mixed views on valuation."
+     ]
+    },
+    "tokens_in": 569,
+    "tokens_out": 212,
+    "ms": 9763,
+    "error": null,
+    "model": "qwen3:8b"
+   }
+  },
+  "B": {
+   "A": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Recent acquisitions and investments in AI pathology specialist suggest growth potential",
+      "Positive analyst target lift indicates confidence in future performance",
+      "Outperformance on strong trading day shows market favor"
+     ],
+     "cited_news_ids": [
+      1178,
+      1180,
+      1171
+     ],
+     "caveats": [
+      "No specific financial metrics or revenue figures provided in headlines",
+      "Uncertain how quickly the acquired technologies will translate into revenue",
+      "No mention of potential risks or regulatory challenges"
+     ]
+    },
+    "tokens_in": 706,
+    "tokens_out": 133,
+    "ms": 5333,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "AAPL": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [1091] suggests [COMPANY] is overcoming consumer issues, which could support price movement.",
+      "Headline [1097] indicates [COMPANY] is retesting 2026 peaks and winning AI ecosystem stories, which is positive for the stock.",
+      "Headline [1022] mentions the stock could be 25% above fair value due to the [COMPANY] home push, suggesting potential for upward movement."
+     ],
+     "cited_news_ids": [
+      1091,
+      1097,
+      1022
+     ],
+     "caveats": [
+      "Headline [1065] raises a consumer problem that could negatively impact the stock, but it's unclear how significant this issue is."
+     ]
+    },
+    "tokens_in": 850,
+    "tokens_out": 194,
+    "ms": 7355,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ABBV": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.85,
+     "reasons": [
+      "Positive Phase 3 Skyrizi trial results for Crohn's Disease [175]",
+      "Phase 3 induction therapy data on injectable Skyrizi for Crohn's [176]",
+      "Promising Phase 3 AFFIRM Trial Results for Skyrizi in Crohn's Disease [178]"
+     ],
+     "cited_news_ids": [
+      175,
+      176,
+      178
+     ],
+     "caveats": [
+      "No specific details on the trial outcomes or their potential impact on the stock price are provided in the headlines"
+     ]
+    },
+    "tokens_in": 864,
+    "tokens_out": 150,
+    "ms": 6062,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ACN": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Recent positive price movement with multiple headlines reporting gains of 4.33% and 10.4% over the past days, indicating strong investor interest and possible momentum.",
+      "Positive sentiment around dividend sustainability and growth targets, along with new AI deals and strong dividend outlook, suggests continued support for the stock.",
+      "Analyst coverage and investor day events highlight ongoing interest and potential for further gains."
+     ],
+     "cited_news_ids": [
+      486,
+      469,
+      470,
+      482,
+      477,
+      487
+     ],
+     "caveats": [
+      "The headlines do not provide specific details on the magnitude of future gains or the exact timing of potential price movements."
+     ]
+    },
+    "tokens_in": 859,
+    "tokens_out": 182,
+    "ms": 7251,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ADP": {
+    "output": {
+     "direction": "up",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Headline [929] mentions BMO raised target for [COMPANY] stock, suggesting positive outlook.",
+      "Headline [920] highlights strong execution lifted [COMPANY] in Q3, indicating recent performance improvements.",
+      "Headline [931] states [COMPANY] stock at EUR 253.18, 1.07 percent above Xetra close, showing recent price increase."
+     ],
+     "cited_news_ids": [
+      929,
+      920,
+      931
+     ],
+     "caveats": [
+      "Headline [921] and [924] indicate [COMPANY] stock is below target and losing value, which could counteract the positive signals."
+     ]
+    },
+    "tokens_in": 877,
+    "tokens_out": 187,
+    "ms": 7622,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "BDX": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Barclays sets USD 165.00 target for [COMPANY] stock",
+      "[COMPANY] stock hits 52-week high at 193.1 USD"
+     ],
+     "cited_news_ids": [
+      1165,
+      1163
+     ],
+     "caveats": [
+      "No details on the rationale for Barclays target",
+      "No details on the factors contributing to the 52-week high"
+     ]
+    },
+    "tokens_in": 546,
+    "tokens_out": 123,
+    "ms": 5480,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "BF-B": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headline 37 discusses forecasts but does not specify a positive or negative outlook for BF-B.",
+      "Headline 36 focuses on dividend questions without indicating a clear impact on stock price movement."
+     ],
+     "cited_news_ids": [
+      37,
+      36
+     ],
+     "caveats": [
+      "No specific performance or earnings details are provided in the headlines.",
+      "The headlines are generic and do not provide actionable insights into the stock's direction."
+     ]
+    },
+    "tokens_in": 278,
+    "tokens_out": 127,
+    "ms": 5107,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CBOE": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [3510] and [323] indicate the stock outperformed competitors on a strong trading day, suggesting positive market sentiment.",
+      "Headline [334], [3513], and [314] mention the company plans to extend options trading hours, which could increase trading volume and investor interest.",
+      "Headline [347] shows a target cut, but this is a bearish signal, which is conflicting with the positive news."
+     ],
+     "cited_news_ids": [
+      3510,
+      323,
+      334,
+      3513,
+      314,
+      347
+     ],
+     "caveats": [
+      "The target cut in headline [347] is a conflicting signal that may reduce the positive impact of other headlines."
+     ]
+    },
+    "tokens_in": 833,
+    "tokens_out": 206,
+    "ms": 9175,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CCI": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [284] suggests recent price surge may indicate further gains",
+      "Headline [310] indicates Barclays raised target price for the stock",
+      "Headline [279] implies the stock may be undervalued based on AI demand news"
+     ],
+     "cited_news_ids": [
+      284,
+      310,
+      279
+     ],
+     "caveats": [
+      "No specific earnings results or guidance are mentioned in the headlines",
+      "The undervaluation claim is based on AI demand, which may not directly impact the company's operations",
+      "The comparison with competitors in some headlines does not provide clear directional signals"
+     ]
+    },
+    "tokens_in": 798,
+    "tokens_out": 167,
+    "ms": 7693,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CME": {
+    "output": {
+     "direction": "up",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Analyst targets suggest limited upside for [COMPANY] Group stock",
+      "Wells Fargo lifts target for [COMPANY] Group stock to USD 315 from USD 301"
+     ],
+     "cited_news_ids": [
+      441,
+      443
+     ],
+     "caveats": [
+      "The analyst targets do not specify the timeframe for the upside",
+      "The stock is holding near highs, which may indicate resistance"
+     ]
+    },
+    "tokens_in": 859,
+    "tokens_out": 123,
+    "ms": 6217,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "COP": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [1155] mentions analyst optimism and a $7 billion asset offer, which could boost investor sentiment and stock price.",
+      "Headline [1156] states analysts are bullish on [COMPANY], indicating positive expectations.",
+      "Headline [1148] highlights dividend sustainability as a focus, which can support stock price through income generation."
+     ],
+     "cited_news_ids": [
+      1155,
+      1156,
+      1148
+     ],
+     "caveats": [
+      "The asset offer details are not specified, so the actual impact on the stock is uncertain.",
+      "The bullish analyst ratings may not translate into immediate price movement without further positive news."
+     ]
+    },
+    "tokens_in": 837,
+    "tokens_out": 177,
+    "ms": 7979,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CTAS": {
+    "output": {
+     "direction": "up",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Recent institutional buying activity suggests positive sentiment",
+      "Increased stake by investment advisors may indicate confidence in the stock",
+      "A price target headline could imply analyst optimism"
+     ],
+     "cited_news_ids": [
+      1186,
+      1191,
+      1183,
+      3861
+     ],
+     "caveats": [
+      "No specific reason is given for the institutional buying",
+      "The price target headline lacks details on the analyst's methodology or rationale",
+      "The Alaska Department of Revenue's stake growth may not directly impact stock performance"
+     ]
+    },
+    "tokens_in": 376,
+    "tokens_out": 143,
+    "ms": 5935,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "CVX": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [951] mentions analysts lifting oil and project views, suggesting positive sentiment",
+      "Headline [959] indicates the stock hit a fresh high, implying potential for further gains",
+      "Headline [976] states Wells Fargo gave a buy rating, adding to the positive outlook"
+     ],
+     "cited_news_ids": [
+      951,
+      959,
+      976
+     ],
+     "caveats": [
+      "Headline [953] reports a stock fall, which could indicate short-term weakness",
+      "Headline [960] mentions a stock sale, which may have negative implications",
+      "Headline [971] discusses leadership changes, which could introduce uncertainty"
+     ]
+    },
+    "tokens_in": 799,
+    "tokens_out": 181,
+    "ms": 7654,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "DHR": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [771] and [782] suggest the stock may move 6.2% on the earnings release next week, indicating positive expectations.",
+      "Headline [780] and [770] highlight a partnership with NVIDIA and AI-driven initiatives, which could drive investor interest.",
+      "Headline [772] mentions strong technical ratings, suggesting potential for a breakout."
+     ],
+     "cited_news_ids": [
+      771,
+      782,
+      780,
+      770,
+      772
+     ],
+     "caveats": [
+      "The exact impact of the earnings release is uncertain and depends on actual results.",
+      "The AI partnership's long-term benefits are not clearly defined in the headlines.",
+      "There is no direct mention of earnings performance, only potential for movement."
+     ]
+    },
+    "tokens_in": 845,
+    "tokens_out": 204,
+    "ms": 8327,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "EMR": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [821] mentions a price target bump from Royal Bank Of Canada, suggesting positive outlook.",
+      "Headline [820] states J.P. Morgan gave a Buy rating, indicating confidence in the stock.",
+      "Headline [829] highlights analyst upgrades and earnings buzz, which could drive price up."
+     ],
+     "cited_news_ids": [
+      821,
+      820,
+      829
+     ],
+     "caveats": [
+      "No specific earnings figures or target prices are mentioned in the headlines.",
+      "The positive sentiment is based on analyst ratings and momentum, not fundamental improvements.",
+      "There is no mention of any negative factors or market conditions that could counteract the positive sentiment."
+     ]
+    },
+    "tokens_in": 783,
+    "tokens_out": 181,
+    "ms": 7451,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "EXPD": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline 941 suggests the stock has hit a fresh high and asks if there is still room to run, indicating positive momentum.",
+      "Headline 944 mentions an earnings beat which could support further price movement upwards.",
+      "Headline 945 refers to stock forecasts, which may imply positive expectations for the stock."
+     ],
+     "cited_news_ids": [
+      941,
+      944,
+      945
+     ],
+     "caveats": [
+      "Headline 942 raises concerns about overvaluation, which could offset the positive sentiment from other headlines."
+     ]
+    },
+    "tokens_in": 410,
+    "tokens_out": 154,
+    "ms": 6098,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "FAST": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headlines [367] and [375] suggest mixed reactions to Q3 results, with one highlighting margin power and another noting a stock dip",
+      "Headlines [378], [387], and [390] show conflicting analyst views, with some cutting estimates and others questioning valuation",
+      "Headlines [382] and [384] indicate bullish and bearish signals, suggesting uncertainty in market sentiment"
+     ],
+     "cited_news_ids": [
+      367,
+      375,
+      378,
+      387,
+      390,
+      382,
+      384
+     ],
+     "caveats": [
+      "No specific guidance on future performance or price targets is provided in the headlines",
+      "The impact of margin pressure on stock price is not clearly defined in the text",
+      "The fair value lift mentioned is not tied to a specific price level or timeframe"
+     ]
+    },
+    "tokens_in": 830,
+    "tokens_out": 224,
+    "ms": 9072,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "GEHC": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Recent stock rise due to SOFIE acquisition and operating momentum",
+      "Investors weighing SOFIE acquisition and steady operating momentum",
+      "M&A and execution to drive a value re-rating"
+     ],
+     "cited_news_ids": [
+      354,
+      355,
+      353
+     ],
+     "caveats": [
+      "No specific earnings results or financial metrics mentioned",
+      "No clear analyst ratings or price targets provided"
+     ]
+    },
+    "tokens_in": 449,
+    "tokens_out": 119,
+    "ms": 4991,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "HUM": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [251] mentions a partnership with BlackRock to expand senior care clinics, which could drive growth.",
+      "Headline [239] notes that [COMPANY] advanced 2% after UnitedHealth rose, suggesting positive market sentiment.",
+      "Headline [229] forecasts strong price appreciation, indicating optimism among analysts."
+     ],
+     "cited_news_ids": [
+      251,
+      239,
+      229
+     ],
+     "caveats": [
+      "Headline [250] states shares fell 3.0% and says the stock is overvalued, which contradicts the positive sentiment in other headlines."
+     ]
+    },
+    "tokens_in": 862,
+    "tokens_out": 169,
+    "ms": 7428,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "IEX": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.8,
+     "reasons": [
+      "Positive analyst ratings from Mizuho and Royal Bank Of Canada suggest confidence in the stock's potential growth",
+      "KeyCorp upgrading the stock indicates improved outlook from financial institutions",
+      "Strong trading day performance highlights positive market sentiment"
+     ],
+     "cited_news_ids": [
+      815,
+      811,
+      814,
+      812,
+      813
+     ],
+     "caveats": []
+    },
+    "tokens_in": 394,
+    "tokens_out": 117,
+    "ms": 4927,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "IFF": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [498] states [COMPANY] Shares Close at a 52-Week High",
+      "Headline [492] mentions [COMPANY] (NYSE:[COMPANY]) Hits New 1-Year High - What's Next?",
+      "Headline [501] reports [COMPANY] stock reaches 52-week high at 89.32 USD"
+     ],
+     "cited_news_ids": [
+      498,
+      492,
+      501
+     ],
+     "caveats": [
+      "Headline [505] notes [COMPANY] Q2 2026 Earnings: EPS Misses Consensus by 27.3% While Shares Advance 3.81% - Debt Analysis Report, which suggests mixed performance despite price gains"
+     ]
+    },
+    "tokens_in": 814,
+    "tokens_out": 201,
+    "ms": 8714,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "KDP": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [597] suggests the stock is at a new 1-year high, which may indicate positive momentum",
+      "Headline [598] confirms the stock has reached a 52-week high, reinforcing the upward trend",
+      "Headline [593] mentions Piper Sandler reiterates the stock rating on separation upside, which could support further gains"
+     ],
+     "cited_news_ids": [
+      597,
+      598,
+      593
+     ],
+     "caveats": [
+      "The headlines do not mention any specific catalysts or earnings reports that could confirm the upward trend",
+      "There is no mention of any negative factors that could counteract the positive sentiment",
+      "The focus on separation upside may not translate into immediate price movement without further developments"
+     ]
+    },
+    "tokens_in": 809,
+    "tokens_out": 194,
+    "ms": 8387,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "KMI": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headline [611] mentions a stock dip while the market gains, but it does not specify the cause or future outlook.",
+      "Headline [613] provides mixed signals with 2 reasons to like and 1 to stay skeptical, indicating uncertainty.",
+      "Headline [615] refers to options market signals but does not clarify if they are bullish or bearish."
+     ],
+     "cited_news_ids": [
+      611,
+      613,
+      615
+     ],
+     "caveats": [
+      "No headline specifies the reason for the stock dip in [611].",
+      "Headline [613] does not explain the skepticism in detail.",
+      "Headline [615] does not specify the nature of the options market signal."
+     ]
+    },
+    "tokens_in": 515,
+    "tokens_out": 194,
+    "ms": 7976,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "KO": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [907] mentions [COMPANY] hits record high, indicating strong market sentiment.",
+      "Headline [903] states [COMPANY] rises on strong consumer staples day amid dividend, showing positive market reaction.",
+      "Headline [911] highlights [COMPANY] stock has outperformed the entire Magnificent 7 this year, suggesting strong performance."
+     ],
+     "cited_news_ids": [
+      907,
+      903,
+      911
+     ],
+     "caveats": [
+      "Headlines mention [COMPANY] but do not specify the exact stock ticker or company name, which could be a source of confusion."
+     ]
+    },
+    "tokens_in": 848,
+    "tokens_out": 170,
+    "ms": 7517,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "MA": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [3] suggests the stock has passed its buy point and is moving higher.",
+      "Headline [21] highlights the company unveiling a global money platform targeting 40 currencies by 2027, which could boost investor interest.",
+      "Headline [32] and [30] mention the company being highlighted by Zacks Analyst Blog, indicating positive analyst sentiment."
+     ],
+     "cited_news_ids": [
+      3,
+      21,
+      32,
+      30
+     ],
+     "caveats": [
+      "Headline [11] and [4] suggest the stock could be undervalued, but this is not a clear indication of future price movement.",
+      "Headline [16] and [29] raise questions about whether investors should take action, which could indicate uncertainty.",
+      "Headline [24] suggests a recent rally, but it's unclear if this is a continuation or a reversal."
+     ]
+    },
+    "tokens_in": 805,
+    "tokens_out": 226,
+    "ms": 9420,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "MSFT": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headlines [651], [688], [692], [687], [696], [688], [649], [666], [8664], [650], [629] suggest positive momentum, analyst upgrades, and expectations of strong earnings performance, particularly around Azure growth and Copilot momentum."
+     ],
+     "cited_news_ids": [
+      651,
+      688,
+      692,
+      687,
+      696,
+      649,
+      666,
+      8664,
+      650,
+      629
+     ],
+     "caveats": [
+      "No specific earnings date or results are mentioned, so the timing of the potential price move is uncertain."
+     ]
+    },
+    "tokens_in": 852,
+    "tokens_out": 201,
+    "ms": 8501,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "MTD": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.85,
+     "reasons": [
+      "Recent price targets from Morgan Stanley and TradingView suggest positive momentum",
+      "The stock has hit new 52-week and 12-month highs in recent days",
+      "Upgrades and positive analyst commentary indicate strong market sentiment"
+     ],
+     "cited_news_ids": [
+      262,
+      270,
+      265,
+      263,
+      258
+     ],
+     "caveats": [
+      "No specific volume or trading activity mentioned to confirm strength",
+      "Some headlines are speculative and may not translate to actual price movement"
+     ]
+    },
+    "tokens_in": 721,
+    "tokens_out": 143,
+    "ms": 6097,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "NDSN": {
+    "output": {
+     "direction": "down",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Headline [834] mentions a director selling a significant amount of company stock, which can signal insider confidence or a potential price move down.",
+      "Headline [836] and [831] both report on directors selling shares, reinforcing the idea of possible downward pressure from insider activity.",
+      "Headline [833] is a forecast page and does not provide clear directional insight."
+     ],
+     "cited_news_ids": [
+      834,
+      836,
+      831,
+      833
+     ],
+     "caveats": [
+      "Headline [832] is vague and does not provide clear directional signals.",
+      "Headline [835] refers to trading strategies and not direct news about the company's performance or future outlook."
+     ]
+    },
+    "tokens_in": 441,
+    "tokens_out": 193,
+    "ms": 7685,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PFE": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Recent headlines indicate that [COMPANY] is seeing increased investor interest as money rotates into healthcare, with the stock hitting a 52-week high",
+      "Analysts are highlighting the potential for [COMPANY] to be 60% below fair value due to Tukysa approval and vaccine data, suggesting positive sentiment around the company's pipeline",
+      "The stock is gaining as the market dips, indicating some level of defensive buying or positive fundamental news"
+     ],
+     "cited_news_ids": [
+      764,
+      739,
+      744,
+      752,
+      9924,
+      751,
+      756,
+      758,
+      743,
+      759,
+      754,
+      761,
+      9925,
+      763,
+      748
+     ],
+     "caveats": [
+      "The exact nature of the vaccine data and its potential impact on the stock is not clearly detailed in the headlines",
+      "There is conflicting sentiment with some headlines indicating a drop in stock price due to lung cancer trial disappointment",
+      "The fair value assessment is based on analyst opinion and may not reflect actual market conditions"
+     ]
+    },
+    "tokens_in": 901,
+    "tokens_out": 278,
+    "ms": 11513,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PG": {
+    "output": {
+     "direction": "up",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.6,
+     "reasons": [
+      "Headline [578] suggests a bullish extension if the stock breaks above $161.74 resistance.",
+      "Headline [577] confirms a dividend payment of USD 1.0885, which may support the stock price.",
+      "Headline [524] highlights a long-term dividend history, which can attract long-term investors."
+     ],
+     "cited_news_ids": [
+      578,
+      577,
+      524
+     ],
+     "caveats": [
+      "The resistance level mentioned in [578] is not confirmed to be valid or likely to be broken.",
+      "The dividend payment in [577] is already known and does not indicate future performance.",
+      "The dividend history in [524] does not guarantee future performance."
+     ]
+    },
+    "tokens_in": 900,
+    "tokens_out": 198,
+    "ms": 8414,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PLTR": {
+    "output": {
+     "direction": "down",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.4,
+     "reasons": [
+      "Headline [105] suggests the stock is heading for its worst month ever, indicating negative sentiment.",
+      "Headline [130] mentions the stock falling to $100 as AI financing risks spread, showing weakness.",
+      "Headline [129] states [COMPANY], CRM stocks can't stop sliding while chip stocks shine, implying broader market weakness for [COMPANY]."
+     ],
+     "cited_news_ids": [
+      105,
+      130,
+      129
+     ],
+     "caveats": [
+      "Headlines [138] and [140] mention positive developments but are not enough to counter the negative sentiment from other headlines.",
+      "Headline [120] mentions an earnings beat but is offset by the overall negative trend in the headlines."
+     ]
+    },
+    "tokens_in": 902,
+    "tokens_out": 198,
+    "ms": 8514,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PM": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [1134] suggests the stock is at a 52-week high, indicating strong investor sentiment",
+      "Headline [1130] mentions the stock outperformed competitors on a strong trading day",
+      "Headline [1124] reports a 3.16% gain on the previous day, showing positive momentum"
+     ],
+     "cited_news_ids": [
+      1134,
+      1130,
+      1124
+     ],
+     "caveats": [
+      "Headline [1131] and [1133] indicate recent pullbacks, suggesting potential short-term volatility",
+      "Headline [1122] raises concerns about overvaluation, which could limit upside potential"
+     ]
+    },
+    "tokens_in": 857,
+    "tokens_out": 186,
+    "ms": 8172,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "PNW": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headlines compare PNW to competitors without clear performance indicators",
+      "Mixed signals about PNW's performance relative to competitors",
+      "Uncertainty about future earnings growth from customer demand"
+     ],
+     "cited_news_ids": [
+      582,
+      583,
+      585
+     ],
+     "caveats": [
+      "No specific financial results or guidance provided",
+      "No mention of sector trends or macroeconomic factors",
+      "No clear sentiment on PNW's fundamentals"
+     ]
+    },
+    "tokens_in": 356,
+    "tokens_out": 126,
+    "ms": 5229,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "SNPS": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.75,
+     "reasons": [
+      "Headline [797] mentions a $1B accelerated buyback and analysts raising targets, which typically supports a price move up.",
+      "Headline [792] suggests the stock may be 15% undervalued following AI deal news, indicating potential for upward movement.",
+      "Headline [810] highlights a $11B AI roadmap, which could drive investor interest and push the stock higher."
+     ],
+     "cited_news_ids": [
+      797,
+      792,
+      810
+     ],
+     "caveats": [
+      "The exact impact of the AI roadmap on stock performance is not quantified in the headline.",
+      "The buyback announcement does not specify the timing or duration of the buyback program.",
+      "The undervaluation claim is based on relative metrics and does not account for market conditions or broader industry trends."
+     ]
+    },
+    "tokens_in": 817,
+    "tokens_out": 211,
+    "ms": 8811,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "TECH": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headline [1006] indicates the stock is near its 52-week high but slightly below, suggesting no clear direction"
+     ],
+     "cited_news_ids": [
+      1006
+     ],
+     "caveats": [
+      "No headline confirms positive or negative sentiment beyond proximity to a high",
+      "Headline [1007] mentions an investigation into a potential sale, which could be neutral or negative but lacks confirmation",
+      "Headline [1004] and [1003] mention facility opening and attention, but do not specify positive or negative impact"
+     ]
+    },
+    "tokens_in": 396,
+    "tokens_out": 152,
+    "ms": 6217,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "TRV": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [1009] mentions a new $341.00 price target at Wells Fargo, suggesting positive outlook.",
+      "Headline [1015] raises the price target to $352.00, reinforcing the bullish sentiment.",
+      "Headline [1014] states the stock holds firm with underwriting metrics supporting results, indicating stability and potential for upward movement."
+     ],
+     "cited_news_ids": [
+      1009,
+      1015,
+      1014
+     ],
+     "caveats": [
+      "No recent earnings results are mentioned, so the positive sentiment is based on price targets and market sentiment rather than actual performance."
+     ]
+    },
+    "tokens_in": 745,
+    "tokens_out": 176,
+    "ms": 7438,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ULTA": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Headline [514] mentions that [COMPANY] Beauty raised its 2026 outlook and sets a target price of USD 627.83",
+      "Headline [510] states that [COMPANY] Beauty Inc. stock outperformed competitors on a strong trading day",
+      "Headline [515] indicates that [COMPANY] Beauty shares ticked up 1.09% to $570.37 and pushed toward the upper trading range"
+     ],
+     "cited_news_ids": [
+      514,
+      510,
+      515
+     ],
+     "caveats": [
+      "Headline [518] suggests a dip in stock price after strong earnings, which could indicate mixed signals"
+     ]
+    },
+    "tokens_in": 689,
+    "tokens_out": 192,
+    "ms": 8229,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "V": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [66] mentions [COMPANY] Direct Launches Stablecoin-Powered Money Movement as Pilots Move to Production, suggesting positive developments in the company's services.",
+      "Headline [59] states [COMPANY] Shares Near 52-Week High as Stablecoin Payments Expand, indicating strong market sentiment.",
+      "Headline [63] notes [COMPANY], SNOW Stocks Hit Fresh 52-Week Highs Today \u2013 What\u2019s Got Investors Buzzing? showing recent price strength."
+     ],
+     "cited_news_ids": [
+      66,
+      59,
+      63
+     ],
+     "caveats": [
+      "Headline [39] mentions [COMPANY] Stock Slips After-Hours \u2014 [COMPANY] Reports $563M Job Cut-Related Costs Amid Resilient Consumer Spending, which could introduce some downward pressure.",
+      "Headline [46] indicates [COMPANY] (NYSE:[COMPANY]) Stock Falls 1.3% - Time to Sell? which may suggest some bearish sentiment.",
+      "Headline [70] states [COMPANY] ([COMPANY]) Slips 1.17% to $391.43, Trading Within a Defined Range - Mean Reversion Trade, indicating possible short-term volatility."
+     ]
+    },
+    "tokens_in": 842,
+    "tokens_out": 301,
+    "ms": 12213,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "VEEV": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.7,
+     "reasons": [
+      "Headline [733] indicates the stock has broken to a fresh 52-week high, suggesting positive momentum.",
+      "Headline [707] highlights the stock breaking out as big money grabs exposure to the AI software play, indicating strong investor interest.",
+      "Headline [735] mentions Oppenheimer keeping a $325 target for the stock, showing continued analyst confidence."
+     ],
+     "cited_news_ids": [
+      733,
+      707,
+      735
+     ],
+     "caveats": [
+      "Headline [733] is a single data point and does not explain the underlying reasons for the price increase.",
+      "Headlines [723], [706], [727], [714] indicate insider selling, which could be a negative signal.",
+      "Headlines [710], [712], [12105], [12106], [718] provide context but do not directly support a price move."
+     ]
+    },
+    "tokens_in": 873,
+    "tokens_out": 247,
+    "ms": 10254,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "XOM": {
+    "output": {
+     "direction": "up",
+     "magnitude": "medium",
+     "horizon": "1w",
+     "confidence": 0.65,
+     "reasons": [
+      "Recent price target boost from Morgan Stanley suggests positive outlook",
+      "Stock has set new 52-week high and is labeled as still a buy",
+      "Analysts suggest the stock may be undervalued and question its valuation"
+     ],
+     "cited_news_ids": [
+      853,
+      858,
+      837
+     ],
+     "caveats": [
+      "Uncertain how market reactions to Kashagan risk will affect the stock",
+      "Conflicting views on whether the stock is overvalued or undervalued",
+      "No clear indication of long-term trends beyond short-term movements"
+     ]
+    },
+    "tokens_in": 829,
+    "tokens_out": 152,
+    "ms": 6617,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "YUM": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headlines include mixed signals such as a potential undervaluation and analyst cuts, but also positive developments like Coca-Cola partnerships and global expansion bets"
+     ],
+     "cited_news_ids": [
+      199,
+      207,
+      206,
+      194,
+      188
+     ],
+     "caveats": [
+      "Uncertainty around Taco Bell sales impact and cyclosporiasis investigation outcomes",
+      "No clear consensus on earnings forecasts or valuation metrics",
+      "Some headlines are speculative or unrelated to core business performance"
+     ]
+    },
+    "tokens_in": 856,
+    "tokens_out": 139,
+    "ms": 6148,
+    "error": null,
+    "model": "qwen3:8b"
+   },
+   "ZBRA": {
+    "output": {
+     "direction": "none",
+     "magnitude": "low",
+     "horizon": "1w",
+     "confidence": 0.3,
+     "reasons": [
+      "Headlines focus on valuation debates and mixed signals about whether the stock is undervalued or fairly valued",
+      "There is no clear consensus on the stock's future performance, with some suggesting caution due to valuation risks",
+      "The headlines include questions about the stock's fair value and momentum, without definitive support for a price move up or down"
+     ],
+     "cited_news_ids": [
+      932,
+      933,
+      934,
+      935,
+      938,
+      939,
+      940
+     ],
+     "caveats": [
+      "No specific earnings reports or revenue figures are mentioned to support a directional view",
+      "The headlines are speculative and do not provide concrete data on future performance",
+      "The focus on valuation rather than fundamental performance lacks clarity on the stock's direction"
+     ]
+    },
+    "tokens_in": 572,
+    "tokens_out": 197,
+    "ms": 8167,
+    "error": null,
+    "model": "qwen3:8b"
+   }
+  }
+ }
+}

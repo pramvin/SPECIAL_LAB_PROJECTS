@@ -35,7 +35,7 @@ Read this first; the rest of the file was updated to match.
 2. **Laya labels look wrong on clear cases.** For MA, "Stock Passes Buy Point Amid Powerful Move Higher" and "Could Be 32% Undervalued" were both labeled Bearish, while the LLM says Up. There is no ground truth yet; the hand-labeled file `to_label.csv` (T0) is what settles this.
 3. **The LLM leans bullish** (36 of 42 up). Possible bias from words like "stock" in headlines, or from the selection (the ideas are already momentum names). Check on labeled data before trusting.
 4. **Laya and the LLM are not chained yet.** `pipeline/llm.py` reads every headline with `rule_noise = 0`; it does not use Laya's filler/event result or source tiers (stages 3 and 4 are still Todo).
-5. **Duplicate LLM-server files from a parallel session** are in the repo and overlap with the above: `llm_server/proxy.py`, `llm_server/build_notebook.py`, `experiments/ollama_server_kaggle.ipynb`, `experiments/llm_kaggle_one_cell.py`, `experiments/llm_server_kaggle.ipynb`. `Backend/README.md` also has two LLM sections ("LLM server" and "Kaggle gateways"). Pick one path (the one-notebook `kaggle_gateways.ipynb` is the tested one) and delete the rest. Note `llm_server/server.py` was edited by that session after the assistant first wrote it; `kaggle_gateways.ipynb` embeds the current version.
+5. ~~Duplicate LLM-server files~~ removed 2026-10-27; `experiments/kaggle_gateways.ipynb` is the only Kaggle path.
 6. A test account `llmcheck@planwise.test` exists in `planwise.db` (created to view the UI). Delete it when done.
 
 **State of the running things at the end of the session**

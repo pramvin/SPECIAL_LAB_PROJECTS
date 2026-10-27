@@ -21,6 +21,7 @@ class Req(BaseModel):
     messages: list[dict] = Field(max_length=20)
     format: dict | str | None = None   # JSON schema, or "json"
     options: dict | None = None        # e.g. {"temperature": 0, "num_ctx": 8192}
+    think: bool = False                # qwen3 reasoning mode; off by default (fast, stable JSON)
 
 
 app = FastAPI(title="LLM gateway")
@@ -35,7 +36,7 @@ def health():
 def chat(req: Req, authorization: str | None = Header(default=None)):
     if not authorization or not hmac.compare_digest(authorization, f"Bearer {TOKEN}"):
         raise HTTPException(401, "bad token")
-    body = {"model": MODEL, "messages": req.messages, "stream": False, "think": False}
+    body = {"model": MODEL, "messages": req.messages, "stream": False, "think": req.think}
     if req.format:
         body["format"] = req.format
     if req.options:

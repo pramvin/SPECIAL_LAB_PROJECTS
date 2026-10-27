@@ -31,13 +31,6 @@ Appends to `news_items` (unique per ticker+url, `first_seen_at` = when we first 
 Google News RSS keeps only ~7 days, so the archive only grows if this runs regularly, e.g. cron:
 `0 * * * * cd /path/to/Backend && .venv/bin/python -m pipeline.news >> news.log 2>&1`
 
-## LLM server (Kaggle, not local)
-
-`experiments/ollama_server_kaggle.ipynb` runs Ollama (default `qwen3:8b`) plus a token proxy behind a Cloudflare tunnel.
-Import it into a new Kaggle notebook (GPU T4, Internet On), Run All, then copy the printed `LLM_URL`, `LLM_TOKEN`,
-`LLM_MODEL` lines into `.env`. Check with `.venv/bin/python -m pipeline.llm`. The notebook is generated from
-`llm_server/proxy.py`: after editing it, run `python3 llm_server/build_notebook.py`.
-
 ## Kaggle gateways (Laya + LLM, one notebook)
 
 1. Import `experiments/kaggle_gateways.ipynb` into Kaggle (GPU T4 x2, Internet On). Run cell 1, cell 2, then cell 3 and leave cell 3 running.
