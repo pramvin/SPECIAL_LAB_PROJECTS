@@ -7,7 +7,12 @@ import secrets
 import sqlite3
 import time
 import json
+import smtplib
+from email.message import EmailMessage
 from typing import Literal
+from urllib.parse import quote
+
+from fastapi import Request
 
 from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
@@ -16,6 +21,9 @@ from .seed import NEWS_SOURCE, SEED
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 SESSION_TTL = 7 * 24 * 3600
+RESET_TTL = 30 * 60
+LOGIN_WINDOW = 15 * 60
+MAX_LOGIN_FAILURES = 5
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS users (
@@ -29,6 +37,28 @@ CREATE TABLE IF NOT EXISTS sessions (
   user_id INTEGER NOT NULL REFERENCES users(id),
   expires_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS password_reset_tokens (
+  token_hash TEXT PRIMARY KEY,
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  expires_at INTEGER NOT NULL,
+  used_at INTEGER
+);
+CREATE TABLE IF NOT EXISTS auth_events (
+  id INTEGER PRIMARY KEY,
+  user_id INTEGER,
+  email TEXT NOT NULL,
+  event_type TEXT NOT NULL,
+  ip_address TEXT,
+  created_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS login_failures (
+  id INTEGER PRIMARY KEY,
+  email TEXT NOT NULL,
+  ip_address TEXT NOT NULL,
+  created_at INTEGER NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_login_failures_lookup ON login_failures(email, ip_address, created_at);
+CREATE INDEX IF NOT EXISTS idx_auth_events_created_at ON auth_events(created_at);
 CREATE TABLE IF NOT EXISTS risk_profiles (
   user_id INTEGER PRIMARY KEY REFERENCES users(id),
   horizon TEXT NOT NULL,
@@ -114,13 +144,45 @@ def risk_level(p: Profile) -> str:
     return "conservative" if score <= 1 else "moderate" if score <= 3 else "aggressive"
 
 
+def record_auth_event(conn: sqlite3.Connection, email: str, event_type: str,
+                      ip_address: str | None = None, user_id: int | None = None) -> None:
+    """Save a small audit record; never store passwords or reset tokens here."""
+    conn.execute(
+        "INSERT INTO auth_events (user_id, email, event_type, ip_address, created_at) VALUES (?, ?, ?, ?, ?)",
+        (user_id, email[:254], event_type, ip_address, int(time.time())),
+    )
+
+
+def login_is_limited(conn: sqlite3.Connection, email: str, ip_address: str) -> bool:
+    cutoff = int(time.time()) - LOGIN_WINDOW
+    count = conn.execute(
+        "SELECT COUNT(*) FROM login_failures WHERE email = ? AND ip_address = ? AND created_at > ?",
+        (email, ip_address, cutoff),
+    ).fetchone()[0]
+    return count >= MAX_LOGIN_FAILURES
+
+
+def record_login_failure(conn: sqlite3.Connection, email: str, ip_address: str) -> None:
+    now = int(time.time())
+    conn.execute("DELETE FROM login_failures WHERE created_at < ?", (now - LOGIN_WINDOW,))
+    conn.execute(
+        "INSERT INTO login_failures (email, ip_address, created_at) VALUES (?, ?, ?)",
+        (email[:254], ip_address, now),
+    )
+
+
 def start_session(conn: sqlite3.Connection, response: Response, user_id: int) -> None:
     token = secrets.token_urlsafe(32)
     conn.execute(
         "INSERT INTO sessions (token, user_id, expires_at) VALUES (?, ?, ?)",
         (token, user_id, int(time.time()) + SESSION_TTL),
     )
-    response.set_cookie("session", token, max_age=SESSION_TTL, httponly=True, samesite="lax", path="/")
+    secure_default = "1" if os.environ.get("APP_ENV", "development").lower() == "production" else "0"
+    secure_cookie = os.environ.get("COOKIE_SECURE", secure_default).strip().lower() in {"1", "true", "yes"}
+    response.set_cookie(
+        "session", token, max_age=SESSION_TTL, httponly=True,
+        secure=secure_cookie, samesite="lax", path="/",
+    )
 
 
 def current_user(conn: sqlite3.Connection, token: str | None) -> sqlite3.Row:
@@ -150,8 +212,9 @@ def profile_dict(row: sqlite3.Row | None) -> dict | None:
 
 
 @app.post("/api/auth/register")
-def register(body: Credentials, response: Response):
+def register(body: Credentials, request: Request, response: Response):
     email = body.email.strip().lower()
+    ip_address = request.client.host if request.client else "unknown"
     if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
         raise HTTPException(422, "Invalid email")
     with db() as conn:
@@ -161,27 +224,160 @@ def register(body: Credentials, response: Response):
                 (email, hash_password(body.password), int(time.time())),
             )
         except sqlite3.IntegrityError:
+            record_auth_event(conn, email, "registration_duplicate", ip_address)
+            conn.commit()  # Preserve the security event even though registration failed.
             raise HTTPException(409, "Email already registered")
+        record_auth_event(conn, email, "registration_success", ip_address, cur.lastrowid)
         start_session(conn, response, cur.lastrowid)
     return {"email": email}
 
 
 @app.post("/api/auth/login")
-def login(body: Credentials, response: Response):
+def login(body: Credentials, request: Request, response: Response):
     email = body.email.strip().lower()
+    ip_address = request.client.host if request.client else "unknown"
     with db() as conn:
+        if login_is_limited(conn, email, ip_address):
+            record_auth_event(conn, email, "login_rate_limited", ip_address)
+            conn.commit()
+            raise HTTPException(429, "Too many sign-in attempts. Please wait 15 minutes and try again.")
         row = conn.execute("SELECT id, password_hash FROM users WHERE email = ?", (email,)).fetchone()
+        # Keep the same message for unknown emails and incorrect passwords.
         if row is None or not verify_password(body.password, row["password_hash"]):
+            record_login_failure(conn, email, ip_address)
+            record_auth_event(conn, email, "login_failed", ip_address, row["id"] if row else None)
+            conn.commit()  # Failed attempts must still be saved before returning the error.
             raise HTTPException(401, "Wrong email or password")
+        conn.execute("DELETE FROM login_failures WHERE email = ? AND ip_address = ?", (email, ip_address))
+        record_auth_event(conn, email, "login_success", ip_address, row["id"])
         start_session(conn, response, row["id"])
     return {"email": email}
+
+
+class ForgotPasswordRequest(BaseModel):
+    email: str = Field(max_length=254)
+
+
+class ResetPasswordRequest(BaseModel):
+    token: str = Field(min_length=32, max_length=200)
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+def send_reset_email(email: str, reset_url: str) -> None:
+    """Send via SMTP when configured; otherwise print the link for local development only."""
+    host = os.environ.get("SMTP_HOST")
+    if not host:
+        if os.environ.get("APP_ENV", "development").lower() == "production":
+            raise RuntimeError("SMTP_HOST must be configured in production")
+        print(f"[PlanWise development password reset] {email}: {reset_url}")
+        return
+
+    message = EmailMessage()
+    message["Subject"] = "Reset your PlanWise AI password"
+    message["From"] = os.environ.get("SMTP_FROM", os.environ.get("SMTP_USER", "no-reply@localhost"))
+    message["To"] = email
+    message.set_content(
+        "We received a request to reset your PlanWise AI password.\n\n"
+        f"Open this one-time link within 30 minutes: {reset_url}\n\n"
+        "If you did not request this, you can ignore this email."
+    )
+    port = int(os.environ.get("SMTP_PORT", "587"))
+    with smtplib.SMTP(host, port, timeout=10) as server:
+        server.starttls()
+        username = os.environ.get("SMTP_USER")
+        password = os.environ.get("SMTP_PASSWORD")
+        if username and password:
+            server.login(username, password)
+        server.send_message(message)
+
+
+@app.post("/api/auth/forgot-password")
+def forgot_password(body: ForgotPasswordRequest, request: Request):
+    email = body.email.strip().lower()
+    ip_address = request.client.host if request.client else "unknown"
+    # Return the same response whether the account exists or not, to reduce account enumeration.
+    generic_response = {"message": "If an account exists for that email, password reset instructions will be sent."}
+    if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email):
+        return generic_response
+
+    with db() as conn:
+        cutoff = int(time.time()) - LOGIN_WINDOW
+        reset_request_count = conn.execute(
+            "SELECT COUNT(*) FROM auth_events WHERE ip_address = ? AND event_type = 'password_reset_requested' AND created_at > ?",
+            (ip_address, cutoff),
+        ).fetchone()[0]
+        if reset_request_count >= MAX_LOGIN_FAILURES:
+            record_auth_event(conn, email, "password_reset_rate_limited", ip_address)
+            return generic_response
+        row = conn.execute("SELECT id FROM users WHERE email = ?", (email,)).fetchone()
+        record_auth_event(conn, email, "password_reset_requested", ip_address, row["id"] if row else None)
+        if row is None:
+            return generic_response
+        now = int(time.time())
+        conn.execute("UPDATE password_reset_tokens SET used_at = ? WHERE user_id = ? AND used_at IS NULL", (now, row["id"]))
+        raw_token = secrets.token_urlsafe(32)
+        token_hash = hashlib.sha256(raw_token.encode()).hexdigest()
+        conn.execute(
+            "INSERT INTO password_reset_tokens (token_hash, user_id, expires_at, used_at) VALUES (?, ?, ?, NULL)",
+            (token_hash, row["id"], now + RESET_TTL),
+        )
+
+    frontend_url = os.environ.get("FRONTEND_URL", "http://localhost:3000").rstrip("/")
+    reset_url = f"{frontend_url}/reset-password?token={quote(raw_token)}"
+    try:
+        send_reset_email(email, reset_url)
+    except Exception:
+        # Do not expose email-service errors or reset tokens to the requester.
+        with db() as conn:
+            conn.execute("UPDATE password_reset_tokens SET used_at = ? WHERE token_hash = ?", (int(time.time()), token_hash))
+            record_auth_event(conn, email, "password_reset_delivery_failed", ip_address, row["id"])
+        raise HTTPException(503, "Password reset email is temporarily unavailable. Please try again later.")
+    return generic_response
+
+
+@app.post("/api/auth/reset-password")
+def reset_password(body: ResetPasswordRequest, request: Request, response: Response):
+    token_hash = hashlib.sha256(body.token.encode()).hexdigest()
+    now = int(time.time())
+    ip_address = request.client.host if request.client else "unknown"
+    with db() as conn:
+        row = conn.execute(
+            "SELECT t.user_id, u.email FROM password_reset_tokens t JOIN users u ON u.id = t.user_id "
+            "WHERE t.token_hash = ? AND t.expires_at > ? AND t.used_at IS NULL",
+            (token_hash, now),
+        ).fetchone()
+        if row is None:
+            raise HTTPException(400, "This password reset link is invalid or has expired. Request a new one.")
+        conn.execute("UPDATE users SET password_hash = ? WHERE id = ?", (hash_password(body.new_password), row["user_id"]))
+        conn.execute("UPDATE password_reset_tokens SET used_at = ? WHERE token_hash = ?", (now, token_hash))
+        # Revoke every existing session after a password change.
+        conn.execute("DELETE FROM sessions WHERE user_id = ?", (row["user_id"],))
+        conn.execute("DELETE FROM login_failures WHERE email = ?", (row["email"],))
+        record_auth_event(conn, row["email"], "password_reset_success", ip_address, row["user_id"])
+    response.delete_cookie("session", path="/")
+    return {"message": "Password updated. Please sign in with your new password."}
+
+
+@app.get("/api/auth/security-events")
+def security_events(session: str | None = Cookie(default=None)):
+    """Return only the signed-in user's recent authentication events."""
+    with db() as conn:
+        user = current_user(conn, session)
+        rows = conn.execute(
+            "SELECT event_type, created_at FROM auth_events WHERE user_id = ? ORDER BY created_at DESC LIMIT 20",
+            (user["id"],),
+        ).fetchall()
+    return {"events": [{"type": r["event_type"], "created_at": r["created_at"]} for r in rows]}
 
 
 @app.post("/api/auth/logout")
 def logout(response: Response, session: str | None = Cookie(default=None)):
     if session:
         with db() as conn:
+            row = conn.execute("SELECT u.id, u.email FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.token = ?", (session,)).fetchone()
             conn.execute("DELETE FROM sessions WHERE token = ?", (session,))
+            if row:
+                record_auth_event(conn, row["email"], "logout", user_id=row["id"])
     response.delete_cookie("session", path="/")
     return {"ok": True}
 
