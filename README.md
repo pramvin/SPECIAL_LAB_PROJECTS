@@ -1,25 +1,39 @@
 # PlanWise AI
 
 An Intelligent Personalized Agent for Individual Financial Planning — a
-responsive frontend prototype built with Next.js, TypeScript, and Tailwind CSS.
+responsive frontend prototype (Next.js) with a small FastAPI backend for auth,
+onboarding, and example recommendations.
 
 ## Live app
 
 **https://div-royalty-html-populations.trycloudflare.com**
 
-> This link is served through a temporary Cloudflare Quick Tunnel. It has no
-> uptime guarantee and the URL changes whenever the tunnel restarts. For a
-> stable local URL, see [Run locally](#run-locally).
+> Served through a temporary Cloudflare Quick Tunnel. It has no uptime
+> guarantee and the URL changes whenever the tunnel restarts. For a stable
+> local URL, see [Run locally](#run-locally).
+
+## Demo login
+
+| Field | Value |
+|---|---|
+| Email | `demo@planwise.ai` |
+| Password | `planwise123` |
+
+This demo account is seeded automatically when the backend starts, so the
+credential above works on a fresh database. You can also create your own account
+with any valid email and a password of at least 8 characters.
+
+> Demo only — do not reuse these credentials anywhere real.
 
 ## What this is
 
-A frontend-only prototype that turns a user's financial information and goals
-into a clearer overview and reviewable next steps. It uses **synthetic example
-data only** — no backend, no real accounts, and no financial advice.
+A prototype that turns a user's information and goals into a clearer overview
+and reviewable next steps. It uses **synthetic example data only** — no real
+accounts, bank connections, or financial advice.
 
 Screens:
 
-- **Dashboard** — financial overview, metrics, completeness, agent observation
+- **Trade ideas** — example recommendations with news and sentiment
 - **Goals** — goal progress, status, and a create/simulate drawer
 - **Assistant** — plan & assistant workspace with visible assumptions
 - **Settings & Privacy** — demo-mode controls and data-provenance legend
@@ -31,15 +45,30 @@ Assumptions, Example Data, or Needs Review). See
 
 ## Run locally
 
+### 1. Backend (FastAPI + SQLite)
+
+```bash
+cd Backend
+python3 -m venv .venv
+.venv/bin/pip install -r requirements.txt
+.venv/bin/uvicorn app.main:app --port 8000
+```
+
+The frontend proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8000`).
+The demo account is created on first start.
+
+### 2. Frontend (Next.js)
+
 ```bash
 cd frontend
 npm install      # first time only
 npm run dev
 ```
 
-Open http://localhost:3000.
+Open http://localhost:3000. The root redirects to `/login`, then to
+`/onboarding` for new accounts.
 
-## Other commands
+### Other frontend commands
 
 ```bash
 cd frontend
@@ -53,8 +82,9 @@ npx tsc --noEmit # typecheck
 
 - Next.js (App Router) + React + TypeScript
 - Tailwind CSS v4 with the "Sovereign Sanctuary" design tokens
+- FastAPI + SQLite (auth, onboarding, example recommendations)
 - Dependency-free SVG charts
-- Mock data isolated under `frontend/src/lib/data/`
+- Mock/example data isolated under `frontend/src/lib/data/`
 
 ## Status
 
