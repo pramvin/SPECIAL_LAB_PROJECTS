@@ -300,3 +300,27 @@ def top_news(limit: int = 5, session: str | None = Cookie(default=None)):
             })
     items.sort(key=lambda x: x["published_at"], reverse=True)
     return {"items": items[: max(1, min(limit, 20))]}
+
+
+# ---------------------------------------------------------------------------
+# Demo account (prototype only)
+# ---------------------------------------------------------------------------
+# Seeded idempotently so the credential documented in the README works on a
+# fresh database. All portfolio/goal data remains synthetic example data.
+DEMO_EMAIL = "demo@planwise.ai"
+DEMO_PASSWORD = "planwise123"
+
+
+def ensure_demo_user() -> None:
+    with db() as conn:
+        exists = conn.execute(
+            "SELECT 1 FROM users WHERE email = ?", (DEMO_EMAIL,)
+        ).fetchone()
+        if exists is None:
+            conn.execute(
+                "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
+                (DEMO_EMAIL, hash_password(DEMO_PASSWORD), int(time.time())),
+            )
+
+
+ensure_demo_user()
