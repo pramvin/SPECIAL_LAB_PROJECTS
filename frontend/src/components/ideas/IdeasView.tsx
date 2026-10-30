@@ -5,14 +5,17 @@ import { Icon } from "@/components/ui/Icon";
 import { NoticeBanner } from "@/components/ui/NoticeBanner";
 import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
 import { SentimentBadge } from "./SentimentBadge";
-import { SocialSentiment } from "./SocialSentiment";
+import { NewsSentiment } from "./NewsSentiment";
 import { TopNews } from "./TopNews";
+import { DataStatus as DataStatusBar } from "./DataStatus";
 import {
   HORIZONS,
   type TopNewsItem,
   type Horizon,
   type LlmAnalysis,
   type Recommendation,
+  type TickerNewsSentiment,
+  type DataStatus as DataStatusData,
 } from "@/lib/recommendations";
 
 const usd = (n: number) =>
@@ -104,7 +107,15 @@ function LlmBlock({ llm }: { llm: LlmAnalysis }) {
   );
 }
 
-function IdeaCard({ r, rank }: { r: Recommendation; rank: number }) {
+function IdeaCard({
+  r,
+  rank,
+  news,
+}: {
+  r: Recommendation;
+  rank: number;
+  news?: TickerNewsSentiment | null;
+}) {
   return (
     <Card as="article" className="flex flex-col gap-space-md">
       <div className="flex flex-wrap items-start justify-between gap-space-sm">
@@ -198,7 +209,7 @@ function IdeaCard({ r, rank }: { r: Recommendation; rank: number }) {
         </div>
         {r.llm && <LlmBlock llm={r.llm} />}
         <div className="mt-space-lg">
-          <SocialSentiment ticker={r.ticker} priceScore={r.score} />
+          <NewsSentiment ticker={r.ticker} data={news} />
         </div>
       </details>
     </Card>
@@ -209,25 +220,30 @@ export function IdeasView({
   horizon,
   items,
   topNews,
+  newsSentiment,
+  dataStatus,
 }: {
   horizon: Horizon;
   items: Recommendation[] | null;
   topNews: TopNewsItem[];
+  newsSentiment: Record<string, TickerNewsSentiment>;
+  dataStatus: DataStatusData | null;
 }) {
   return (
     <div className="flex flex-col gap-space-lg">
+      <DataStatusBar status={dataStatus} />
+
       <div className="flex flex-col gap-1">
         <h1 className="font-headline-md text-headline-md text-on-surface">
           Trade ideas
         </h1>
         <p className="font-body-md text-body-md text-on-surface-variant">
-          S&amp;P 500 stocks, buy-only (no shorting, no futures), ranked for your
-          holding period and risk profile.
+          S&amp;P 500 stocks, buy-only (no shorting, no futures), ranked for
+          your holding period and risk profile.
         </p>
       </div>
 
       <TopNews items={topNews} />
-
       <nav aria-label="Holding period" className="flex gap-space-xs">
         {HORIZONS.map((h) => (
           <Link
@@ -246,10 +262,11 @@ export function IdeasView({
       </nav>
 
       {items?.some((r) => r.is_example) ? (
-        <NoticeBanner icon="info" tone="warning" title="Example data only">
-          Prices, scores and news below are placeholders until the live data
-          pipeline is connected. This is not investment advice and nothing here
-          is a guaranteed outcome.
+        <NoticeBanner icon="info" tone="warning" title="Example prices and scores">
+          Prices, scores and position sizes below are placeholders until the
+          live data pipeline is connected. Headlines are real (Google News), and
+          sentiment labels, when shown, are AI-generated and not validated. This
+          is not investment advice and nothing here is a guaranteed outcome.
         </NoticeBanner>
       ) : (
         <NoticeBanner
@@ -274,7 +291,12 @@ export function IdeasView({
         </p>
       )}
       {items?.map((r, i) => (
-        <IdeaCard key={r.ticker} r={r} rank={i + 1} />
+        <IdeaCard
+          key={r.ticker}
+          r={r}
+          rank={i + 1}
+          news={newsSentiment[r.ticker] ?? null}
+        />
       ))}
     </div>
   );

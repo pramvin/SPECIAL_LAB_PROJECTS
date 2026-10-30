@@ -6,6 +6,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: import.meta.dirname,
   },
+  // Hide the floating Next.js dev indicator so it does not cover the UI.
+  devIndicators: false,
   async rewrites() {
     return [{ source: "/api/:path*", destination: `${BACKEND_URL}/api/:path*` }];
   },

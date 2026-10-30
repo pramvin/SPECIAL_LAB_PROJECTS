@@ -3,7 +3,7 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, next order of work. Update most often.
 tags: [active]
-timestamp: 2026-10-27T12:00:00Z
+timestamp: 2026-10-30T05:52:12Z
 ---
 
 **โฟกัส:** Stage 5 (LLM) รันครั้งแรกแล้ว 42/42 → ต้องทำให้เชื่อถือได้: แก้บั๊ก UI, กวาดไฟล์ซ้ำ, ให้ผู้ใช้ติดป้ายเพื่อวัดความแม่น
@@ -18,11 +18,11 @@ timestamp: 2026-10-27T12:00:00Z
 
 ## สถานะ runtime (ณ จบ session ก่อน)
 - Kaggle `notebookdd09550bcb` เริ่ม ~23:40 วันที่ 10-17 ลิงก์ตายแล้ว ค่าใน `.env` เก่า → **หยุด session** ประหยัด GPU
-- `npm run build` ยังไม่รันหลังแก้ล่าสุด
-- Git: commit `18182bd` มีแล้ว (spec เดิมเขียนว่ายังไม่ commit = ล้าสมัย) · สถานะ: `D Agenda.docx` · อย่า commit ถ้าไม่สั่ง
+- `npm run build` ผ่านแล้ว (2026-10-30)
+- Git: origin/main `2c73fbc` · งานสอบถาม/ข่าวอยู่ branch `questionare-branch` (2026-10-30) · อย่า commit ถ้าไม่สั่ง
 
 ## รอผู้ใช้ตัดสินใจ
-1. เก็บ/ลบ mock `SocialSentiment` (มีลายน้ำ SAMPLE)
+1. ~~เก็บ/ลบ mock `SocialSentiment`~~ ✅ แทนด้วย `NewsSentiment` (Google News จริง) 2026-10-30
 2. อนุมัติ source tier + กฎ corroboration (Proposal)
 3. อนุมัติเกณฑ์ Laya: ไม่แย่กว่า FinBERT และ ~75%+
 4. ติดตั้ง scheduled job รายวันไหม
@@ -47,3 +47,10 @@ Han = login/security · Vincent = แบบสอบถาม + บันทึ�
 
 ## ลำดับต่อไป
 T0 (ผู้ใช้ติดป้าย) ∥ T2, T3, T9, T10, แก้ `ReasonText` → T1 → rerun T5 บนข่าวที่กรองแล้ว + T6 → T4/T7 เมื่อผู้ใช้เรียก → T8 · ตาราง task: [progress](progress.md)
+
+## งานล่าสุด (2026-10-30)
+- ลบ UI questionnaire ("Your view") และ "Your saved views" ตามคำสั่งผู้ใช้; คง backend `sentiment_responses` + API
+- แทน mock `SocialSentiment` ด้วย `NewsSentiment` จาก Google News จริง (`news_items` + `/api/news-sentiment`): 770 พาดหัว 12 ticker; `news_scores` ว่าง → แสดง "not scored yet"
+- เพิ่มแถบ fixed บนหน้า Trade Ideas: Now (local + UTC), News updated, Sentiment, Refresh; มือถือ 2 บรรทัด, desktop wrap ได้; วัดความสูงด้วย ResizeObserver
+- เพิ่ม `GET /api/data-status`; seed บัญชี demo; ซ่อน Next dev indicator; คืน `/api` rewrites ที่หลุด
+- ค้าง: รัน `pipeline.analyze` กับ Laya/LLM บน Kaggle เพื่อให้ sentiment มีคะแนน; ตัดสินใจ scheduled job ของ `pipeline.news`

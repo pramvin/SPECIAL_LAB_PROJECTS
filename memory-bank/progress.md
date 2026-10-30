@@ -1,9 +1,9 @@
 ---
 type: Progress
 title: Stage and task status
-description: Status of the 8 pipeline stages, DB size, task list T0-T10.
+description: Status of the 8 pipeline stages, DB size, task list T0-T12.
 tags: [status]
-timestamp: 2026-10-26T21:30:00Z
+timestamp: 2026-10-30T05:52:12Z
 ---
 
 สถานะ: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (ผู้ใช้เรียกเอง) · ❌ Dropped
@@ -36,8 +36,9 @@ timestamp: 2026-10-26T21:30:00Z
 | T6 | UI: แทนชิป Laya, credibility badge, แก้ `ReasonText` | 🟡 |
 | T7 | Earnings trigger + scheduler | ⏸ |
 | T8 | Backtest, event study, latency (ระบุ survivorship bias) | ⬜ |
-| T9 | รวมไฟล์ LLM-server ซ้ำ | ⬜ |
-| T10 | ลบบัญชีทดสอบ + ตัดสินใจ `SocialSentiment` | ⬜ |
+| T9 | รวมไฟล์ LLM-server ซ้ำ | ✅ ลบแล้ว 10-27 |
+| T10 | ลบบัญชีทดสอบ + ตัดสินใจ `SocialSentiment` | ✅ แทน mock ด้วย `NewsSentiment` (Google News จริง); sentiment รอ scoring |
 | T11 | ชั้นตัวเลขยืนยัน: เทียบป้าย Laya/LLM กับผลราคาจริง (ดู activeContext) | ⬜ รอผู้ใช้อนุมัติแผน |
+| T12 | Per-stock sentiment questionnaire (backend) | 🟡 table + API พร้อม (`sentiment_responses`) · UI ลบตามคำสั่งผู้ใช้ 2026-10-30 |
 
 ผลทดลอง: [experiments/results](experiments/results.md)

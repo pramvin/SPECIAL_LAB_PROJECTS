@@ -7,6 +7,7 @@ import secrets
 import sqlite3
 import time
 import json
+from datetime import datetime, timezone
 from typing import Literal
 
 from fastapi import Cookie, FastAPI, HTTPException, Response
@@ -38,6 +39,17 @@ CREATE TABLE IF NOT EXISTS risk_profiles (
   sectors TEXT NOT NULL,
   risk_level TEXT NOT NULL,
   updated_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS sentiment_responses (
+  user_id INTEGER NOT NULL REFERENCES users(id),
+  ticker TEXT NOT NULL,
+  view TEXT NOT NULL,
+  confidence TEXT NOT NULL,
+  useful TEXT NOT NULL,
+  comment TEXT NOT NULL DEFAULT '',
+  created_at INTEGER NOT NULL,
+  updated_at INTEGER NOT NULL,
+  PRIMARY KEY (user_id, ticker)
 );
 CREATE TABLE IF NOT EXISTS recommendations (
   id INTEGER PRIMARY KEY,
@@ -107,6 +119,16 @@ class Profile(BaseModel):
     experience: Literal["beginner", "some", "experienced"]
     capital: Literal["under_1k", "1k_10k", "over_10k"]
     sectors: list[Literal["tech", "healthcare", "finance", "energy", "consumer", "any"]] = Field(min_length=1)
+
+
+class SentimentResponse(BaseModel):
+    """Per-stock questionnaire answers. User input, not example data."""
+
+    ticker: str = Field(min_length=1, max_length=10)
+    view: Literal["positive", "neutral", "negative"]
+    confidence: Literal["low", "medium", "high"]
+    useful: Literal["yes", "no", "unsure"]
+    comment: str = Field(default="", max_length=500)
 
 
 def risk_level(p: Profile) -> str:
@@ -210,6 +232,68 @@ def save_profile(body: Profile, session: str | None = Cookie(default=None)):
     return {"risk_level": level}
 
 
+def sentiment_response_dict(row: sqlite3.Row) -> dict:
+    return {
+        "ticker": row["ticker"],
+        "view": row["view"],
+        "confidence": row["confidence"],
+        "useful": row["useful"],
+        "comment": row["comment"],
+        "updated_at": row["updated_at"],
+    }
+
+
+@app.get("/api/sentiment-responses")
+def list_sentiment_responses(session: str | None = Cookie(default=None)):
+    """All saved per-stock questionnaire answers for the signed-in user."""
+    with db() as conn:
+        user = current_user(conn, session)
+        rows = conn.execute(
+            "SELECT ticker, view, confidence, useful, comment, updated_at "
+            "FROM sentiment_responses WHERE user_id = ?",
+            (user["id"],),
+        ).fetchall()
+    return {"responses": {r["ticker"]: sentiment_response_dict(r) for r in rows}}
+
+
+@app.put("/api/sentiment-response")
+def save_sentiment_response(
+    body: SentimentResponse,
+    session: str | None = Cookie(default=None),
+):
+    """Upsert one user's questionnaire answers for a ticker."""
+    ticker = body.ticker.strip().upper()
+    if not re.fullmatch(r"[A-Z][A-Z.\-]{0,9}", ticker):
+        raise HTTPException(422, "Invalid ticker")
+    now = int(time.time())
+    with db() as conn:
+        user = current_user(conn, session)
+        conn.execute(
+            "INSERT INTO sentiment_responses "
+            "(user_id, ticker, view, confidence, useful, comment, created_at, updated_at) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?) "
+            "ON CONFLICT(user_id, ticker) DO UPDATE SET "
+            "view=excluded.view, confidence=excluded.confidence, useful=excluded.useful, "
+            "comment=excluded.comment, updated_at=excluded.updated_at",
+            (
+                user["id"],
+                ticker,
+                body.view,
+                body.confidence,
+                body.useful,
+                body.comment.strip(),
+                now,
+                now,
+            ),
+        )
+        row = conn.execute(
+            "SELECT ticker, view, confidence, useful, comment, updated_at "
+            "FROM sentiment_responses WHERE user_id = ? AND ticker = ?",
+            (user["id"], ticker),
+        ).fetchone()
+    return sentiment_response_dict(row)
+
+
 # Max share of capital in one position, by risk level.
 POSITION_CAP_PCT = {"conservative": 10, "moderate": 20, "aggressive": 30}
 
@@ -300,6 +384,123 @@ def top_news(limit: int = 5, session: str | None = Cookie(default=None)):
             })
     items.sort(key=lambda x: x["published_at"], reverse=True)
     return {"items": items[: max(1, min(limit, 20))]}
+
+
+@app.get("/api/news-sentiment")
+def news_sentiment(tickers: str, limit: int = 3):
+    """Real Google News headlines per ticker, plus sentiment when scored.
+
+    Sentiment is display-only and never changes the trade score. If the
+    `news_scores` table is missing/empty (model not run yet), headlines are
+    still returned and `has_sentiment` is false — no synthetic labels.
+    """
+    limit = max(1, min(limit, 10))
+    wanted: list[str] = []
+    for raw in tickers.split(","):
+        t = raw.strip().upper()
+        if re.fullmatch(r"[A-Z][A-Z.\-]{0,9}", t) and t not in wanted:
+            wanted.append(t)
+    wanted = wanted[:60]
+    result: dict[str, dict] = {}
+    with db() as conn:
+        tables = {
+            r[0]
+            for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        if "news_items" not in tables:
+            return {
+                "generated_at": datetime.now(timezone.utc).isoformat(),
+                "tickers": {},
+            }
+        has_scores = "news_scores" in tables
+        for t in wanted:
+            if has_scores:
+                rows = conn.execute(
+                    "SELECT n.title, n.source, n.url, n.published_at, "
+                    "(SELECT s.sentiment FROM news_scores s WHERE s.news_id = n.id "
+                    " ORDER BY s.scored_at DESC LIMIT 1) AS sentiment "
+                    "FROM news_items n WHERE n.ticker = ? AND n.rule_noise = 0 "
+                    "ORDER BY n.published_at DESC LIMIT ?",
+                    (t, limit),
+                ).fetchall()
+            else:
+                rows = conn.execute(
+                    "SELECT title, source, url, published_at, NULL AS sentiment "
+                    "FROM news_items WHERE ticker = ? AND rule_noise = 0 "
+                    "ORDER BY published_at DESC LIMIT ?",
+                    (t, limit),
+                ).fetchall()
+            distribution = None
+            if has_scores:
+                counts = conn.execute(
+                    "SELECT sentiment, COUNT(*) AS n FROM ("
+                    "  SELECT (SELECT s.sentiment FROM news_scores s WHERE s.news_id = n.id "
+                    "          ORDER BY s.scored_at DESC LIMIT 1) AS sentiment "
+                    "  FROM news_items n WHERE n.ticker = ? AND n.rule_noise = 0"
+                    ") WHERE sentiment IS NOT NULL GROUP BY sentiment",
+                    (t,),
+                ).fetchall()
+                by = {r["sentiment"]: r["n"] for r in counts}
+                scored = sum(by.values())
+                if scored:
+                    distribution = {
+                        "positive": by.get("bullish", 0),
+                        "neutral": by.get("neutral", 0),
+                        "negative": by.get("bearish", 0),
+                        "scored": scored,
+                    }
+            result[t] = {
+                "items": [dict(r) for r in rows],
+                "distribution": distribution,
+                "has_sentiment": distribution is not None,
+            }
+    return {
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "tickers": result,
+    }
+
+
+@app.get("/api/data-status")
+def data_status():
+    """When the trade-idea data was last refreshed.
+
+    `news_updated_at` is the latest time the news pipeline touched a headline;
+    `sentiment_updated_at` is the latest scoring run (null until it runs).
+    """
+    with db() as conn:
+        tables = {
+            r[0]
+            for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        }
+        news_count = 0
+        news_updated_at = None
+        sentiment_updated_at = None
+        recommendations_generated_at = None
+        if "news_items" in tables:
+            row = conn.execute(
+                "SELECT COUNT(*) AS n, MAX(last_seen_at) AS updated FROM news_items"
+            ).fetchone()
+            news_count = row["n"]
+            news_updated_at = row["updated"]
+        if "news_scores" in tables:
+            sentiment_updated_at = conn.execute(
+                "SELECT MAX(scored_at) FROM news_scores"
+            ).fetchone()[0]
+        if "recommendations" in tables:
+            generated = conn.execute(
+                "SELECT MAX(generated_at) FROM recommendations"
+            ).fetchone()[0]
+            if generated:
+                recommendations_generated_at = datetime.fromtimestamp(
+                    generated, timezone.utc
+                ).isoformat()
+    return {
+        "server_time": datetime.now(timezone.utc).isoformat(),
+        "news_updated_at": news_updated_at,
+        "news_count": news_count,
+        "sentiment_updated_at": sentiment_updated_at,
+        "recommendations_generated_at": recommendations_generated_at,
+    }
 
 
 # ---------------------------------------------------------------------------

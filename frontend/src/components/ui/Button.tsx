@@ -23,6 +23,7 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   variant?: Variant;
   size?: Size;
   icon?: string;
+  iconClassName?: string;
   trailingIcon?: string;
 }
 
@@ -30,6 +31,7 @@ export function Button({
   variant = "primary",
   size = "md",
   icon,
+  iconClassName = "",
   trailingIcon,
   className = "",
   children,
@@ -42,7 +44,7 @@ export function Button({
       className={`inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...rest}
     >
-      {icon && <Icon name={icon} className="text-[18px]" />}
+      {icon && <Icon name={icon} className={`text-[18px] ${iconClassName}`} />}
       {children}
       {trailingIcon && <Icon name={trailingIcon} className="text-[18px]" />}
     </button>
