@@ -26,6 +26,20 @@ const SECTOR_LABEL: Record<string, string> = {
   consumer: "Consumer",
 };
 
+const CHART_INTERVAL: Record<Horizon, { value: string; label: string }> = {
+  "1w": { value: "240", label: "4-hour" },
+  "1m": { value: "1D", label: "daily" },
+  "3m": { value: "1D", label: "daily" },
+};
+
+function tradingViewChartUrl(ticker: string, horizon: Horizon) {
+  const params = new URLSearchParams({
+    symbol: ticker,
+    interval: CHART_INTERVAL[horizon].value,
+  });
+  return `https://www.tradingview.com/chart/?${params.toString()}`;
+}
+
 function Level({ label, value, tone }: { label: string; value: string; tone?: string }) {
   return (
     <div className="flex flex-col">
@@ -104,7 +118,16 @@ function LlmBlock({ llm }: { llm: LlmAnalysis }) {
   );
 }
 
-function IdeaCard({ r, rank }: { r: Recommendation; rank: number }) {
+function IdeaCard({
+  r,
+  rank,
+  horizon,
+}: {
+  r: Recommendation;
+  rank: number;
+  horizon: Horizon;
+}) {
+  const chartInterval = CHART_INTERVAL[horizon];
   return (
     <Card as="article" className="flex flex-col gap-space-md">
       <div className="flex flex-wrap items-start justify-between gap-space-sm">
@@ -115,7 +138,15 @@ function IdeaCard({ r, rank }: { r: Recommendation; rank: number }) {
           <div className="flex flex-col">
             <div className="flex items-center gap-space-xs">
               <h2 className="font-headline-sm text-headline-sm text-on-surface">
-                {r.ticker}
+                <a
+                  href={tradingViewChartUrl(r.ticker, horizon)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={`View ${r.ticker} chart on TradingView with ${chartInterval.label} candles (opens in a new tab)`}
+                  className="text-tertiary-accent underline-offset-4 hover:underline"
+                >
+                  {r.ticker}
+                </a>
               </h2>
               <Badge tone="success" icon="trending_up">
                 {r.action}
@@ -274,7 +305,7 @@ export function IdeasView({
         </p>
       )}
       {items?.map((r, i) => (
-        <IdeaCard key={r.ticker} r={r} rank={i + 1} />
+        <IdeaCard key={r.ticker} r={r} rank={i + 1} horizon={horizon} />
       ))}
     </div>
   );

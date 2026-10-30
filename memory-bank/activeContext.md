@@ -3,10 +3,12 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, next order of work. Update most often.
 tags: [active]
-timestamp: 2026-10-27T12:00:00Z
+timestamp: 2026-10-30T18:14:51Z
 ---
 
 **โฟกัส:** Stage 5 (LLM) รันครั้งแรกแล้ว 42/42 → ต้องทำให้เชื่อถือได้: แก้บั๊ก UI, กวาดไฟล์ซ้ำ, ให้ผู้ใช้ติดป้ายเพื่อวัดความแม่น
+
+**UI decision (2026-10-31):** Trade Ideas ticker opens its TradingView chart in a new tab; intervals are 1w → 4H, 1m → 1D, and 3m → 1D. Use a direct chart link, with no widget or API key.
 
 ## ปัญหาค้าง
 1. `ReasonText` (`IdeasView.tsx`) ใส่ `[1]` ทุกลิงก์; id ที่ไม่อยู่ใน `cited_news_ids` เป็นเลขเปล่า

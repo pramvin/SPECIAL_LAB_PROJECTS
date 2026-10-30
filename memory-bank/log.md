@@ -4,6 +4,7 @@ title: Change log
 description: Chronological changes to this memory bank. Newest first.
 ---
 
+- 2026-10-31 ตกลงลิงก์ ticker ไป TradingView แท็บใหม่ · 1w ใช้ 4H, 1m/3m ใช้ 1D · ไม่ฝัง widget หรือใช้ API key
 - 2026-10-27 ลบไฟล์ LLM-server ซ้ำ 5 ไฟล์ + ลบส่วน README ซ้ำ · บันทึกแบ่งงานทีม · push main
 - 2026-10-27 ทดสอบ FMP: key ใช้ได้ แต่แพ็กเกจไม่รวมรายชื่อ S&P 500 (402) → รายชื่อยังมาจาก Wikipedia · `ingest.py` ลอง FMP ก่อนแล้วถอยไป Wikipedia · เก็บ `FMP_API_KEY` ใน `Backend/.env`
 - 2026-10-26 บันทึกแนวชั้นตัวเลขยืนยัน (T11) ใน activeContext/progress · แก้ frontend error: ลบ cache `.next` แล้วเปิด dev ใหม่ที่ :3001 (พอร์ต 3000 เป็นของโปรเจกต์ Colony)

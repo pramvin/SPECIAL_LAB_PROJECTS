@@ -66,6 +66,12 @@ Route group `src/app/(app)/` applies the responsive `AppShell`.
 - Data-provenance legend.
 - Open points list (auth, bank feeds, retention/consent, AI boundaries).
 
+### 3.5 Trade Ideas
+- Each ticker links to its TradingView chart and opens in a new tab.
+- Chart candle interval follows the selected holding period: 1w → 4H, 1m → 1D,
+  and 3m → 1D.
+- Use a direct chart link; do not embed a widget or require an API key.
+
 ## 4. Cross-cutting requirements
 
 - **Provenance:** every figure carries a badge — User Input, AI Guidance with
@@ -92,6 +98,8 @@ Charts: dependency-free SVG (`LineChart`).
 - [x] Navigation reflects the active route (sidebar + bottom tabs).
 - [x] Every displayed figure is labeled example/provenance data.
 - [x] Goal create form shows a validation error and cannot save while invalid.
+- [x] Trade Ideas tickers open their TradingView chart in a new tab with the
+      candle interval mapped from the selected holding period.
 - [x] `npx tsc --noEmit` passes.
 - [x] `npm run lint` passes with no errors/warnings.
 - [x] `npm run build` succeeds.
