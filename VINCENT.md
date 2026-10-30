@@ -14,7 +14,7 @@ feed it.
 | Item | Value |
 |---|---|
 | Branch | `questionare-branch` |
-| Commit | `425c7bc` |
+| Feature commit | `425c7bc` (this guide is a later commit on the same branch) |
 | Based on | `main` at `2c73fbc` |
 | Area | Trade Ideas tab + supporting backend |
 | Shared-file risk | `Backend/app/main.py` (also edited by `Login-and-Security-Feature`) |
@@ -222,6 +222,7 @@ curl -s -b "session=<cookie>" http://127.0.0.1:8000/api/sentiment-responses
 ## 9. Files in this branch
 
 ```text
+VINCENT.md
 Backend/app/main.py
 Backend/requirements.txt
 README.md
