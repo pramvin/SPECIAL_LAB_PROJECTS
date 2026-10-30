@@ -39,6 +39,13 @@ CREATE TABLE IF NOT EXISTS risk_profiles (
   risk_level TEXT NOT NULL,
   updated_at INTEGER NOT NULL
 );
+CREATE TABLE IF NOT EXISTS watchlist (
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    ticker TEXT NOT NULL,
+    name TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, ticker)
+);
 CREATE TABLE IF NOT EXISTS recommendations (
   id INTEGER PRIMARY KEY,
   ticker TEXT NOT NULL,
