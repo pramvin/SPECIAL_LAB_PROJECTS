@@ -51,6 +51,64 @@ feed it.
 If they are missing, the UI shows real headlines only when `pipeline.news` has
 run; otherwise it shows an empty state. It never invents data.
 
+### Google News integration (real data path)
+
+This uses **Google News RSS**, not an official API and no API key. It is
+implemented in `Backend/pipeline/news.py`.
+
+**1. Fetch**
+- URL: `https://news.google.com/rss/search`
+- Query: `"<company>" <ticker> stock when:7d`, with `hl=en-US`, `gl=US`,
+  `ceid=US:en` (7-day window).
+- Parsed with `requests` + XML; a headline must mention the company or ticker;
+  duplicates are skipped and low-value headlines are marked `rule_noise`.
+- Source is unofficial: Google can change or rate-limit it.
+
+**2. Store**
+- `news_items`: `ticker, title, source, url, published_at, first_seen_at,
+  last_seen_at, rule_noise`; unique on `(ticker, url)`.
+- For current recommendations, the top 3 non-noise headlines are copied into
+  `recommendations.news` (the card's News list).
+
+**3. Sentiment (separate)**
+- `pipeline/analyze.py` calls Laya on Kaggle (`LAYA_URL` / `LAYA_TOKEN` in
+  `Backend/.env`) and writes `news_scores`
+  (`sentiment`, probabilities, `kind`, `p_filler`, `scored_at`).
+- Labels are display-only and unvalidated. No labels are invented locally.
+
+**4. Read path**
+- `frontend/src/app/(app)/page.tsx` → `getNewsSentiment()` →
+  `GET /api/news-sentiment?tickers=...&limit=3` → `news_items` + latest
+  `news_scores`.
+- `NewsSentiment.tsx` renders real headlines; if no scores exist it shows
+  “not scored yet”.
+- `GET /api/data-status` returns `MAX(last_seen_at)` and `MAX(scored_at)` for
+  the fixed status bar.
+
+**5. Run / refresh**
+
+```bash
+cd Backend
+.venv/bin/pip install -r requirements.txt   # includes requests
+.venv/bin/python -m pipeline.news
+```
+
+- `pipeline.news` is manual; there is no scheduler yet.
+- The Refresh button only re-reads the DB; it does **not** run the pipeline.
+- Suggested cadence: daily (Google News keeps ~7 days); hourly if fresher.
+
+**6. Limitations**
+- Unofficial RSS: can change or rate-limit; no SLA.
+- ~7 days of history.
+- News only, not social/influencer data (project rule).
+- Headlines are real; sentiment stays absent until `pipeline.analyze` runs.
+
+**7. Merge notes**
+- Keep `requests` in `Backend/requirements.txt`.
+- Do not add any news API key to the frontend.
+- `news_items` / `news_scores` live in the gitignored DB; a fresh checkout has
+  no headlines until `pipeline.news` runs.
+
 ## 3. Recommended merge order
 
 1. Merge `Login-and-Security-Feature` **first** (or resolve it together with
@@ -192,6 +250,8 @@ curl -s -b "session=<cookie>" http://127.0.0.1:8000/api/sentiment-responses
 ```
 
 ## 7. Runtime notes
+
+The full data path is described in the **Google News integration** section above.
 
 - Populate real headlines with:
 

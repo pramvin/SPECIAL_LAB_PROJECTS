@@ -3,7 +3,7 @@ type: Progress
 title: Stage and task status
 description: Status of the 8 pipeline stages, DB size, task list T0-T12.
 tags: [status]
-timestamp: 2026-10-30T06:09:40Z
+timestamp: 2026-10-30T06:17:25Z
 ---
 
 สถานะ: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (ผู้ใช้เรียกเอง) · ❌ Dropped

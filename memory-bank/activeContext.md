@@ -3,7 +3,7 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, next order of work. Update most often.
 tags: [active]
-timestamp: 2026-10-30T06:09:40Z
+timestamp: 2026-10-30T06:17:25Z
 ---
 
 **โฟกัส:** Stage 5 (LLM) รันครั้งแรกแล้ว 42/42 → ต้องทำให้เชื่อถือได้: แก้บั๊ก UI, กวาดไฟล์ซ้ำ, ให้ผู้ใช้ติดป้ายเพื่อวัดความแม่น
@@ -55,3 +55,4 @@ T0 (ผู้ใช้ติดป้าย) ∥ T2, T3, T9, T10, แก้ `Rea
 - เพิ่ม `GET /api/data-status`; seed บัญชี demo; ซ่อน Next dev indicator; คืน `/api` rewrites ที่หลุด
 - ค้าง: รัน `pipeline.analyze` กับ Laya/LLM บน Kaggle เพื่อให้ sentiment มีคะแนน; ตัดสินใจ scheduled job ของ `pipeline.news`
 - เพิ่ม `VINCENT.md`: คู่มือ merge `questionare-branch` เข้า main (conflict recipe `Backend/app/main.py`, checklist, runtime notes)
+- อัปเดต `VINCENT.md`: เพิ่มส่วน Google News integration (RSS, `news_items`/`news_scores`, `pipeline.news`)
