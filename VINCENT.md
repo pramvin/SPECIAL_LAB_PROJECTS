@@ -109,6 +109,53 @@ cd Backend
 - `news_items` / `news_scores` live in the gitignored DB; a fresh checkout has
   no headlines until `pipeline.news` runs.
 
+### News filtering logic (actual rules)
+
+There are several filters, not just “mentions the company”.
+
+**A. Query filter** (`Backend/pipeline/news.py:27-30,65`)
+- `MAX_AGE_DAYS = 7`; query is
+  `"<company without suffixes>" <ticker> stock when:7d`
+  with `hl=en-US`, `gl=US`, `ceid=US:en`.
+- `SUFFIX` regex strips `inc/corp/corporation/co/company/ltd/plc/holdings/
+  group/the/class A-C`; `keyword()` keeps the first remaining word, lowercased.
+
+**B. Relevance filter** (`news.py:76`)
+- Keep a headline only if the keyword appears in the title **or** the ticker
+  matches as a whole word (`\b<TICKER>\b`). Otherwise skip it.
+
+**C. Dedup** (`news.py:76-80`, `news.py:52`)
+- Per run: repeated lowercase titles are skipped.
+- DB: unique on `(ticker, url)`; a re-seen URL only updates `last_seen_at`.
+
+**D. Noise flag — not deletion** (`news.py:34-38,51,84`)
+- `NOISE` regex marks low-value headlines `rule_noise=1`, e.g.:
+  stock-quote pages, “how to buy”, “how much you would have made”,
+  “stock/shares sold/bought/acquired/purchased by”,
+  “position in/trimmed/raised/lifted/cut”.
+- Flagged rows stay in `news_items`; they are excluded from display.
+
+**E. Card selection** (`news.py:125`)
+- `recommendations.news` gets the first `PER_STOCK = 3` non-noise headlines
+  in feed order.
+
+**F. Filler demotion** (`Backend/pipeline/analyze.py:22,62-74`)
+- After Laya scoring, headlines with `p_filler >= 0.8` are demoted below
+  others; the card still keeps 3.
+
+**G. API selection** (`GET /api/news-sentiment`)
+- Reads `rule_noise = 0`, orders by `published_at DESC`, limit 3.
+- Sentiment split comes only from `news_scores`; no synthetic labels.
+
+**H. What is NOT filtered**
+- No sentiment-based filtering, no source-tier whitelist, and no LLM/FinBERT
+  gate at fetch time. Sentiment/filler scoring happens later in
+  `pipeline/analyze.py`.
+
+> Note: the card's News list uses the `recommendations.news` snapshot written
+> by `pipeline.news`; the Trade Ideas news panel queries `news_items` live via
+> `/api/news-sentiment`. Both read the same table.
+
 ## 3. Recommended merge order
 
 1. Merge `Login-and-Security-Feature` **first** (or resolve it together with
