@@ -13,6 +13,7 @@ from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
 from .seed import NEWS_SOURCE, SEED
+from .watchlist import build_router as build_watchlist_router
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 SESSION_TTL = 7 * 24 * 3600
@@ -38,6 +39,13 @@ CREATE TABLE IF NOT EXISTS risk_profiles (
   sectors TEXT NOT NULL,
   risk_level TEXT NOT NULL,
   updated_at INTEGER NOT NULL
+);
+CREATE TABLE IF NOT EXISTS watchlist (
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    ticker TEXT NOT NULL,
+    name TEXT NOT NULL,
+    added_at INTEGER NOT NULL,
+    PRIMARY KEY (user_id, ticker)
 );
 CREATE TABLE IF NOT EXISTS recommendations (
   id INTEGER PRIMARY KEY,
@@ -301,6 +309,7 @@ def top_news(limit: int = 5, session: str | None = Cookie(default=None)):
     items.sort(key=lambda x: x["published_at"], reverse=True)
     return {"items": items[: max(1, min(limit, 20))]}
 
+app.include_router(build_watchlist_router(db, current_user))
 
 # ---------------------------------------------------------------------------
 # Demo account (prototype only)
