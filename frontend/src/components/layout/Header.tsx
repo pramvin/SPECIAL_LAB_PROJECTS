@@ -4,7 +4,7 @@ import { PROFILE } from "@/lib/data/profile";
 
 export function DesktopHeader() {
   return (
-    <header className="fixed left-72 right-0 top-0 z-40 hidden h-16 items-center justify-between border-b border-surface-container-high bg-surface/85 px-space-lg backdrop-blur-xl lg:flex">
+    <header className="fixed left-72 right-0 top-0 z-40 hidden h-16 items-center justify-between border-b border-surface-container-high bg-surface px-space-lg lg:flex">
       <div className="flex items-center gap-space-md">
         <span className="font-headline-sm text-headline-sm font-semibold tracking-tight text-on-surface">
           Advisory Workspace
