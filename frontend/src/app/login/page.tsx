@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { useState } from "react";
 import { LogoWordmark } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
@@ -81,6 +82,14 @@ export default function LoginPage() {
             <Button type="submit" disabled={busy}>
               {mode === "login" ? "Sign in" : "Create account"}
             </Button>
+            {mode === "login" && (
+              <Link
+                href="/forgot-password"
+                className="text-center font-body-sm text-body-sm text-primary underline-offset-4 hover:underline"
+              >
+                Forgot password?
+              </Link>
+            )}
             <Button
               variant="ghost"
               size="sm"
