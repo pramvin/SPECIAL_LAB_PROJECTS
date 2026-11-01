@@ -22,6 +22,13 @@ export const NAV_ITEMS: NavItem[] = [
     icon: "flag",
   },
   {
+  id: "watchlist",
+  label: "Watchlist",
+  shortLabel: "Watchlist",
+  href: "/watchlist",
+  icon: "bookmark",
+  },
+  {
     id: "assistant",
     label: "Plan & Assistant",
     shortLabel: "Assistant",
