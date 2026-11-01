@@ -87,3 +87,63 @@ export async function getTopNews(): Promise<TopNewsItem[]> {
     return [];
   }
 }
+
+export interface NewsSentimentItem {
+  title: string;
+  source: string;
+  url: string;
+  published_at: string;
+  sentiment: "bullish" | "bearish" | "neutral" | null;
+}
+
+export interface TickerNewsSentiment {
+  items: NewsSentimentItem[];
+  distribution: {
+    positive: number;
+    neutral: number;
+    negative: number;
+    scored: number;
+  } | null;
+  has_sentiment: boolean;
+}
+
+/**
+ * Real Google News headlines per ticker (from the backend pipeline), plus
+ * sentiment when the scoring model has been run. No synthetic fallback.
+ */
+export async function getNewsSentiment(
+  tickers: string[],
+): Promise<Record<string, TickerNewsSentiment>> {
+  if (tickers.length === 0) return {};
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/api/news-sentiment?tickers=${encodeURIComponent(tickers.join(","))}&limit=3`,
+      { cache: "no-store" },
+    );
+    if (!res.ok) return {};
+    return ((await res.json()) as { tickers: Record<string, TickerNewsSentiment> })
+      .tickers;
+  } catch {
+    return {};
+  }
+}
+
+export interface DataStatus {
+  server_time: string;
+  news_updated_at: string | null;
+  news_count: number;
+  sentiment_updated_at: string | null;
+  recommendations_generated_at: string | null;
+}
+
+/** Latest data-refresh times reported by the backend (null if unavailable). */
+export async function getDataStatus(): Promise<DataStatus | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/data-status`, {
+      cache: "no-store",
+    });
+    return res.ok ? ((await res.json()) as DataStatus) : null;
+  } catch {
+    return null;
+  }
+}

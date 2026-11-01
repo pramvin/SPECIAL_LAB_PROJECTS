@@ -4,13 +4,9 @@ An Intelligent Personalized Agent for Individual Financial Planning — a
 responsive frontend prototype (Next.js) with a small FastAPI backend for auth,
 onboarding, and example recommendations.
 
-## Live app
+## Local app
 
-**https://div-royalty-html-populations.trycloudflare.com**
-
-> Served through a temporary Cloudflare Quick Tunnel. It has no uptime
-> guarantee and the URL changes whenever the tunnel restarts. For a stable
-> local URL, see [Run locally](#run-locally).
+**http://localhost:3000** (after starting the backend and frontend below).
 
 ## Demo login
 
@@ -56,6 +52,18 @@ python3 -m venv .venv
 
 The frontend proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8000`).
 The demo account is created on first start.
+
+To fetch the real Google News headlines used by the “News sentiment” panel:
+
+```bash
+cd Backend
+.venv/bin/python -m pipeline.news
+```
+
+Sentiment labels appear only after the existing scoring step
+(`.venv/bin/python -m pipeline.analyze`) runs against the Kaggle Laya/LLM
+gateway. Until then the panel shows the real headlines with “not scored yet” —
+it never invents labels.
 
 ### 2. Frontend (Next.js)
 

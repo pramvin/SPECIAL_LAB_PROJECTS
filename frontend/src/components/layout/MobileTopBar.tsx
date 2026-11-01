@@ -13,7 +13,7 @@ export function MobileTopBar() {
     ) ?? NAV_ITEMS[0];
 
   return (
-    <header className="sticky top-0 z-40 flex items-center justify-between gap-space-sm border-b border-surface-container-high bg-surface/95 px-space-md py-space-sm backdrop-blur-xl lg:hidden">
+    <header className="sticky top-0 z-40 flex h-16 items-center justify-between gap-space-sm border-b border-surface-container-high bg-surface px-space-md lg:hidden">
       <div className="flex items-center gap-space-sm">
         <LogoMark size={36} />
         <div className="flex min-w-0 flex-col">
