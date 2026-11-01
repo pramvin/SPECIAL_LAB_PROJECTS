@@ -42,7 +42,7 @@ The AI models:
 ```
 Backend/    FastAPI app, SQLite DB, pipeline steps, Kaggle server code and notebook
 frontend/   Next.js web app
-memory-bank/  project notes and decisions (start at memory-bank/index.md)
+.okf/       project knowledge in OKF format (start at .okf/index.md)
 OVERVIEW.md, PIPELINE_SPEC.md   original project docs
 ```
 
@@ -139,10 +139,10 @@ Run from `Backend/` with the gateways up:
 
 First results on 42 stocks: dropping filler or hiding names barely changes the output, and the LLM still says "up"
 for about 80% of stocks. There are no human-labeled answers yet, so these results cannot say which version is right.
-Details: `memory-bank/experiments/results.md`.
+Details: `.okf/experiments/results.md`.
 
 ## Status
 
 Done: prices, news, ranking with ATR stop and target, idea cards UI, first LLM and Laya runs.
 Not done: source credibility check, event/rumor/filler tagging, hand-labeled evaluation, backtest.
-See `memory-bank/progress.md` for the full list.
+See `.okf/project/progress.md` for the full list.
