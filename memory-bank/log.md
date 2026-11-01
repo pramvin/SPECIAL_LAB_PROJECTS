@@ -4,6 +4,7 @@ title: Change log
 description: Chronological changes to this memory bank. Newest first.
 ---
 
+- 2026-10-31 ตกลงลิงก์ ticker ไป TradingView แท็บใหม่ · 1w ใช้ 4H, 1m/3m ใช้ 1D · ไม่ฝัง widget หรือใช้ API key
 - 2026-10-30 เพิ่ม news filtering logic (ของจริง) ใน VINCENT.md
 - 2026-10-30 อัปเดต VINCENT.md: เพิ่มส่วน Google News integration (RSS, news_items/news_scores, pipeline.news)
 - 2026-10-30 เพิ่ม `VINCENT.md` (merge guide สำหรับ `questionare-branch` → main)
