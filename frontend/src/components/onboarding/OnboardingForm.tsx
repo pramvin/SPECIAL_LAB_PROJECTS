@@ -5,6 +5,7 @@ import { useState } from "react";
 import { LogoWordmark } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
 import { Card, SectionLabel } from "@/components/ui/Card";
+import { LogoutButton } from "@/components/layout/LogoutButton";
 
 interface Option {
   value: string;
@@ -59,10 +60,16 @@ const QUESTIONS: {
     multi: true,
     options: [
       { value: "tech", label: "Technology" },
+      { value: "communication", label: "Communication" },
       { value: "healthcare", label: "Healthcare" },
       { value: "finance", label: "Finance" },
       { value: "energy", label: "Energy" },
-      { value: "consumer", label: "Consumer" },
+      { value: "consumer_discretionary", label: "Consumer Discretionary" },
+      { value: "consumer_staples", label: "Consumer Staples" },
+      { value: "industrials", label: "Industrials" },
+      { value: "materials", label: "Materials" },
+      { value: "real_estate", label: "Real Estate" },
+      { value: "utilities", label: "Utilities" },
       { value: "any", label: "No preference" },
     ],
   },
@@ -117,7 +124,10 @@ export function OnboardingForm() {
 
   return (
     <main className="mx-auto flex min-h-screen w-full max-w-xl flex-col gap-space-lg p-space-lg">
-      <LogoWordmark compact />
+      <div className="flex items-center justify-between">
+        <LogoWordmark compact />
+        <LogoutButton />
+      </div>
       <div className="flex flex-col gap-1">
         <h1 className="font-headline-sm text-headline-sm text-on-surface">
           Tell us how you invest

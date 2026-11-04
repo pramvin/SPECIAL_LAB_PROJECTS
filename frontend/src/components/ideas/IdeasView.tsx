@@ -13,6 +13,7 @@ import {
   type TopNewsItem,
   type Horizon,
   type LlmAnalysis,
+  type Quote,
   type Recommendation,
   type TickerNewsSentiment,
   type DataStatus as DataStatusData,
@@ -23,10 +24,16 @@ const usd = (n: number) =>
 
 const SECTOR_LABEL: Record<string, string> = {
   tech: "Technology",
+  communication: "Communication",
   healthcare: "Healthcare",
   finance: "Finance",
   energy: "Energy",
-  consumer: "Consumer",
+  consumer_discretionary: "Consumer Discretionary",
+  consumer_staples: "Consumer Staples",
+  industrials: "Industrials",
+  materials: "Materials",
+  real_estate: "Real Estate",
+  utilities: "Utilities",
 };
 
 const CHART_INTERVAL: Record<Horizon, { value: string; label: string }> = {
@@ -34,6 +41,18 @@ const CHART_INTERVAL: Record<Horizon, { value: string; label: string }> = {
   "1m": { value: "1D", label: "daily" },
   "3m": { value: "1D", label: "daily" },
 };
+
+function quoteTime(iso: string) {
+  return (
+    new Date(iso).toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      month: "short",
+      day: "numeric",
+      hour: "numeric",
+      minute: "2-digit",
+    }) + " ET"
+  );
+}
 
 function tradingViewChartUrl(ticker: string, horizon: Horizon) {
   const params = new URLSearchParams({
@@ -126,11 +145,13 @@ function IdeaCard({
   rank,
   horizon,
   news,
+  quote,
 }: {
   r: Recommendation;
   rank: number;
   horizon: Horizon;
   news?: TickerNewsSentiment | null;
+  quote?: Quote | null;
 }) {
   const chartInterval = CHART_INTERVAL[horizon];
   return (
@@ -185,6 +206,39 @@ function IdeaCard({
         Upside {r.upside_pct}% · Stop {r.stop_distance_pct}% below entry · If the
         stop is hit you lose about {r.loss_at_stop_pct}% of your capital.
       </p>
+      {r.bigmove_p !== null && (
+        <div className="flex flex-col gap-1 rounded-md bg-surface-container-low p-space-sm">
+          <Badge tone="neutral">
+            Big-move chance {Math.round(r.bigmove_p * 100)}% · typical 20%
+          </Badge>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            Chance this stock moves more than most S&amp;P 500 stocks over the
+            next 5 trading days, up or down. Not a direction forecast.
+            Experimental, tested on past data only.
+          </p>
+        </div>
+      )}
+      {!r.is_example && (
+        <>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            Entry is the {r.as_of ?? "latest"} daily close (Yahoo Finance), not a
+            live price.
+          </p>
+          <p className="font-body-sm text-body-sm text-on-surface-variant">
+            {quote ? (
+              <>
+                <span className="font-medium text-on-surface">
+                  Latest price {usd(quote.price)}
+                </span>{" "}
+                · quote time {quoteTime(quote.quote_time)} · delayed (Yahoo
+                Finance, usually about 15 minutes)
+              </>
+            ) : (
+              "Latest price unavailable. Open the chart for current prices."
+            )}
+          </p>
+        </>
+      )}
 
       <details open className="group rounded-md bg-surface-container-low p-space-md">
         <summary className="flex cursor-pointer items-center gap-space-xs font-title-md text-title-md text-on-surface">
@@ -195,7 +249,7 @@ function IdeaCard({
           <div className="flex flex-col gap-space-xs">
             <SectionLabel>Reasons</SectionLabel>
             <ul className="list-disc pl-5 font-body-sm text-body-sm text-on-surface">
-              {r.reasons.map((x) => (
+              {[...r.match_reasons, ...r.reasons].map((x) => (
                 <li key={x}>{x}</li>
               ))}
             </ul>
@@ -246,12 +300,14 @@ export function IdeasView({
   items,
   topNews,
   newsSentiment,
+  quotes,
   dataStatus,
 }: {
   horizon: Horizon;
   items: Recommendation[] | null;
   topNews: TopNewsItem[];
   newsSentiment: Record<string, TickerNewsSentiment>;
+  quotes: Record<string, Quote>;
   dataStatus: DataStatusData | null;
 }) {
   return (
@@ -297,9 +353,11 @@ export function IdeasView({
         <NoticeBanner
           icon="info"
           tone="neutral"
-          title={`Based on daily prices as of ${items?.[0]?.as_of ?? "—"}`}
+          title={`Based on daily closing prices as of ${items?.[0]?.as_of ?? "—"}`}
         >
-          Ideas come from simple price-trend rules and have not been backtested.
+          Entry prices are Yahoo Finance end-of-day closes. The latest price on each
+          card is a delayed Yahoo quote (usually about 15 minutes), not real-time,
+          so it may differ from the entry shown. Ideas come from simple price-trend rules and have not been backtested.
           Headlines are shown for context only and do not affect the score; fundamentals are not connected yet. This is not investment
           advice and nothing here is a guaranteed outcome.
         </NoticeBanner>
@@ -322,6 +380,7 @@ export function IdeasView({
           rank={i + 1}
           horizon={horizon}
           news={newsSentiment[r.ticker] ?? null}
+          quote={quotes[r.ticker] ?? null}
         />
       ))}
     </div>
