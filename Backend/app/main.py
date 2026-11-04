@@ -18,6 +18,7 @@ from fastapi import Request
 from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
+from . import matching
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
 
@@ -104,7 +105,10 @@ CREATE TABLE IF NOT EXISTS recommendations (
   news TEXT NOT NULL,
   is_example INTEGER NOT NULL DEFAULT 1,
   generated_at INTEGER NOT NULL,
-  as_of TEXT
+  as_of TEXT,
+  atr_pct REAL,
+  in_top INTEGER NOT NULL DEFAULT 1,
+  bigmove_p REAL
 );
 """
 
@@ -118,8 +122,15 @@ def db() -> sqlite3.Connection:
 
 with db() as _c:
     _c.executescript(SCHEMA)
-    if "as_of" not in {r[1] for r in _c.execute("PRAGMA table_info(recommendations)")}:
+    _rec_cols = {r[1] for r in _c.execute("PRAGMA table_info(recommendations)")}
+    if "as_of" not in _rec_cols:
         _c.execute("ALTER TABLE recommendations ADD COLUMN as_of TEXT")
+    if "atr_pct" not in _rec_cols:
+        _c.execute("ALTER TABLE recommendations ADD COLUMN atr_pct REAL")
+    if "in_top" not in _rec_cols:
+        _c.execute("ALTER TABLE recommendations ADD COLUMN in_top INTEGER NOT NULL DEFAULT 1")
+    if "bigmove_p" not in _rec_cols:
+        _c.execute("ALTER TABLE recommendations ADD COLUMN bigmove_p REAL")
     if _c.execute("SELECT COUNT(*) FROM recommendations").fetchone()[0] == 0:
         _c.executemany(
             "INSERT INTO recommendations (ticker, name, sector, horizon, entry, stop, target, score, reasons, news, generated_at) "
@@ -156,7 +167,10 @@ class Profile(BaseModel):
     max_loss_pct: Literal[2, 5, 10]
     experience: Literal["beginner", "some", "experienced"]
     capital: Literal["under_1k", "1k_10k", "over_10k"]
-    sectors: list[Literal["tech", "healthcare", "finance", "energy", "consumer", "any"]] = Field(min_length=1)
+    sectors: list[Literal[
+        "tech", "communication", "healthcare", "finance", "energy", "consumer_discretionary",
+        "consumer_staples", "industrials", "materials", "real_estate", "utilities", "any",
+    ]] = Field(min_length=1)
 
 
 class SentimentResponse(BaseModel):
@@ -500,6 +514,7 @@ def save_sentiment_response(
 
 # Max share of capital in one position, by risk level.
 POSITION_CAP_PCT = {"conservative": 10, "moderate": 20, "aggressive": 30}
+TOP_N_SERVED = 20  # ideas shown per horizon
 
 
 def latest_llm(conn: sqlite3.Connection, tickers: list[str]) -> dict:
@@ -534,10 +549,18 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
         rows = conn.execute(
             "SELECT * FROM recommendations WHERE horizon = ? ORDER BY score DESC", (horizon,)
         ).fetchall()
-        llm = latest_llm(conn, [r["ticker"] for r in rows])
-    interests = set(prof["sectors"].split(",")) if prof else {"any"}
+    interests = prof["sectors"].split(",") if prof else ["any"]
+    # Personalized: rank every stock that passed the filters by score + fit to the user's answers.
+    # No profile yet: serve the curated list (in_top) by plain score.
+    cands = [dict(r) for r in rows]
+    if prof:
+        ranked = matching.rank_for_user(cands, interests, prof["risk_level"], TOP_N_SERVED)
+    else:
+        ranked = [{**c, "fit": None, "match_reasons": []} for c in cands if c["in_top"]][:TOP_N_SERVED]
+    with db() as conn:
+        llm = latest_llm(conn, [c["ticker"] for c in ranked])
     out = []
-    for r in rows:
+    for r in ranked:  # each item is a recommendations row (dict) plus fit / match_reasons
         stop_pct = (r["entry"] - r["stop"]) / r["entry"] * 100
         # Position size: capped by risk level, and by the user's per-trade loss budget.
         size = POSITION_CAP_PCT[prof["risk_level"]] if prof else 10
@@ -551,13 +574,60 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
             "upside_pct": round((r["target"] - r["entry"]) / r["entry"] * 100, 1),
             "position_pct": round(size, 1),
             "loss_at_stop_pct": round(size * stop_pct / 100, 2),
-            "matches_interest": "any" in interests or r["sector"] in interests,
+            "matches_interest": matching.matches_interest(r["sector"], interests),
+            "fit": r["fit"], "match_reasons": r["match_reasons"],
             "is_example": bool(r["is_example"]),
             "as_of": r["as_of"],
+            "bigmove_p": (round(float(r["bigmove_p"]), 4)
+                          if horizon == "1w" and r["bigmove_p"] is not None else None),
             "llm": llm.get(r["ticker"]),
         })
-    out.sort(key=lambda x: (not x["matches_interest"], -x["score"]))
     return {"horizon": horizon, "items": out}
+
+
+_quote_cache: dict[str, tuple[float, dict]] = {}
+
+
+@app.get("/api/quotes")
+def quotes(tickers: str, session: str | None = Cookie(default=None)):
+    """Latest 1-minute bar per ticker from Yahoo Finance (unofficial feed, usually ~15 min delayed).
+
+    `quote_time` is the real timestamp of that bar, so the UI can show how old the price is.
+    Cached 60 s per ticker set.
+    """
+    with db() as conn:
+        current_user(conn, session)
+    wanted: list[str] = []
+    for raw in tickers.split(","):
+        t = raw.strip().upper()
+        if re.fullmatch(r"[A-Z][A-Z.\-]{0,9}", t) and t not in wanted:
+            wanted.append(t)
+    wanted = wanted[:30]
+    if not wanted:
+        return {"quotes": {}}
+    key = ",".join(sorted(wanted))
+    hit = _quote_cache.get(key)
+    if hit and time.time() - hit[0] < 60:
+        return hit[1]
+    import yfinance as yf
+    try:
+        raw = yf.download([t.replace(".", "-") for t in wanted], period="1d", interval="1m",
+                          group_by="ticker", progress=False, auto_adjust=True, threads=True)
+    except Exception:
+        raise HTTPException(502, "Quote provider unavailable")
+    out: dict[str, dict] = {}
+    for t in wanted:
+        sym = t.replace(".", "-")
+        try:
+            df = (raw[sym] if len(wanted) > 1 else raw).dropna(how="all")
+        except KeyError:
+            continue
+        if not df.empty:
+            out[t] = {"price": round(float(df["Close"].iloc[-1]), 2), "quote_time": df.index[-1].isoformat()}
+    result = {"quotes": out, "source": "Yahoo Finance"}
+    _quote_cache.clear()
+    _quote_cache[key] = (time.time(), result)
+    return result
 
 
 @app.get("/api/top-news")
