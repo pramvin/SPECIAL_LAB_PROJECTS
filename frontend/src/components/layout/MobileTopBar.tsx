@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { LogoMark } from "@/components/brand/Logo";
 import { Icon } from "@/components/ui/Icon";
 import { NAV_ITEMS } from "@/lib/nav";
+import { LogoutButton } from "./LogoutButton";
 
 export function MobileTopBar() {
   const pathname = usePathname();
@@ -33,6 +34,7 @@ export function MobileTopBar() {
           <Icon name="lock" className="text-[12px]" />
           Private
         </span>
+        <LogoutButton className="p-space-xs" />
       </div>
     </header>
   );
