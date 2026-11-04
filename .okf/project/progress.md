@@ -3,7 +3,7 @@ type: Progress
 title: Stage and task status
 description: Status of the 8 pipeline stages and the tasks still open
 tags: [status]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-01T06:40:00Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-03T15:00:00Z }
 ---
 
 Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user brings it back) · ❌ Dropped
@@ -37,5 +37,7 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 | T8 | Backtest, event study, latency (state survivorship bias) | ⬜ |
 | T11 | Numeric confirmation layer | ⬜ waiting on user approval · [Verification layer](/project/verification-layer.md) |
 | T12 | Per-stock sentiment questionnaire | 🟡 backend ready, no UI |
+| T13 | Personalized matching (branch `fais-questionire`): step 1 store all filtered stocks + `atr_pct` ✅ · step 2 matcher `app/matching.py` + `tests/test_matching.py` ✅ · step 3 API `/api/recommendations` ranks all stocks per user + UI shows match reasons ✅ · onboarding now 11 GICS sectors ✅ · real data needs `ingest` + `rank` ⬜ | 🟡 |
+| T14 | Big-move badge (chart-only model, 1w): train on Kaggle ✅ · serve in `rank.py` + API + UI badge ✅ · needs real `ingest` + `rank` to show numbers ⬜ | 🟡 |
 
 Experiment results: [Results](/experiments/results.md)

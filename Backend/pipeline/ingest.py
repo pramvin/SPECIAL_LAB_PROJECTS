@@ -21,21 +21,26 @@ BATCH = 100
 MAX_DAILY_MOVE = 0.5  # |close/prev_close - 1| above this is flagged as suspect
 MIN_ROWS = 60  # fewer valid daily bars than this -> ticker is rejected
 
-# GICS sector -> the sector keys used by the onboarding form.
+# GICS sector -> the sector keys used by the onboarding form (one per GICS sector).
 SECTOR_MAP = {
     "Information Technology": "tech",
-    "Communication Services": "tech",
+    "Communication Services": "communication",
     "Health Care": "healthcare",
     "Financials": "finance",
     "Energy": "energy",
-    "Consumer Discretionary": "consumer",
-    "Consumer Staples": "consumer",
+    "Consumer Discretionary": "consumer_discretionary",
+    "Consumer Staples": "consumer_staples",
+    "Industrials": "industrials",
+    "Materials": "materials",
+    "Real Estate": "real_estate",
+    "Utilities": "utilities",
     # FMP's own sector names
     "Technology": "tech",
     "Healthcare": "healthcare",
     "Financial Services": "finance",
-    "Consumer Cyclical": "consumer",
-    "Consumer Defensive": "consumer",
+    "Consumer Cyclical": "consumer_discretionary",
+    "Consumer Defensive": "consumer_staples",
+    "Basic Materials": "materials",
 }
 
 SCHEMA = """

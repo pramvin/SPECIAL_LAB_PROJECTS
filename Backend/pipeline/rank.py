@@ -14,6 +14,9 @@ import time
 import numpy as np
 import pandas as pd
 
+from .bigmove import load_bundle
+from .bigmove import score as score_bigmove
+
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 TOP_N = 20  # per horizon
 MAX_PER_GICS_SECTOR = 4
@@ -62,6 +65,16 @@ def main() -> None:
     if px.empty:
         raise SystemExit("prices is empty: run `python -m pipeline.ingest` first")
 
+    bundle = load_bundle()
+    big = {}
+    if bundle:
+        close_wide = px.pivot(index="date", columns="ticker", values="close")
+        volume_wide = px.pivot(index="date", columns="ticker", values="volume")
+        big = score_bigmove(bundle, close_wide, volume_wide)
+        print(f"big-move model loaded, scored {len(big)} tickers")
+    else:
+        print("no big-move model (models/bigmove_model.joblib or sklearn missing): bigmove_p will be NULL")
+
     rows = {}
     for t, g in px.groupby("ticker"):
         ind = indicators(g)
@@ -87,8 +100,11 @@ def main() -> None:
             d = d[d["above_sma200"] > 0]
         d["score"] = sum(d[f"r_{k}"] * w for k, w in weights.items())
         d = d.sort_values("score", ascending=False)
+        # Keep every stock that passes the filters; `in_top` marks the old curated list
+        # (sector cap + TOP_N) that the API serves until personalized matching replaces it.
         d["n"] = d.groupby("gics_sector").cumcount()
-        d = d[d["n"] < MAX_PER_GICS_SECTOR].head(TOP_N)
+        eligible = d["n"] < MAX_PER_GICS_SECTOR
+        d["in_top"] = (eligible & (eligible.cumsum() <= TOP_N)).astype(int)
         for t, r in d.iterrows():
             entry = float(r["close"])
             stop = round(entry - stop_k * r["atr"], 2)
@@ -103,20 +119,30 @@ def main() -> None:
             if horizon != "1w":
                 reasons.append(f"Trading {r['above_sma200']:.1%} above its 200-day average")
             reasons.append(f"Typical daily range (ATR) is {r['atr_pct']:.1f}% of price; stop {stop_k:g}x ATR, target {target_k:g}x ATR")
+            big_p = big.get(t) if horizon == "1w" else None
             out.append((t, r["name"], r["sector"], horizon, round(entry, 2), stop, target, int(round(r["score"])),
-                        json.dumps(reasons), json.dumps([]), 0, now, as_of))
+                        json.dumps(reasons), json.dumps([]), 0, now, as_of,
+                        round(float(r["atr_pct"]), 2), int(r["in_top"]),
+                        round(float(big_p), 4) if big_p is not None else None))
 
     cols = {r[1] for r in conn.execute("PRAGMA table_info(recommendations)")}
     with conn:
         if "as_of" not in cols:
             conn.execute("ALTER TABLE recommendations ADD COLUMN as_of TEXT")
+        if "atr_pct" not in cols:
+            conn.execute("ALTER TABLE recommendations ADD COLUMN atr_pct REAL")
+        if "in_top" not in cols:
+            conn.execute("ALTER TABLE recommendations ADD COLUMN in_top INTEGER NOT NULL DEFAULT 1")
+        if "bigmove_p" not in cols:
+            conn.execute("ALTER TABLE recommendations ADD COLUMN bigmove_p REAL")
         conn.execute("DELETE FROM recommendations")
         conn.executemany(
             "INSERT INTO recommendations (ticker, name, sector, horizon, entry, stop, target, score, reasons, news, "
-            "is_example, generated_at, as_of) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)", out)
+            "is_example, generated_at, as_of, atr_pct, in_top, bigmove_p) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)", out)
     for h in HORIZONS:
-        top = [o[0] for o in out if o[3] == h][:5]
-        print(f"{h}: {sum(1 for o in out if o[3] == h)} ideas, top: {', '.join(top)}")
+        rows_h = [o for o in out if o[3] == h]
+        top = [o[0] for o in rows_h if o[14]][:5]
+        print(f"{h}: {len(rows_h)} stored, {sum(o[14] for o in rows_h)} in curated top, top: {', '.join(top)}")
 
 
 if __name__ == "__main__":

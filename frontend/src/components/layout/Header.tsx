@@ -1,6 +1,7 @@
 import { Icon } from "@/components/ui/Icon";
 import { MaskedAvatar } from "@/components/brand/Logo";
 import { PROFILE } from "@/lib/data/profile";
+import { LogoutButton } from "./LogoutButton";
 
 export function DesktopHeader() {
   return (
@@ -22,6 +23,8 @@ export function DesktopHeader() {
           <Icon name="help_center" className="text-body-sm" />
           Help &amp; Glossary
         </a>
+        <span className="h-5 w-px bg-outline-variant/40" />
+        <LogoutButton />
         <span className="h-5 w-px bg-outline-variant/40" />
         <MaskedAvatar name={PROFILE.name} size={32} />
       </div>

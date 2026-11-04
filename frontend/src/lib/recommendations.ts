@@ -25,8 +25,13 @@ export interface Recommendation {
   position_pct: number;
   loss_at_stop_pct: number;
   matches_interest: boolean;
+  /** Cosine fit to the user's answers (0..1); null when no profile is saved yet. */
+  fit: number | null;
+  match_reasons: string[];
   is_example: boolean;
   as_of: string | null;
+  /** Chance of a top-20% 5-day move (0..1); null when no model or horizon is not 1w. */
+  bigmove_p: number | null;
   llm: LlmAnalysis | null;
 }
 
@@ -57,6 +62,27 @@ export async function getRecommendations(
     return ((await res.json()) as { items: Recommendation[] }).items;
   } catch {
     return null;
+  }
+}
+
+export interface Quote {
+  price: number;
+  /** Timestamp of the latest 1-minute bar (ISO, with offset). */
+  quote_time: string;
+}
+
+export async function getQuotes(tickers: string[]): Promise<Record<string, Quote>> {
+  const session = (await cookies()).get("session")?.value;
+  if (!session || tickers.length === 0) return {};
+  try {
+    const res = await fetch(
+      `${BACKEND_URL}/api/quotes?tickers=${encodeURIComponent(tickers.slice(0, 30).join(","))}`,
+      { headers: { cookie: `session=${session}` }, cache: "no-store" },
+    );
+    if (!res.ok) return {};
+    return ((await res.json()) as { quotes: Record<string, Quote> }).quotes;
+  } catch {
+    return {};
   }
 }
 

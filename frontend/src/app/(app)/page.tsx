@@ -2,6 +2,7 @@ import { IdeasView } from "@/components/ideas/IdeasView";
 import {
   getDataStatus,
   getNewsSentiment,
+  getQuotes,
   getRecommendations,
   getTopNews,
   type Horizon,
@@ -27,10 +28,12 @@ export default async function IdeasPage({
   const newsSentiment = await getNewsSentiment(
     (items ?? []).map((r) => r.ticker),
   );
+  const quotes = await getQuotes((items ?? []).map((r) => r.ticker));
   return (
     <IdeasView
       horizon={horizon}
       items={items}
+      quotes={quotes}
       topNews={topNews}
       newsSentiment={newsSentiment}
       dataStatus={dataStatus}
