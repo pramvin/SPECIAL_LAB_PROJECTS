@@ -161,9 +161,7 @@ The frontend proxies `/api/*` to the backend with a Next `rewrites()` rule in `f
 | `pipeline/llm.py` | Stage 5, see section 0. Constants `PROMPT_VERSION = "v1"`, `MAX_HEADLINES = 15`. Reads `LLM_URL`, `LLM_TOKEN` from `.env`. |
 | `llm_server/server.py` | Gateway that runs **on Kaggle** in front of Ollama: `/health`, `/chat` (Bearer token), forces `stream: false` and `think: false`. |
 | `laya_server/server.py` | The server that runs **on Kaggle**: FastAPI `/health`, `/analyze` (Bearer token). Source of truth for the Kaggle notebook. |
-| `experiments/laya_eval.ipynb` | Kaggle experiment A (Laya vs FinBERT). |
 | `experiments/kaggle_gateways.ipynb` | **Use this one.** Runs Laya and the LLM gateway in one session (see section 0). Cells: setup (zstd, pciutils, Ollama, cloudflared), write server files, launch. |
-| `experiments/laya_server_kaggle.ipynb` | Older Laya-only notebook. Superseded by `kaggle_gateways.ipynb`. |
 | `experiments/news_items.csv` | Export of the 12,801 archived headlines (git-ignored). |
 | `experiments/to_label.csv` | 200 random non-noise headlines with empty `gold_sentiment` / `gold_kind` columns, for the user to label by hand (git-ignored). |
 | `.env` | Secrets, git-ignored. Contains `ollama_key` and the `LLM_URL`, `LLM_TOKEN`, `LAYA_URL`, `LAYA_TOKEN` of the last Kaggle run (they die when that session stops; one token is shared by both URLs). Never print its contents. |
