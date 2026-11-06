@@ -42,7 +42,7 @@ export function TopNews({ items }: { items: TopNewsItem[] }) {
       <CardHeader
         title="Top news"
         icon="newspaper"
-        subtitle={`Latest headlines on stocks in your ideas${priceDate ? ` · prices are the last close, ${priceDate}, and are not a reaction to the headline` : ""}. AI labels are not validated yet.`}
+        subtitle={`Latest headlines on stocks in your ideas${priceDate ? ` · prices are the last close, ${priceDate}, and are not a reaction to the headline` : ""}. ML sentiment labels are not validated yet.`}
       />
       <ul className="mt-space-md flex flex-col divide-y divide-surface-container-high">
         {items.map((n) => (

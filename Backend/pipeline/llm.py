@@ -3,7 +3,7 @@
 The model is NOT run locally. LLM_URL and LLM_TOKEN (Backend/.env or environment) point at the Kaggle
 notebook `experiments/kaggle_gateways.ipynb` (Ollama behind a Cloudflare tunnel); the URL changes every restart.
 Output is display-only. It never changes the score, entry, stop or target.
-Input today is every non-noise headline of the last 7 days; stages 3 and 4 (source tier, event/rumor/filler)
+Input today is every non-noise headline of the last 7 days; stages 3 and 4 (source tier, event/rumor)
 are not built yet, so credibility is NOT filtered here. Every call is logged in `llm_analysis`.
 
 Run from Backend/ after news:  .venv/bin/python -m pipeline.llm [--limit N]
