@@ -31,3 +31,4 @@ okf_version: "0.2"
 # Experiments
 
 * [Results](/experiments/results.md) - Laya / FinBERT / LLM experiment results
+* [Direction prediction](/experiments/direction-prediction.md) - Every up/down test (news, chart, RSI/MACD); retired 2026-11-06
