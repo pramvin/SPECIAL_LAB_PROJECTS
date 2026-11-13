@@ -3,7 +3,7 @@ type: Experiment Results
 title: Laya / FinBERT / LLM experiments
 description: Numbers from Kaggle T4 runs on 2026-10-16 to 10-19 (single runs, no CI, no human labels on our own headlines)
 tags: [evaluation]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-03T15:00:00Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-06T11:00:00Z }
 ---
 
 # A: Public dataset
@@ -66,9 +66,7 @@ Spearman between scores: dictionary–FinBERT 0.47 · dictionary–Laya 0.43 · 
 
 **Direction: no usable probability (AUC 0.50–0.52); the NN is no better than logistic; news adds nothing. Big move: a real, stable, well-calibrated signal, but it comes from chart (volatility history), news adds about +0.001 AUC.** Calibration of P(big move), gradient boosting chart+news, ten equal groups (predicted → actual): 0.045→0.054 · 0.082→0.084 · 0.101→0.104 · 0.122→0.124 · 0.149→0.148 · 0.182→0.176 · 0.236→0.214 · 0.292→0.265 · 0.390→0.334 · **0.557→0.494** (top group actual by year 0.503 / 0.537 / 0.462 vs base 0.20; slightly over-confident at the top) · social sentiment not used (no history, see [Data sources](/architecture/data-sources.md)) · the 1-day top-minus-bottom hint of section G does not show up here as AUC (different measurement: all stock-days vs only days with news)
 
-# Proposed criterion (not approved by the user)
-
-On the 200 labeled rows, Laya should be no worse than FinBERT and reach ~75%+, otherwise fine-tune (`github.com/NandhaKishorM/laya`, `notebooks/laya_finetune_typed_decisions_2xT4_kaggle.ipynb`) · Laya probabilities are **not calibrated**
+Laya was retired on 2026-11-06 (see [News sentiment](/architecture/news-sentiment.md)); sections A to G are history.
 
 Follow-up: [Verification layer](/project/verification-layer.md)
 

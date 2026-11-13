@@ -16,6 +16,7 @@ okf_version: "0.2"
 * [System patterns](/architecture/system-patterns.md) - Pipeline structure and patterns in use
 * [Scoring](/architecture/scoring.md) - Scoring formula and ATR stop/target (guessed values, not backtested)
 * [Tech context](/architecture/tech-context.md) - Stack, ports, tooling cautions
+* [News sentiment](/architecture/news-sentiment.md) - Local ML label for headlines (replaces Laya), training data, limits
 * [Auth and security](/architecture/auth-security.md) - Login, hashing, rate limit, known limits
 * [Data sources](/architecture/data-sources.md) - Prices, news, FMP, and sources not used
 
@@ -27,7 +28,7 @@ okf_version: "0.2"
 # Runbooks
 
 * [Daily refresh](/runbooks/daily-refresh.md) - Start backend/frontend and run the pipeline in order
-* [Kaggle gateways](/runbooks/kaggle-gateways.md) - Start/stop Laya + LLM on Kaggle
+* [Kaggle gateways](/runbooks/kaggle-gateways.md) - Start/stop the LLM gateway on Kaggle (Laya retired)
 
 # Experiments
 
