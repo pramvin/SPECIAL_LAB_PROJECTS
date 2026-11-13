@@ -128,7 +128,7 @@ function ReasonText({
 function LlmBlock({ llm }: { llm: LlmAnalysis }) {
   const dir = { up: "Up", down: "Down", none: "No clear view" }[llm.direction];
   return (
-    <div className="flex flex-col gap-3 rounded-[20px] bg-surface-container-low p-5 md:p-6">
+    <div className="flex flex-col gap-3 rounded-[20px] bg-surface-container-low p-4 md:p-5">
       <div className="flex flex-wrap items-center gap-2">
         <span className="font-title-md text-title-md text-on-surface">
           AI reading of the news
@@ -180,8 +180,8 @@ function IdeaCard({
   const chartInterval = CHART_INTERVAL[horizon];
 
   return (
-    <Card as="article" className="flex flex-col gap-8">
-      <div className="flex flex-col gap-5 md:flex-row md:items-start md:justify-between">
+    <Card as="article" className="flex flex-col gap-6">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
           <span className="pt-1 font-body-sm text-body-sm font-medium tabular-nums text-on-surface-variant">
             {String(rank).padStart(2, "0")}
@@ -221,7 +221,7 @@ function IdeaCard({
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-6 border-y border-surface-container-high py-6 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-5 border-y border-surface-container-high py-5 sm:grid-cols-4">
         <Level label="Entry" value={usd(r.entry)} />
         <Level label="Stop" value={usd(r.stop)} tone="text-error" />
         <Level label="Target" value={usd(r.target)} tone="text-tertiary-accent" />
@@ -261,7 +261,7 @@ function IdeaCard({
         )}
       </div>
 
-      <details className="group border-t border-surface-container-high pt-6">
+      <details className="group border-t border-surface-container-high pt-5">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-title-md text-title-md text-on-surface">
           <span>Why this stock and the news</span>
           <Icon
@@ -269,7 +269,7 @@ function IdeaCard({
             className="text-[22px] text-on-surface-variant transition-transform group-open:rotate-180"
           />
         </summary>
-        <div className="mt-8 grid gap-8 md:grid-cols-2">
+        <div className="mt-6 grid gap-6 md:grid-cols-2">
           <div className="flex flex-col gap-3">
             <SectionLabel>Reasons</SectionLabel>
             <ul className="flex list-disc flex-col gap-2 pl-5 font-body-md text-body-md text-on-surface">
@@ -310,7 +310,7 @@ function IdeaCard({
             </ul>
           </div>
         </div>
-        <div className="mt-8 flex flex-col gap-6">
+        <div className="mt-6 flex flex-col gap-5">
           {r.llm && <LlmBlock llm={r.llm} />}
           <NewsSentiment ticker={r.ticker} data={news} />
         </div>
@@ -335,10 +335,10 @@ export function IdeasView({
   dataStatus: DataStatusData | null;
 }) {
   return (
-    <div className="flex flex-col gap-12 lg:gap-20">
-      <header className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8 lg:gap-10">
+      <header className="flex flex-col gap-4">
         <DataStatusBar status={dataStatus} />
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-3">
           <h1 className="max-w-3xl font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-headline-lg">
             Trade ideas
           </h1>
@@ -400,7 +400,7 @@ export function IdeasView({
       )}
 
       {items && items.length > 0 && (
-        <section className="flex flex-col gap-6">
+        <section className="flex flex-col gap-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <h2 className="font-headline-sm text-headline-sm text-on-surface">
               Ideas for {HORIZONS.find((h) => h.value === horizon)?.label}
@@ -409,7 +409,7 @@ export function IdeasView({
               {items.length} {items.length === 1 ? "idea" : "ideas"}
             </span>
           </div>
-          <div className="flex flex-col gap-6">
+          <div className="flex flex-col gap-5">
             {items.map((r, i) => (
               <IdeaCard
                 key={r.ticker}

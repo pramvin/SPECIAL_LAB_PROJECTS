@@ -44,9 +44,9 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center bg-surface px-5 py-12">
-      <div className="flex w-full max-w-[420px] flex-col gap-8">
-        <div className="flex flex-col items-center gap-3 text-center">
+    <main className="flex min-h-screen items-center justify-center bg-surface px-5 py-8">
+      <div className="flex w-full max-w-[420px] flex-col gap-6">
+        <div className="flex flex-col items-center gap-2 text-center">
           <LogoWordmark compact />
           <h1 className="font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-[40px] sm:leading-[44px]">
             {mode === "login" ? "Sign in" : "Create account"}
@@ -58,7 +58,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        <form onSubmit={submit} className="flex flex-col gap-5 rounded-[28px] bg-surface-container-lowest p-6 sm:p-8">
+        <form onSubmit={submit} className="flex flex-col gap-4 rounded-[28px] bg-surface-container-lowest p-6">
           <Field label="Email" htmlFor="email">
             <TextInput
               id="email"

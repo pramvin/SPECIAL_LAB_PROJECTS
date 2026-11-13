@@ -50,11 +50,11 @@ export function TopNews({ items }: { items: TopNewsItem[] }) {
             : ""
         }`}
       />
-      <ul className="mt-8 flex flex-col divide-y divide-surface-container-high">
+      <ul className="mt-6 flex flex-col divide-y divide-surface-container-high">
         {items.map((n) => (
           <li
             key={n.ticker}
-            className="flex flex-col gap-3 py-6 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-8"
+            className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
           >
             <div className="flex min-w-0 flex-col gap-2">
               <div className="flex flex-wrap items-center gap-2">

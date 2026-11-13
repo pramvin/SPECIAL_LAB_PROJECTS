@@ -65,7 +65,7 @@ export function SettingsView() {
   );
 
   return (
-    <div className="flex flex-col gap-12 lg:gap-16">
+    <div className="flex flex-col gap-8 lg:gap-10">
       <header className="flex flex-col gap-4">
         <SectionLabel>Workspace controls</SectionLabel>
         <h1 className="max-w-3xl font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-headline-lg">
@@ -77,7 +77,7 @@ export function SettingsView() {
         </p>
       </header>
 
-      <Card className="flex flex-col gap-6">
+      <Card className="flex flex-col gap-5">
         <CardHeader
           icon="person"
           title="Profile"
@@ -107,7 +107,7 @@ export function SettingsView() {
           {SETTINGS.map((setting) => (
             <div
               key={setting.id}
-              className="flex items-start justify-between gap-6 py-6"
+              className="flex items-start justify-between gap-6 py-5"
             >
               <div className="flex flex-col gap-1">
                 <div className="flex flex-wrap items-center gap-2">
@@ -139,7 +139,7 @@ export function SettingsView() {
         </div>
       </Card>
 
-      <Card className="flex flex-col gap-6">
+      <Card className="flex flex-col gap-5">
         <CardHeader
           icon="label"
           title="Data provenance legend"

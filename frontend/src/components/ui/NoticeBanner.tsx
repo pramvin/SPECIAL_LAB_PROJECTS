@@ -25,7 +25,7 @@ export function NoticeBanner({
 }) {
   return (
     <div
-      className={`flex flex-col gap-3 rounded-[20px] p-5 md:flex-row md:items-center md:justify-between md:p-6 ${TONES[tone]} ${className}`}
+      className={`flex flex-col gap-3 rounded-[20px] p-4 md:flex-row md:items-center md:justify-between md:p-5 ${TONES[tone]} ${className}`}
     >
       <div className="flex items-start gap-3">
         <Icon name={icon} className="mt-0.5 text-[20px] opacity-80" />

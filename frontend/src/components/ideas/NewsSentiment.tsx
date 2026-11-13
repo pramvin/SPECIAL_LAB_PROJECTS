@@ -25,7 +25,7 @@ export function NewsSentiment({
   const total = dist?.scored ?? 0;
 
   return (
-    <section className="flex flex-col gap-5 rounded-[20px] bg-surface-container-low p-5 md:p-6">
+    <section className="flex flex-col gap-4 rounded-[20px] bg-surface-container-low p-4 md:p-5">
       <div className="flex flex-wrap items-center gap-2">
         <h3 className="font-title-md text-title-md text-on-surface">
           News sentiment · {ticker}
@@ -90,7 +90,7 @@ export function NewsSentiment({
               {items.map((h) => (
                 <li
                   key={h.url || h.title}
-                  className="flex flex-col gap-1 py-3 first:pt-1 last:pb-0"
+                  className="flex flex-col gap-1 py-2.5 first:pt-1 last:pb-0"
                 >
                   <a
                     href={h.url}

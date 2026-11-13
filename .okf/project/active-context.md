@@ -17,7 +17,7 @@ No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/not
 
 # Frontend redesign (2026-11-13)
 
-The active routes were restyled with an Apple-inspired light system: neutral surfaces, system UI font, one blue accent, sticky top navigation, larger type, and more whitespace. Dense data stays available through collapsed detail sections. See [Apple-inspired light UI](/decisions/apple-inspired-ui.md). The old unused `DashboardView` was left untouched.
+The active routes were restyled with an Apple-inspired light system: neutral surfaces, system UI font, one blue accent, sticky top navigation, larger type, and balanced density. Dense data stays available through collapsed detail sections. See [Apple-inspired light UI](/decisions/apple-inspired-ui.md). The old unused `DashboardView` was left untouched.
 
 # Personalized matching (in main via PR #5)
 

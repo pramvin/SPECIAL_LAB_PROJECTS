@@ -48,7 +48,7 @@ There is no test runner configured yet. If tests are added, document them here.
 - `src/lib/data/` — mock data modules (the only source of figures).
 - `src/lib/format.ts` — currency/percent/date helpers. Keep isolated.
 - `src/app/globals.css` — Apple-inspired light design tokens (Tailwind v4
-  `@theme`). Neutral surfaces, near-black text, one blue accent, generous
+  `@theme`). Neutral surfaces, near-black text, one blue accent, balanced
   spacing, and large type.
 
 ## Conventions
