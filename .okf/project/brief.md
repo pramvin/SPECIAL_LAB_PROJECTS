@@ -3,14 +3,14 @@ type: Project Brief
 title: PlanWise AI brief
 description: What the project does, the locked decisions, and the hard rules (source of truth)
 tags: [core]
-generated: { by: opencode/deepseek-flash, at: 2026-11-13T05:22:32Z }
+generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:37:52Z }
 ---
 
 **PlanWise AI** is a capstone project: a web app that recommends **short-term S&P 500 stocks, personalized per user**, with reasons and news. Short term first, long term later.
 
 # Locked (do not reopen)
 
-- S&P 500 only · **long only** · holding periods `1w` `1m` `3m`
+- S&P 500 only · trade ideas are **long-only**; simulated positions support **long and short** · holding periods `1w` `1m` `3m`
 - **No AI runs on the user's machine** → Kaggle + Cloudflare tunnel ([runbook](/runbooks/kaggle-gateways.md))
 - LLM = Ollama `qwen3:8b` on Kaggle
 - **No X/influencer data**
