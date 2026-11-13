@@ -1,16 +1,16 @@
 """A/B tests for step 5. A = what pipeline.llm sends today (rule_noise = 0, newest 15 headlines, thinking off).
 Each arm changes ONE thing against A; same prompt and model, temperature 0.
 
-  filter  drop headlines Laya labels `filler` before taking the newest 15
   anon    replace the company name / ticker with [COMPANY] (big gap vs A = the model leans on what it knows about the firm)
   think   turn qwen3 reasoning mode on (slower; needs a gateway built from the current notebook)
 
-Results go to experiments/ab_<arm>.json, NOT to `llm_analysis`, so the cards are untouched. The A result is reused from
-experiments/ab_result.json (the first filter run) when it exists, so a new arm costs one pass, not two.
+The old `filter` arm is gone: it dropped headlines from Laya's `filler` class, and Laya and `news_scores.kind`
+no longer exist. Results go to experiments/ab_<arm>.json, NOT to `llm_analysis`, so the cards are untouched. The A
+result is reused from experiments/ab_result.json (the first A run) when it exists, so a new arm costs one pass, not two.
 Needs LLM_URL / LLM_TOKEN (Kaggle) unless --dry-run. Without gold labels this shows how much an arm differs from A,
 not which one is right.
 
-Run from Backend/:  .venv/bin/python -m pipeline.llm_ab --arm filter|anon|think [--limit N] [--dry-run]
+Run from Backend/:  .venv/bin/python -m pipeline.llm_ab --arm anon|think [--limit N] [--dry-run]
 """
 import argparse
 import json
@@ -25,9 +25,8 @@ from pipeline.llm import DB_PATH, HERE, MAX_HEADLINES, analyse, load_env
 
 EXP = os.path.join(HERE, "..", "experiments")
 BASE = os.path.join(EXP, "ab_result.json")
-Q = ("SELECT n.id, n.title, n.source, n.published_at FROM news_items n "
-     "LEFT JOIN news_scores s ON s.news_id = n.id WHERE n.ticker = ? AND n.rule_noise = 0 {extra} "
-     "ORDER BY n.published_at DESC LIMIT ?")
+Q = ("SELECT id, title, source, published_at FROM news_items "
+     "WHERE ticker = ? AND rule_noise = 0 {extra} ORDER BY published_at DESC LIMIT ?")
 SUFFIX = re.compile(r"\([^)]*\)|[,.]?\s+(inc|corp|corporation|co|company|companies|plc|ltd|holdings|group)\b\.?", re.I)
 GENERIC = {"the", "american", "general", "united", "first", "new", "north", "southern", "international", "national"}
 
@@ -53,7 +52,7 @@ def summarise(results: dict) -> str:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--arm", choices=["filter", "anon", "think"], default="filter")
+    ap.add_argument("--arm", choices=["anon", "think"], default="anon")
     ap.add_argument("--limit", type=int)
     ap.add_argument("--dry-run", action="store_true", help="show the input difference only; no model call")
     args = ap.parse_args()
@@ -68,8 +67,7 @@ def main() -> None:
         a = conn.execute(Q.format(extra=""), (t, MAX_HEADLINES)).fetchall()
         if not a:
             continue
-        b = {"filter": lambda: conn.execute(Q.format(extra="AND COALESCE(s.kind, '') != 'filler'"), (t, MAX_HEADLINES)).fetchall(),
-             "anon": lambda: anonymise(t, name, a), "think": lambda: a}[args.arm]()
+        b = {"anon": lambda: anonymise(t, name, a), "think": lambda: a}[args.arm]()
         inputs[t] = (name, a, b)
     same = [t for t, (_, a, b) in inputs.items() if a == b]
     print(f"arm {args.arm}: {len(inputs)} tickers; input identical to A for {len(same)}")

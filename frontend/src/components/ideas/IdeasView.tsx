@@ -287,9 +287,7 @@ function IdeaCard({
           </div>
         </div>
         {r.llm && <LlmBlock llm={r.llm} />}
-        <div className="mt-space-lg">
-          <NewsSentiment ticker={r.ticker} data={news} />
-        </div>
+        <NewsSentiment ticker={r.ticker} data={news} />
       </details>
     </Card>
   );

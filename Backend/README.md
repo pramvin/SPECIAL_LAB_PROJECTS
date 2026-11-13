@@ -31,9 +31,24 @@ Appends to `news_items` (unique per ticker+url, `first_seen_at` = when we first 
 Google News RSS keeps only ~7 days, so the archive only grows if this runs regularly, e.g. cron:
 `0 * * * * cd /path/to/Backend && .venv/bin/python -m pipeline.news >> news.log 2>&1`
 
-## Kaggle gateways (Laya + LLM, one notebook)
+## News sentiment (local ML model)
+
+`models/news_sentiment_model.joblib` is trained on Kaggle
+(`experiments/news_sentiment_train.py`) and copied here. It scores headlines with
+tf-idf + LinearSVC and writes to the same `news_scores` table.
+
+```bash
+.venv/bin/python -m pipeline.sentiment            # new headlines for current ideas
+.venv/bin/python -m pipeline.sentiment --all      # whole archive
+.venv/bin/python -m pipeline.sentiment --limit 20 # smoke test
+```
+
+If the model file or scikit-learn is missing, the command says so and exits;
+it never guesses labels.
+
+## Kaggle gateway (LLM)
 
 1. Import `experiments/kaggle_gateways.ipynb` into Kaggle (GPU T4 x2, Internet On). Run cell 1, cell 2, then cell 3 and leave cell 3 running.
-2. Cell 3 prints four lines (`LLM_URL`, `LLM_TOKEN`, `LAYA_URL`, `LAYA_TOKEN`; one token, two URLs). Replace the old ones in `Backend/.env`.
-3. `.venv/bin/python -m pipeline.llm [--limit N]` (LLM analysis, display-only, logged in `llm_analysis`) and `.venv/bin/python -m pipeline.analyze` (Laya).
+2. Cell 3 prints `LLM_URL` and `LLM_TOKEN` (it may also print unused extra lines). Replace the old values in `Backend/.env`.
+3. `.venv/bin/python -m pipeline.llm [--limit N]` (LLM analysis, display-only, logged in `llm_analysis`).
 4. Stop the Kaggle session when finished. Re-running cell 3 after an interrupt stops the old servers first.
