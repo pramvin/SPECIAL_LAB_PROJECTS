@@ -16,12 +16,12 @@ export function LogoMark({ size = 40 }: { size?: number }) {
       aria-label="PlanWise AI"
       className="shrink-0"
     >
-      <rect width="48" height="48" rx="12" fill="#1b4332" />
+      <rect width="48" height="48" rx="14" fill="#1d1d1f" />
       <circle
         cx="24"
         cy="24"
         r="14"
-        stroke="#a3e635"
+        stroke="#2997ff"
         strokeWidth="2.5"
         strokeDasharray="4 3"
       />
@@ -32,7 +32,7 @@ export function LogoMark({ size = 40 }: { size?: number }) {
         strokeLinecap="round"
         strokeLinejoin="round"
       />
-      <circle cx="31" cy="18" r="2" fill="#a3e635" />
+      <circle cx="31" cy="18" r="2" fill="#2997ff" />
       <circle cx="24" cy="24" r="3" fill="#ffffff" />
     </svg>
   );
@@ -40,15 +40,15 @@ export function LogoMark({ size = 40 }: { size?: number }) {
 
 export function LogoWordmark({ compact = false }: { compact?: boolean }) {
   return (
-    <div className="flex items-center gap-space-sm">
-      <LogoMark size={40} />
+    <div className="flex items-center gap-3">
+      <LogoMark size={36} />
       <div className="flex min-w-0 flex-col">
-        <span className="font-headline-sm text-headline-sm font-bold leading-tight tracking-tight text-primary">
+        <span className="font-headline-sm text-[20px] font-semibold leading-tight tracking-tight text-on-surface">
           PlanWise AI
         </span>
         {!compact && (
-          <span className="truncate font-label-code text-label-code text-on-surface-variant">
-            Financial Planning Prototype • Draft
+          <span className="truncate font-body-sm text-body-sm text-on-surface-variant">
+            Financial planning prototype
           </span>
         )}
       </div>
@@ -71,7 +71,7 @@ export function MaskedAvatar({
   return (
     <span
       aria-hidden
-      className="flex shrink-0 items-center justify-center rounded-full bg-primary-fixed font-title-md text-title-md font-semibold text-on-primary-fixed"
+      className="flex shrink-0 items-center justify-center rounded-full bg-surface-container-high font-title-md text-title-md font-semibold text-on-surface"
       style={{ width: size, height: size }}
     >
       {initials}

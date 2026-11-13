@@ -12,14 +12,14 @@ export function GoalTargetPanel() {
   );
 
   return (
-    <Card className="flex flex-col gap-space-md">
+    <Card className="flex flex-col gap-5">
       <CardHeader
         icon="flag"
         title={GOAL_TARGET_SUMMARY.title}
         action={<Icon name="info" className="text-on-surface-variant" />}
       />
-      <div className="flex flex-col gap-1">
-        <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between gap-3">
           <span className="font-title-md text-title-md text-on-surface">
             {GOAL_TARGET_SUMMARY.label}
           </span>
@@ -28,16 +28,16 @@ export function GoalTargetPanel() {
           </span>
         </div>
         <ProgressBar value={pct} size="md" label="Down payment goal progress" />
-        <span className="font-label-code text-label-code text-on-surface-variant">
+        <span className="font-body-sm text-body-sm text-on-surface-variant">
           Funded: {formatCurrency(GOAL_TARGET_SUMMARY.funded)} ({pct.toFixed(0)}%)
-          • Target {formatShortMonthYear(GOAL_TARGET_SUMMARY.targetDate)}
+          · Target {formatShortMonthYear(GOAL_TARGET_SUMMARY.targetDate)}
         </span>
       </div>
-      <div className="flex flex-col gap-1">
-        <span className="font-label-code text-label-code uppercase tracking-wide text-on-surface-variant">
-          Portfolio Impact Graphic
+      <div className="flex flex-col gap-2">
+        <span className="font-body-sm text-body-sm text-on-surface-variant">
+          Portfolio impact
         </span>
-        <div className="rounded-md border border-surface-container-high bg-surface-container-low p-space-sm">
+        <div className="rounded-xl bg-surface-container-low p-3">
           <LineChart
             height={110}
             target={GOAL_TARGET_SUMMARY.target}
@@ -45,19 +45,19 @@ export function GoalTargetPanel() {
             series={[
               {
                 points: PORTFOLIO_IMPACT.baseline,
-                color: "#c1c8c2",
+                color: "#86868b",
                 dashed: true,
               },
               {
                 points: PORTFOLIO_IMPACT.reallocated,
-                color: "#1b4332",
+                color: "#0071e3",
                 area: true,
               },
             ]}
           />
         </div>
-        <span className="font-label-code text-label-code text-on-surface-variant">
-          Green = Reallocated ($1,050/mo) • Dashed = Baseline
+        <span className="font-body-sm text-body-sm text-on-surface-variant">
+          Blue = reallocated ($1,050/mo) · dashed = baseline
         </span>
       </div>
     </Card>

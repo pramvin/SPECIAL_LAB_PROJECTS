@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useState } from "react";
 import { LogoWordmark } from "@/components/brand/Logo";
 import { Button } from "@/components/ui/Button";
-import { Card } from "@/components/ui/Card";
 import { Field, TextInput } from "@/components/ui/Field";
 
 export default function LoginPage() {
@@ -45,63 +44,72 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen items-center justify-center p-space-lg">
-      <div className="flex w-full max-w-sm flex-col gap-space-lg">
-        <LogoWordmark compact />
-        <Card>
-          <form onSubmit={submit} className="flex flex-col gap-space-md">
-            <h1 className="font-headline-sm text-headline-sm text-on-surface">
-              {mode === "login" ? "Sign in" : "Create account"}
-            </h1>
-            <Field label="Email" htmlFor="email">
-              <TextInput
-                id="email"
-                type="email"
-                autoComplete="email"
-                required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-              />
-            </Field>
-            <Field
-              label="Password"
-              htmlFor="password"
-              hint={mode === "register" ? "At least 8 characters" : undefined}
-              error={error}
+    <main className="flex min-h-screen items-center justify-center bg-surface px-5 py-12">
+      <div className="flex w-full max-w-[420px] flex-col gap-8">
+        <div className="flex flex-col items-center gap-3 text-center">
+          <LogoWordmark compact />
+          <h1 className="font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-[40px] sm:leading-[44px]">
+            {mode === "login" ? "Sign in" : "Create account"}
+          </h1>
+          <p className="max-w-sm font-body-md text-body-md text-on-surface-variant">
+            {mode === "login"
+              ? "Welcome back. Sign in to see your trade ideas and saved stocks."
+              : "Create a prototype account to personalize your trade ideas."}
+          </p>
+        </div>
+
+        <form onSubmit={submit} className="flex flex-col gap-5 rounded-[28px] bg-surface-container-lowest p-6 sm:p-8">
+          <Field label="Email" htmlFor="email">
+            <TextInput
+              id="email"
+              type="email"
+              autoComplete="email"
+              required
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
+          <Field
+            label="Password"
+            htmlFor="password"
+            hint={mode === "register" ? "At least 8 characters" : undefined}
+            error={error}
+          >
+            <TextInput
+              id="password"
+              type="password"
+              autoComplete={mode === "login" ? "current-password" : "new-password"}
+              required
+              minLength={8}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
+          <Button type="submit" disabled={busy} className="w-full">
+            {mode === "login" ? "Sign in" : "Create account"}
+          </Button>
+          {mode === "login" && (
+            <Link
+              href="/forgot-password"
+              className="text-center font-body-sm text-body-sm text-tertiary-accent hover:underline"
             >
-              <TextInput
-                id="password"
-                type="password"
-                autoComplete={mode === "login" ? "current-password" : "new-password"}
-                required
-                minLength={8}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </Field>
-            <Button type="submit" disabled={busy}>
-              {mode === "login" ? "Sign in" : "Create account"}
-            </Button>
-            {mode === "login" && (
-              <Link
-                href="/forgot-password"
-                className="text-center font-body-sm text-body-sm text-primary underline-offset-4 hover:underline"
-              >
-                Forgot password?
-              </Link>
-            )}
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => {
-                setMode(mode === "login" ? "register" : "login");
-                setError("");
-              }}
-            >
-              {mode === "login" ? "New here? Create an account" : "Have an account? Sign in"}
-            </Button>
-          </form>
-        </Card>
+              Forgot password?
+            </Link>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => {
+              setMode(mode === "login" ? "register" : "login");
+              setError("");
+            }}
+            className="w-full"
+          >
+            {mode === "login"
+              ? "New here? Create an account"
+              : "Have an account? Sign in"}
+          </Button>
+        </form>
       </div>
     </main>
   );

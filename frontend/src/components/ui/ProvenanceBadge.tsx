@@ -48,7 +48,7 @@ export function ProvenanceBadge({
   return (
     <span
       title={label ?? config.label}
-      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-0.5 font-label-code text-label-code uppercase tracking-wide ${config.className} ${className}`}
+      className={`inline-flex shrink-0 items-center gap-1 rounded-full border px-2.5 py-1 font-body-sm text-[11px] font-medium ${config.className} ${className}`}
     >
       <Icon name={config.icon} className="text-[12px]" />
       <span className="whitespace-nowrap">{label ?? config.label}</span>

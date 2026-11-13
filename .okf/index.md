@@ -23,6 +23,7 @@ okf_version: "0.2"
 # Decisions
 
 * [TradingView chart link](/decisions/tradingview-chart-link.md) - Ticker opens the chart in a new tab, no embedded widget
+* [Apple-inspired light UI](/decisions/apple-inspired-ui.md) - Neutral surfaces, top navigation, system font, and one blue accent
 
 # Runbooks
 

@@ -33,7 +33,7 @@ export function NewsSentiment({
   ] as const;
 
   return (
-    <section className="mt-space-lg flex flex-col gap-space-sm rounded-md border border-outline-variant bg-surface-container-lowest p-space-md">
+    <section className="flex flex-col gap-5 rounded-[20px] bg-surface-container-low p-5 md:p-6">
       <div className="flex flex-wrap items-center gap-space-sm">
         <h3 className="font-title-md text-title-md text-on-surface">
           News mood · {ticker}
