@@ -20,7 +20,7 @@ type SettingItem = {
 const SETTINGS: SettingItem[] = [
   {
     id: "demo-mode",
-    title: "Example Data Mode",
+    title: "Example data mode",
     description:
       "Use the synthetic portfolio profile. No real accounts or personal data are loaded.",
     defaultOn: true,
@@ -38,7 +38,7 @@ const SETTINGS: SettingItem[] = [
     id: "session-only",
     title: "Session-only state",
     description:
-      "Prototype holds data in memory for the session. Persistence and retention rules are TBD with the team.",
+      "The prototype holds data in memory for the session. Persistence and retention rules are TBD with the team.",
     defaultOn: true,
     supported: false,
   },
@@ -65,52 +65,52 @@ export function SettingsView() {
   );
 
   return (
-    <>
-      <div className="flex flex-col gap-1">
-        <SectionLabel>Workspace Controls</SectionLabel>
-        <h1 className="font-headline-lg text-headline-lg font-bold tracking-tight text-primary">
-          Settings &amp; Privacy
+    <div className="flex flex-col gap-12 lg:gap-16">
+      <header className="flex flex-col gap-4">
+        <SectionLabel>Workspace controls</SectionLabel>
+        <h1 className="max-w-3xl font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-headline-lg">
+          Settings &amp; privacy
         </h1>
-        <p className="max-w-2xl font-body-sm text-body-sm text-on-surface-variant">
+        <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant">
           Prototype preferences only. Controls marked TBD are not final product
           behavior and must be confirmed by the team before shipping.
         </p>
-      </div>
+      </header>
 
-      <Card className="flex flex-col gap-space-md">
+      <Card className="flex flex-col gap-6">
         <CardHeader
           icon="person"
           title="Profile"
           subtitle={PROFILE.tierLabel}
           badge={<ProvenanceBadge provenance="example" />}
         />
-        <div className="flex items-center gap-space-md">
-          <MaskedAvatar name={PROFILE.name} size={48} />
-          <div className="flex flex-col">
+        <div className="flex items-center gap-4">
+          <MaskedAvatar name={PROFILE.name} size={52} />
+          <div className="flex flex-col gap-1">
             <span className="font-title-md text-title-md text-on-surface">
               {PROFILE.name}
             </span>
-            <span className="font-label-code text-label-code text-on-surface-variant">
-              Synthetic profile • Demo mode
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
+              Synthetic profile · demo mode
             </span>
           </div>
         </div>
       </Card>
 
-      <Card className="flex flex-col gap-space-sm">
+      <Card className="flex flex-col gap-2">
         <CardHeader
           icon="shield_person"
-          title="Privacy & Data Controls"
+          title="Privacy & data controls"
           subtitle="All toggles below affect the prototype UI only."
         />
         <div className="flex flex-col divide-y divide-surface-container-high">
           {SETTINGS.map((setting) => (
             <div
               key={setting.id}
-              className="flex items-start justify-between gap-space-md py-space-lg"
+              className="flex items-start justify-between gap-6 py-6"
             >
-              <div className="flex flex-col">
-                <div className="flex items-center gap-space-xs">
+              <div className="flex flex-col gap-1">
+                <div className="flex flex-wrap items-center gap-2">
                   <span className="font-title-md text-title-md text-on-surface">
                     {setting.title}
                   </span>
@@ -120,7 +120,7 @@ export function SettingsView() {
                     </Badge>
                   )}
                 </div>
-                <span className="max-w-xl font-body-sm text-body-sm text-on-surface-variant">
+                <span className="max-w-2xl font-body-sm text-body-sm text-on-surface-variant">
                   {setting.description}
                 </span>
               </div>
@@ -139,58 +139,65 @@ export function SettingsView() {
         </div>
       </Card>
 
-      <Card className="flex flex-col gap-space-md">
+      <Card className="flex flex-col gap-6">
         <CardHeader
           icon="label"
-          title="Data Provenance Legend"
+          title="Data provenance legend"
           subtitle="How the prototype labels the source of every figure."
         />
-        <div className="grid grid-cols-1 gap-space-sm sm:grid-cols-2">
-          <div className="flex items-center gap-space-sm rounded-md bg-surface-container-low p-space-sm">
-            <ProvenanceBadge provenance="input" />
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              Values you typed or confirmed.
-            </span>
-          </div>
-          <div className="flex items-center gap-space-sm rounded-md bg-surface-container-low p-space-sm">
-            <ProvenanceBadge provenance="ai" />
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              Generated guidance with stated assumptions.
-            </span>
-          </div>
-          <div className="flex items-center gap-space-sm rounded-md bg-surface-container-low p-space-sm">
-            <ProvenanceBadge provenance="example" />
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              Synthetic demonstration data.
-            </span>
-          </div>
-          <div className="flex items-center gap-space-sm rounded-md bg-surface-container-low p-space-sm">
-            <ProvenanceBadge provenance="warning" />
-            <span className="font-body-sm text-body-sm text-on-surface-variant">
-              Something needs your review.
-            </span>
-          </div>
+        <div className="grid gap-3 sm:grid-cols-2">
+          {[
+            {
+              provenance: "input" as const,
+              text: "Values you typed or confirmed.",
+            },
+            {
+              provenance: "ai" as const,
+              text: "Generated guidance with stated assumptions.",
+            },
+            {
+              provenance: "example" as const,
+              text: "Synthetic demonstration data.",
+            },
+            {
+              provenance: "warning" as const,
+              text: "Something needs your review.",
+            },
+          ].map((item) => (
+            <div
+              key={item.provenance}
+              className="flex items-center gap-3 rounded-xl bg-surface-container-low p-4"
+            >
+              <ProvenanceBadge provenance={item.provenance} />
+              <span className="font-body-sm text-body-sm text-on-surface-variant">
+                {item.text}
+              </span>
+            </div>
+          ))}
         </div>
       </Card>
 
-      <Card className="flex flex-col gap-space-sm">
+      <Card className="flex flex-col gap-5">
         <CardHeader
           icon="rule"
-          title="Open Points (Not Yet Supported)"
-          subtitle="Preserved as TBD per OVERVIEW.md §10."
+          title="Open points"
+          subtitle="Not yet supported. Preserved as TBD per OVERVIEW.md §10."
         />
-        <ul className="flex flex-col gap-space-sm">
+        <ul className="flex flex-col gap-3">
           {OPEN_POINTS.map((point) => (
             <li
               key={point}
-              className="flex items-center gap-space-sm font-body-sm text-body-sm text-on-surface-variant"
+              className="flex items-center gap-3 font-body-md text-body-md text-on-surface-variant"
             >
-              <Icon name="radio_button_unchecked" className="text-[16px]" />
+              <Icon
+                name="radio_button_unchecked"
+                className="text-[18px]"
+              />
               {point}
             </li>
           ))}
         </ul>
       </Card>
-    </>
+    </div>
   );
 }

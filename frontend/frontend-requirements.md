@@ -21,12 +21,14 @@ contract, no real accounts.
 
 | Route | Screen | Status |
 |---|---|---|
-| `/` | Dashboard — Financial Overview | Implemented |
+| `/` | Trade Ideas | Implemented |
+| `/watchlist` | Search & Watchlist | Implemented |
 | `/goals` | Financial Goals (+ create/simulate drawer) | Implemented |
 | `/assistant` | Plan & Assistant workspace | Implemented |
-| `/settings` | Settings & Privacy | Basic; flagged TBD (no Stitch mock) |
+| `/settings` | Settings & Privacy | Implemented |
+| `/login`, `/forgot-password`, `/reset-password`, `/onboarding` | Auth and profile setup | Implemented |
 
-Route group `src/app/(app)/` applies the responsive `AppShell`.
+Route group `src/app/(app)/` applies the responsive `AppShell` (top navigation on desktop, bottom tabs on mobile). The older `DashboardView` components remain but no route uses them.
 
 ## 3. Screen requirements
 
@@ -87,15 +89,17 @@ Route group `src/app/(app)/` applies the responsive `AppShell`.
 
 ## 5. Design system
 
-Sovereign Sanctuary tokens in `src/app/globals.css` (Tailwind v4 `@theme`):
-colors, radii, named spacing, and typography mirror the Stitch exports.
-Fonts: Manrope (headings/metrics), Inter (body), JetBrains Mono (labels).
+Apple-inspired light tokens in `src/app/globals.css` (Tailwind v4 `@theme`):
+white and light-gray surfaces, near-black text, one blue accent (`#0071e3`),
+generous section spacing, large typography, subtle hairlines, and pill buttons.
+Fonts: the system UI stack (SF Pro on macOS; Segoe UI/Roboto fallback).
+Navigation: sticky top bar on desktop; bottom tabs on mobile.
 Charts: dependency-free SVG (`LineChart`).
 
 ## 6. Acceptance criteria
 
-- [x] All four routes render at mobile / tablet / desktop widths.
-- [x] Navigation reflects the active route (sidebar + bottom tabs).
+- [x] All active routes render at mobile / tablet / desktop widths.
+- [x] Navigation reflects the active route (top navigation + mobile tabs).
 - [x] Every displayed figure is labeled example/provenance data.
 - [x] Goal create form shows a validation error and cannot save while invalid.
 - [x] Trade Ideas tickers open their TradingView chart in a new tab with the

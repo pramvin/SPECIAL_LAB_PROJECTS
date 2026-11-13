@@ -3,7 +3,7 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, and next steps (the most frequently updated file)
 tags: [active]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-06T10:00:00Z }
+generated: { by: opencode/deepseek-flash, at: 2026-11-13T05:22:32Z }
 ---
 
 **Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: get real data into the DB (`ingest` then `rank`), then make Stage 5 (LLM) trustworthy and fix the UI bugs below.
@@ -12,8 +12,12 @@ No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/not
 
 # Git status
 
-- `main` = `143ebaa` · PR #1–#4 (Han, Adrian, Vincent, Steven) merged 2026-11-01; PR #5 (matching, big-move badge, Log out button, experiment scripts) merged from `fais-questionire` · see [Team](/project/team.md)
+- `main` = `ca94a3d` · PR #1–#4 (Han, Adrian, Vincent, Steven) merged 2026-11-01; PR #5 (matching, big-move badge, Log out button, experiment scripts) and PR #6 (direction experiments) merged · local repo synced to team main 2026-11-13 · see [Team](/project/team.md)
 - Ask before committing or pushing (rule in `AGENTS.md`)
+
+# Frontend redesign (2026-11-13)
+
+The active routes were restyled with an Apple-inspired light system: neutral surfaces, system UI font, one blue accent, sticky top navigation, larger type, and more whitespace. Dense data stays available through collapsed detail sections. See [Apple-inspired light UI](/decisions/apple-inspired-ui.md). The old unused `DashboardView` was left untouched.
 
 # Personalized matching (in main via PR #5)
 
@@ -31,9 +35,8 @@ Still to do: run `ingest` then `rank` on real data (DB has no prices; asked, not
 2. Laya labels look wrong on clear cases (good M&A news labeled Bearish) · no ground truth yet
 3. LLM leans bullish (up 36 / down 2 / none 6)
 4. Laya and the LLM are not connected yet (the LLM reads every headline with `rule_noise=0`)
-6. `npm run dev` is broken: the script is `next dev --turbopack=false`, which Next 16.3.8 rejects → use `npx next dev --webpack` (waiting for the user to approve fixing `package.json`)
-7. Per-stock questionnaire: backend only (`sentiment_responses`), no UI, no answers are saved
-8. Session tokens are stored unhashed in the DB · see [Auth and security](/architecture/auth-security.md)
+5. Per-stock questionnaire: backend only (`sentiment_responses`), no UI, no answers are saved
+6. Session tokens are stored unhashed in the DB · see [Auth and security](/architecture/auth-security.md)
 
 # Runtime status
 
@@ -49,9 +52,8 @@ Still to do: run `ingest` then `rank` on real data (DB has no prices; asked, not
 3. Install a daily scheduled job for `pipeline.news`?
 4. Hide the Laya sentiment chip until it is evaluated?
 5. Want the per-stock questionnaire back in the UI? (the UI was removed)
-6. Fix the `dev` script (`npm run dev` is broken, see Open problems)?
-7. Email for the SEC User-Agent (when SEC comes back)
-8. Numeric confirmation layer: [Verification layer](/project/verification-layer.md)
+6. Email for the SEC User-Agent (when SEC comes back)
+7. Numeric confirmation layer: [Verification layer](/project/verification-layer.md)
 
 # Next
 

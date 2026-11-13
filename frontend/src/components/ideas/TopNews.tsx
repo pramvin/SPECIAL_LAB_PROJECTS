@@ -1,4 +1,5 @@
 import { Card, CardHeader } from "@/components/ui/Card";
+import { Icon } from "@/components/ui/Icon";
 import { SentimentBadge } from "./SentimentBadge";
 import type { TopNewsItem } from "@/lib/recommendations";
 
@@ -17,18 +18,18 @@ function PriceChip({ n }: { n: TopNewsItem }) {
     return null;
   }
   const up = n.change >= 0;
-  const tone = up ? "text-primary" : "text-error";
+  const tone = up ? "text-provenance-input-text" : "text-error";
   const sign = up ? "+" : "−";
   return (
     <span
       title={`Last close${n.price_date ? ` on ${n.price_date}` : ""}`}
-      className="inline-flex shrink-0 items-center gap-space-xs rounded-md border border-outline-variant bg-surface-container-low px-space-sm py-1 font-label-code text-label-code"
+      className="inline-flex shrink-0 items-center gap-2 rounded-full bg-surface-container-low px-3 py-1.5 font-body-sm text-body-sm tabular-nums"
     >
-      <span className="font-semibold text-tertiary-accent">{n.ticker}</span>
+      <span className="font-medium text-tertiary-accent">{n.ticker}</span>
       <span className="text-on-surface">{usd(n.price)}</span>
       <span className={tone}>
-        {sign}${Math.abs(n.change).toFixed(2)} ({sign}
-        {Math.abs(n.change_pct).toFixed(2)}%)
+        {sign}
+        {Math.abs(n.change_pct).toFixed(2)}%
       </span>
     </span>
   );
@@ -37,40 +38,53 @@ function PriceChip({ n }: { n: TopNewsItem }) {
 export function TopNews({ items }: { items: TopNewsItem[] }) {
   if (items.length === 0) return null;
   const priceDate = items.find((i) => i.price_date)?.price_date;
+
   return (
     <Card>
       <CardHeader
-        title="Top news"
+        title="Latest news"
         icon="newspaper"
-        subtitle={`Latest headlines on stocks in your ideas${priceDate ? ` · prices are the last close, ${priceDate}, and are not a reaction to the headline` : ""}. AI labels are not validated yet.`}
+        subtitle={`Headlines on stocks in your ideas${
+          priceDate
+            ? ` · prices are the last close on ${priceDate}, not a reaction to the headline`
+            : ""
+        }`}
       />
-      <ul className="mt-space-md flex flex-col divide-y divide-surface-container-high">
+      <ul className="mt-8 flex flex-col divide-y divide-surface-container-high">
         {items.map((n) => (
           <li
             key={n.ticker}
-            className="flex flex-col gap-space-xs py-space-sm first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-space-md"
+            className="flex flex-col gap-3 py-6 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-8"
           >
-            <div className="flex min-w-0 flex-col">
+            <div className="flex min-w-0 flex-col gap-2">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="font-body-sm text-body-sm font-medium text-tertiary-accent">
+                  {n.ticker}
+                </span>
+                <SentimentBadge sentiment={n.sentiment} />
+              </div>
               {n.url ? (
                 <a
                   href={n.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="font-title-md text-title-md text-on-surface hover:underline"
+                  className="font-title-md text-title-md leading-snug text-on-surface transition-colors hover:text-tertiary-accent"
                 >
                   {n.title}
                 </a>
               ) : (
-                <span className="font-title-md text-title-md text-on-surface">
+                <span className="font-title-md text-title-md leading-snug text-on-surface">
                   {n.title}
                 </span>
               )}
-              <span className="mt-0.5 flex flex-wrap items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant">
-                <SentimentBadge sentiment={n.sentiment} />
+              <span className="flex flex-wrap items-center gap-1.5 font-body-sm text-body-sm text-on-surface-variant">
+                <Icon name="schedule" className="text-[15px]" />
                 {n.source} · {timeAgo(n.published_at)}
               </span>
             </div>
-            <PriceChip n={n} />
+            <div className="sm:pt-1">
+              <PriceChip n={n} />
+            </div>
           </li>
         ))}
       </ul>

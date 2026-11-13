@@ -41,14 +41,15 @@ There is no test runner configured yet. If tests are added, document them here.
 ## Architecture
 
 - `src/app/` — App Router. Route group `(app)/` wraps pages in the responsive
-  `AppShell` (desktop sidebar + header; mobile top bar + bottom nav).
+  `AppShell` (sticky top navigation; mobile bottom tab bar).
 - `src/components/ui/` — reusable primitives (Button, Card, Field, Toggle,
   ProgressBar, RingProgress, LineChart, ProvenanceBadge, NoticeBanner, Icon).
 - `src/components/{dashboard,goals,assistant,settings}/` — feature views.
 - `src/lib/data/` — mock data modules (the only source of figures).
 - `src/lib/format.ts` — currency/percent/date helpers. Keep isolated.
-- `src/app/globals.css` — "Sovereign Sanctuary" design tokens (Tailwind v4
-  `@theme`). Token names mirror the Stitch HTML exports.
+- `src/app/globals.css` — Apple-inspired light design tokens (Tailwind v4
+  `@theme`). Neutral surfaces, near-black text, one blue accent, generous
+  spacing, and large type.
 
 ## Conventions
 

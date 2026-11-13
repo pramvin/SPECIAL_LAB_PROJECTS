@@ -19,15 +19,13 @@ export function RefreshButton({ className = "" }: { className?: string }) {
       disabled={pending}
       aria-label="Refresh all trade ideas data"
       title="Re-fetch recommendations, top news and news sentiment"
-      className={`inline-flex h-8 w-8 shrink-0 items-center justify-center gap-1.5 rounded-md bg-primary-container px-0 font-medium text-on-primary transition-all duration-200 hover:bg-primary-hover active:scale-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto sm:px-space-md ${className}`}
+      className={`inline-flex h-9 items-center justify-center gap-2 rounded-full bg-surface-container-low px-4 font-body-sm text-body-sm font-medium text-on-surface transition-colors hover:bg-surface-container-high disabled:cursor-not-allowed disabled:opacity-60 ${className}`}
     >
       <Icon
         name="refresh"
         className={`text-[18px] ${pending ? "animate-spin" : ""}`}
       />
-      <span className="hidden sm:inline">
-        {pending ? "Refreshing…" : "Refresh"}
-      </span>
+      <span>{pending ? "Refreshing…" : "Refresh"}</span>
     </button>
   );
 }

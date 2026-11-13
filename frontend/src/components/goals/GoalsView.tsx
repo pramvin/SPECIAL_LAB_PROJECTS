@@ -26,7 +26,7 @@ const TABS: { id: Tab; label: string; count: number }[] = [
 
 function DraftGoalCard() {
   return (
-    <Card className="flex flex-col gap-space-md">
+    <Card className="flex flex-col gap-6">
       <CardHeader
         icon="edit_note"
         title={DRAFT_GOAL.title}
@@ -39,21 +39,21 @@ function DraftGoalCard() {
         }
         action={
           <Button variant="secondary" size="sm">
-            Resume Setup
+            Resume setup
           </Button>
         }
       />
-      <div className="grid grid-cols-2 gap-space-md lg:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
         {DRAFT_GOAL.steps.map((step) => (
           <div
             key={step.label}
-            className="flex flex-col gap-1 rounded-md border border-surface-container-high p-space-sm"
+            className="flex flex-col gap-1 rounded-xl bg-surface-container-low p-4"
           >
-            <span className="flex items-center justify-between font-label-code text-label-code uppercase tracking-wide text-on-surface-variant">
+            <span className="flex items-center justify-between font-body-sm text-body-sm text-on-surface-variant">
               {step.label}
               <Icon
                 name={step.done ? "check" : "radio_button_unchecked"}
-                className={`text-[14px] ${step.done ? "text-primary" : "text-on-surface-variant"}`}
+                className={`text-[15px] ${step.done ? "text-tertiary-accent" : "text-on-surface-variant"}`}
               />
             </span>
             <span
@@ -66,7 +66,7 @@ function DraftGoalCard() {
           </div>
         ))}
       </div>
-      <div className="flex flex-wrap items-center justify-between gap-space-sm border-t border-surface-container-high pt-space-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-t border-surface-container-high pt-5">
         <span className="font-body-sm text-body-sm text-on-surface-variant">
           {DRAFT_GOAL.note}
         </span>
@@ -74,7 +74,7 @@ function DraftGoalCard() {
           type="button"
           className="font-body-sm text-body-sm font-medium text-error hover:underline"
         >
-          Discard Draft
+          Discard draft
         </button>
       </div>
     </Card>
@@ -94,28 +94,25 @@ export function GoalsView() {
 
   return (
     <>
-      <div className="flex flex-col gap-space-md lg:flex-row lg:items-end lg:justify-between">
-        <div className="flex flex-col gap-1">
+      <header className="flex flex-col gap-6">
+        <div className="flex flex-col gap-3">
           <SectionLabel>
-            {GOALS_SUMMARY.eyebrow} • {GOALS_SUMMARY.activePoolsLabel}
+            {GOALS_SUMMARY.eyebrow} · {GOALS_SUMMARY.activePoolsLabel}
           </SectionLabel>
-          <h1 className="font-headline-lg text-headline-lg font-bold tracking-tight text-primary">
+          <h1 className="max-w-3xl font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-headline-lg">
             {GOALS_SUMMARY.title}
           </h1>
-          <p className="font-headline-sm text-headline-sm text-on-surface">
+          <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant">
             {formatCurrency(GOALS_SUMMARY.totalSaved)} saved across{" "}
-            {GOALS_SUMMARY.activeCount} active goals
-          </p>
-          <p className="max-w-2xl font-body-sm text-body-sm text-on-surface-variant">
-            Track progress, simulate timelines, and inspect calculation
-            parameters against institutional forecasting standards.
+            {GOALS_SUMMARY.activeCount} active goals. Track progress, simulate
+            timelines, and inspect the assumptions behind each projection.
           </p>
         </div>
-        <div className="flex flex-wrap items-center gap-space-sm">
+        <div className="flex flex-wrap items-center gap-3">
           <div
             role="tablist"
             aria-label="Goal status"
-            className="flex items-center gap-1 rounded-lg border border-surface-container-high bg-surface-container-lowest p-1"
+            className="inline-flex items-center rounded-full bg-surface-container-low p-1"
           >
             {TABS.map((t) => (
               <button
@@ -123,134 +120,107 @@ export function GoalsView() {
                 role="tab"
                 aria-selected={tab === t.id}
                 onClick={() => setTab(t.id)}
-                className={`inline-flex items-center gap-1.5 rounded-md px-space-md py-1.5 font-body-sm text-body-sm transition-colors ${
+                className={`inline-flex items-center gap-2 rounded-full px-4 py-2 font-body-sm text-body-sm font-medium transition-colors ${
                   tab === t.id
-                    ? "bg-primary-container text-on-primary"
-                    : "text-on-surface-variant hover:bg-surface-container-low"
+                    ? "bg-white text-on-surface shadow-sm"
+                    : "text-on-surface-variant hover:text-on-surface"
                 }`}
               >
                 {t.label}
-                <span className="font-label-code text-label-code opacity-80">
-                  {t.count}
-                </span>
+                <span className="text-on-surface-variant/70">{t.count}</span>
               </button>
             ))}
           </div>
           <Button icon="add" onClick={() => setDrawerOpen(true)}>
-            Create New Goal
+            Create goal
           </Button>
         </div>
-      </div>
+      </header>
 
-      <Card className="flex flex-col gap-space-md lg:flex-row lg:items-center lg:gap-space-xl">
-        <div className="flex flex-1 items-center gap-space-md">
-          <span className="flex h-10 w-10 items-center justify-center rounded-md bg-secondary-fixed text-secondary">
-            <Icon name="speed" />
+      <Card className="grid gap-8 md:grid-cols-3">
+        <div className="flex flex-col gap-1">
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            Portfolio target velocity
           </span>
-          <div className="flex flex-col">
-            <span className="font-label-code text-label-code uppercase tracking-wide text-on-surface-variant">
-              Portfolio Target Velocity
+          <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
+            {formatCurrency(GOALS_SUMMARY.velocity)}
+            <span className="ml-1 font-body-sm text-body-sm text-on-surface-variant">
+              /month
             </span>
-            <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
-              {formatCurrency(GOALS_SUMMARY.velocity)}
-              <span className="font-body-sm text-body-sm text-on-surface-variant">
-                /month
-              </span>{" "}
-              <span className="font-label-code text-label-code text-on-surface-variant">
-                Aggregated Auto-Debit
-              </span>
-            </span>
-          </div>
+          </span>
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            Aggregated automatic debit
+          </span>
         </div>
-        <div className="flex flex-col">
-          <span className="font-label-code text-label-code uppercase tracking-wide text-on-surface-variant">
-            Combined Target
+        <div className="flex flex-col gap-1">
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            Combined target
           </span>
           <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
             {formatCurrency(GOALS_SUMMARY.combinedTarget, { decimals: 2 })}
           </span>
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            Across all active goals
+          </span>
         </div>
-        <div className="flex w-full max-w-[240px] flex-col gap-1">
+        <div className="flex flex-col gap-2">
           <div className="flex items-center justify-between">
-            <span className="font-label-code text-label-code uppercase tracking-wide text-on-surface-variant">
-              Aggregate Funded
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
+              Aggregate funded
             </span>
-            <span className="font-title-md text-title-md tabular-nums text-primary">
+            <span className="font-title-md text-title-md tabular-nums text-tertiary-accent">
               {GOALS_SUMMARY.aggregateFundedPct}%
             </span>
           </div>
-          <ProgressBar value={GOALS_SUMMARY.aggregateFundedPct} size="sm" />
+          <ProgressBar value={GOALS_SUMMARY.aggregateFundedPct} size="md" />
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            Example data only
+          </span>
         </div>
       </Card>
 
-      <div className="grid grid-cols-1 gap-space-lg xl:grid-cols-[2fr_1fr]">
-        <div className="flex flex-col gap-space-lg">
-          {visibleGoals.length > 0 ? (
-            visibleGoals.map((goal) => <GoalCard key={goal.id} goal={goal} />)
-          ) : (
-            <Card className="flex flex-col items-center gap-space-sm py-space-xl text-center">
-              <Icon
-                name="inbox"
-                className="text-[32px] text-on-surface-variant"
-              />
-              <span className="font-title-md text-title-md text-on-surface">
-                {emptyCopy[tab]}
-              </span>
-              <span className="font-body-sm text-body-sm text-on-surface-variant">
-                Example data only.
-              </span>
-            </Card>
-          )}
-          <DraftGoalCard />
-        </div>
-
-        <div className="flex flex-col gap-space-lg">
-          <Card className="flex flex-col gap-space-md">
-            <div className="flex items-center justify-between">
-              <span className="font-label-code text-label-code uppercase tracking-wider text-on-surface-variant">
-                Interactive Modal / Drawer
-              </span>
-              <span className="inline-flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
-                <Icon name="touch_app" className="text-[16px]" />
-                Create Goal
-              </span>
-            </div>
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              Open the create-goal drawer to review the prototype form,
-              validation states, and calculation disclosure.
-            </p>
-            <Button
-              variant="secondary"
-              icon="open_in_new"
-              onClick={() => setDrawerOpen(true)}
-            >
-              Open Create Goal Drawer
-            </Button>
+      <section className="flex flex-col gap-6">
+        {visibleGoals.length > 0 ? (
+          <div className="grid gap-6 lg:grid-cols-2">
+            {visibleGoals.map((goal) => (
+              <GoalCard key={goal.id} goal={goal} />
+            ))}
+          </div>
+        ) : (
+          <Card className="flex flex-col items-center gap-3 py-16 text-center">
+            <Icon name="inbox" className="text-[32px] text-on-surface-variant" />
+            <span className="font-title-md text-title-md text-on-surface">
+              {emptyCopy[tab]}
+            </span>
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
+              Example data only.
+            </span>
           </Card>
+        )}
+        <DraftGoalCard />
+      </section>
 
-          <Card className="flex flex-col gap-space-sm">
-            <CardHeader
-              icon="verified"
-              title={ADVISORY_GUIDELINE.title}
-              subtitle="Illustrative guideline, not personalized advice."
-            />
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
-              {ADVISORY_GUIDELINE.body}
-            </p>
-            <div className="flex items-center justify-between border-t border-surface-container-high pt-space-sm">
-              <span className="font-label-code text-label-code text-on-surface-variant">
-                Guideline Rev: {ADVISORY_GUIDELINE.revision}
-              </span>
-              <a
-                href="#"
-                className="font-body-sm text-body-sm font-medium text-primary hover:underline"
-              >
-                View Allocation Policy
-              </a>
-            </div>
-          </Card>
+      <Card className="flex flex-col gap-3">
+        <CardHeader
+          icon="verified"
+          title={ADVISORY_GUIDELINE.title}
+          subtitle="Illustrative guideline, not personalized advice."
+        />
+        <p className="max-w-3xl font-body-md text-body-md text-on-surface-variant">
+          {ADVISORY_GUIDELINE.body}
+        </p>
+        <div className="flex flex-wrap items-center justify-between gap-3 border-t border-surface-container-high pt-4">
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
+            Guideline revision {ADVISORY_GUIDELINE.revision}
+          </span>
+          <a
+            href="#"
+            className="font-body-sm text-body-sm font-medium text-tertiary-accent hover:underline"
+          >
+            View allocation policy
+          </a>
         </div>
-      </div>
+      </Card>
 
       <CreateGoalDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </>

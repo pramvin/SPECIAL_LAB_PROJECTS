@@ -54,21 +54,18 @@ export function CreateGoalDrawer({
       >
         <div className="flex items-start justify-between gap-space-md">
           <div>
-            <span className="font-label-code text-label-code uppercase tracking-wider text-on-surface-variant">
-              Interactive Modal / Drawer
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
+              New goal
             </span>
-            <h2 className="font-headline-md text-headline-md text-on-surface">
-              Create Goal{" "}
-              <span className="text-body-sm text-on-surface-variant">
-                (Prototype Step)
-              </span>
+            <h2 className="font-headline-sm text-headline-sm text-on-surface">
+              Create a goal
             </h2>
           </div>
           <button
             type="button"
             onClick={onClose}
             aria-label="Close create goal"
-            className="rounded-md p-1 text-on-surface-variant hover:bg-surface-container-low"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-on-surface-variant hover:bg-surface-container-low"
           >
             <Icon name="close" />
           </button>
@@ -155,7 +152,7 @@ export function CreateGoalDrawer({
 
         <div className="flex flex-col gap-space-sm rounded-md bg-surface-container-low p-space-md">
           <div className="flex items-center justify-between">
-            <span className="font-label-code text-label-code uppercase tracking-wide text-on-surface-variant">
+            <span className="font-body-sm text-body-sm text-on-surface-variant">
               Projected Horizon
             </span>
             <span className="font-title-md text-title-md tabular-nums text-on-surface">
@@ -163,7 +160,7 @@ export function CreateGoalDrawer({
             </span>
           </div>
           <ProgressBar value={Math.min(100, horizon * 3)} size="sm" />
-          <span className="font-label-code text-label-code text-on-surface-variant">
+          <span className="font-body-sm text-body-sm text-on-surface-variant">
             Visual estimate only
           </span>
         </div>

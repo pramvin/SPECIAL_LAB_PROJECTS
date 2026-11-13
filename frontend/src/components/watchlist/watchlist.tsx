@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
-import { Card, CardHeader } from "@/components/ui/Card";
+import { Card, CardHeader, SectionLabel } from "@/components/ui/Card";
 import { TextInput } from "@/components/ui/Field";
 import { Icon } from "@/components/ui/Icon";
 import { NoticeBanner } from "@/components/ui/NoticeBanner";
@@ -22,7 +22,7 @@ const usd = (n: number) =>
 function Quote({ i }: { i: Instrument }) {
   if (i.price === null) {
     return (
-      <span className="font-label-code text-label-code text-on-surface-variant">
+      <span className="font-body-sm text-body-sm text-on-surface-variant">
         No price data
       </span>
     );
@@ -32,13 +32,13 @@ function Quote({ i }: { i: Instrument }) {
   return (
     <span
       title={`Last close${i.price_date ? ` on ${i.price_date}` : ""}`}
-      className="flex flex-col items-end font-label-code text-label-code tabular-nums"
+      className="flex flex-col items-end font-body-sm text-body-sm tabular-nums"
     >
       <span className="text-on-surface">{usd(i.price)}</span>
       {i.change !== null && i.change_pct !== null && (
-        <span className={up ? "text-primary" : "text-error"}>
-          {sign}${Math.abs(i.change).toFixed(2)} ({sign}
-          {Math.abs(i.change_pct).toFixed(2)}%)
+        <span className={up ? "text-provenance-input-text" : "text-error"}>
+          {sign}
+          {Math.abs(i.change_pct).toFixed(2)}%
         </span>
       )}
     </span>
@@ -59,9 +59,9 @@ function Row({
   inList?: boolean;
 }) {
   return (
-    <li className="flex items-center gap-space-md py-space-sm first:pt-0 last:pb-0">
-      <div className="flex min-w-0 flex-1 flex-col">
-        <div className="flex items-center gap-space-xs">
+    <li className="flex flex-wrap items-center gap-4 py-5 first:pt-0 last:pb-0">
+      <div className="flex min-w-0 flex-1 flex-col gap-1">
+        <div className="flex items-center gap-2">
           <span className="font-title-md text-title-md text-on-surface">
             {i.ticker}
           </span>
@@ -193,16 +193,17 @@ export function WatchlistView({ initial }: { initial: WatchlistItem[] | null }) 
   }
 
   return (
-    <div className="flex flex-col gap-space-lg">
-      <div className="flex flex-col gap-1">
-        <h1 className="font-headline-md text-headline-md text-on-surface">
+    <div className="flex flex-col gap-12 lg:gap-16">
+      <header className="flex flex-col gap-4">
+        <SectionLabel>Research</SectionLabel>
+        <h1 className="max-w-3xl font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-headline-lg">
           Search &amp; watchlist
         </h1>
-        <p className="font-body-md text-body-md text-on-surface-variant">
-          Find S&amp;P 500 stocks and the SCHD and QQQ ETFs, and keep the ones
+        <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant">
+          Find S&amp;P 500 stocks and the SCHD and QQQ ETFs, then keep the ones
           you want to follow. Your list is saved to your account.
         </p>
-      </div>
+      </header>
 
       <NoticeBanner icon="info" tone="neutral" title="A reading list, not advice">
         Prices are the last daily close in our database, not live quotes. An ETF
@@ -216,104 +217,108 @@ export function WatchlistView({ initial }: { initial: WatchlistItem[] | null }) 
         </p>
       )}
 
-      <div className="grid gap-space-lg lg:grid-cols-2">
-        <Card className="flex flex-col gap-space-md">
-          <CardHeader title="Search" icon="search" />
-          <div className="flex flex-col gap-space-sm">
-            <TextInput
-              type="search"
-              aria-label="Search by ticker or company name"
-              placeholder="Ticker or company, e.g. AAPL or Microsoft"
-              autoComplete="off"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-            />
-            <div
-              role="group"
-              aria-label="Search in"
-              className="flex flex-wrap gap-space-xs"
-            >
-              {SEARCH_GROUPS.map((g) => (
-                <button
-                  key={g.value}
-                  type="button"
-                  aria-pressed={group === g.value}
-                  onClick={() => setGroup(g.value)}
-                  className={`rounded-md px-space-md py-1.5 font-body-sm text-body-sm font-medium transition-colors ${
-                    group === g.value
-                      ? "bg-primary-container text-on-primary"
-                      : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
-                  }`}
-                >
-                  {g.label}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {searchError && (
-            <p role="alert" className="font-body-md text-body-md text-error">
-              {searchError}
-            </p>
-          )}
-          {!searchError && (
-            <p
-              aria-live="polite"
-              className="font-body-sm text-body-sm text-on-surface-variant"
-            >
-              {searching
-                ? "Searching…"
-                : results.length === 0
-                  ? "No matches."
-                  : query
-                    ? `${results.length} result${results.length === 1 ? "" : "s"}`
-                    : "Showing the first matches. Type to narrow down."}
-            </p>
-          )}
-          <ul className="flex flex-col divide-y divide-surface-container-high">
-            {results.map((i) => (
-              <Row
-                key={i.ticker}
-                i={i}
-                saved={saved.has(i.ticker)}
-                busy={pending.has(i.ticker)}
-                onToggle={() => toggle(i)}
-              />
-            ))}
-          </ul>
-        </Card>
-
-        <Card className="flex flex-col gap-space-md">
-          <CardHeader
-            title="Your watchlist"
-            icon="star"
-            subtitle={`${watchlist.length} saved`}
+      <Card className="flex flex-col gap-6">
+        <CardHeader
+          title="Search the market"
+          icon="search"
+          subtitle="Search by ticker or company name across the S&P 500, SCHD, and QQQ."
+        />
+        <div className="flex flex-col gap-4">
+          <TextInput
+            type="search"
+            aria-label="Search by ticker or company name"
+            placeholder="Ticker or company, e.g. AAPL or Microsoft"
+            autoComplete="off"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            className="h-14 text-[17px]"
           />
-          {initial === null && (
-            <p role="alert" className="font-body-md text-body-md text-error">
-              Could not load your saved list. Is the backend running?
-            </p>
-          )}
-          {initial !== null && watchlist.length === 0 && (
-            <p className="flex items-center gap-space-xs font-body-md text-body-md text-on-surface-variant">
-              <Icon name="star_outline" className="text-[20px]" />
-              Nothing saved yet. Use Add on a search result.
-            </p>
-          )}
-          <ul className="flex flex-col divide-y divide-surface-container-high">
-            {watchlist.map((w) => (
-              <Row
-                key={w.ticker}
-                i={w}
-                saved
-                inList
-                busy={pending.has(w.ticker)}
-                onToggle={() => toggle(w)}
-              />
+          <div
+            role="group"
+            aria-label="Search in"
+            className="flex flex-wrap gap-2"
+          >
+            {SEARCH_GROUPS.map((g) => (
+              <button
+                key={g.value}
+                type="button"
+                aria-pressed={group === g.value}
+                onClick={() => setGroup(g.value)}
+                className={`rounded-full px-4 py-2 font-body-sm text-body-sm font-medium transition-colors ${
+                  group === g.value
+                    ? "bg-on-surface text-white"
+                    : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
+                }`}
+              >
+                {g.label}
+              </button>
             ))}
-          </ul>
-        </Card>
-      </div>
+          </div>
+        </div>
+
+        {searchError && (
+          <p role="alert" className="font-body-md text-body-md text-error">
+            {searchError}
+          </p>
+        )}
+        {!searchError && (
+          <p
+            aria-live="polite"
+            className="font-body-sm text-body-sm text-on-surface-variant"
+          >
+            {searching
+              ? "Searching…"
+              : results.length === 0
+                ? "No matches."
+                : query
+                  ? `${results.length} result${results.length === 1 ? "" : "s"}`
+                  : "Showing the first matches. Type to narrow down."}
+          </p>
+        )}
+
+        <ul className="flex flex-col divide-y divide-surface-container-high">
+          {results.map((i) => (
+            <Row
+              key={i.ticker}
+              i={i}
+              saved={saved.has(i.ticker)}
+              busy={pending.has(i.ticker)}
+              onToggle={() => toggle(i)}
+            />
+          ))}
+        </ul>
+      </Card>
+
+      <Card className="flex flex-col gap-6">
+        <CardHeader
+          title="Your watchlist"
+          icon="star"
+          subtitle={`${watchlist.length} saved ${watchlist.length === 1 ? "ticker" : "tickers"}`}
+        />
+        {initial === null && (
+          <p role="alert" className="font-body-md text-body-md text-error">
+            Could not load your saved list. Is the backend running?
+          </p>
+        )}
+        {initial !== null && watchlist.length === 0 && (
+          <p className="flex items-center gap-2 font-body-md text-body-md text-on-surface-variant">
+            <Icon name="star_outline" className="text-[20px]" />
+            Nothing saved yet. Use Add on a search result.
+          </p>
+        )}
+        <ul className="flex flex-col divide-y divide-surface-container-high">
+          {watchlist.map((w) => (
+            <Row
+              key={w.ticker}
+              i={w}
+              saved
+              inList
+              busy={pending.has(w.ticker)}
+              onToggle={() => toggle(w)}
+            />
+          ))}
+        </ul>
+      </Card>
     </div>
   );
 }

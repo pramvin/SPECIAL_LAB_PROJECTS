@@ -11,7 +11,7 @@ export function Card({
 }) {
   return (
     <Tag
-      className={`rounded-lg border border-surface-container-high bg-surface-container-lowest p-space-lg ${className}`}
+      className={`rounded-[24px] border border-surface-container-high bg-surface-container-lowest p-6 md:p-8 ${className}`}
     >
       {children}
     </Tag>
@@ -34,22 +34,22 @@ export function CardHeader({
   className?: string;
 }) {
   return (
-    <div className={`flex items-start justify-between gap-space-md ${className}`}>
-      <div className="flex items-start gap-space-sm">
+    <div className={`flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between ${className}`}>
+      <div className="flex items-start gap-3">
         {icon && (
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-surface-container-low text-primary">
+          <span className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-surface-container-low text-tertiary-accent">
             <Icon name={icon} className="text-[20px]" />
           </span>
         )}
-        <div className="flex flex-col">
-          <div className="flex flex-wrap items-center gap-space-xs">
+        <div className="flex flex-col gap-1">
+          <div className="flex flex-wrap items-center gap-2">
             <h2 className="font-headline-sm text-headline-sm text-on-surface">
               {title}
             </h2>
             {badge}
           </div>
           {subtitle && (
-            <p className="font-body-sm text-body-sm text-on-surface-variant">
+            <p className="max-w-2xl font-body-sm text-body-sm text-on-surface-variant">
               {subtitle}
             </p>
           )}
@@ -62,7 +62,7 @@ export function CardHeader({
 
 export function SectionLabel({ children }: { children: React.ReactNode }) {
   return (
-    <span className="block font-label-caps text-label-caps uppercase tracking-wider text-on-surface-variant">
+    <span className="block font-body-sm text-body-sm font-medium text-on-surface-variant">
       {children}
     </span>
   );
