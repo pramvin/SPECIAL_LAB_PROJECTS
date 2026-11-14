@@ -3,7 +3,7 @@ type: Team Assignments
 title: Team split and PR status
 description: Who owns which part, what has been merged into main, and the limits that remain
 tags: [team]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-06T10:00:00Z }
+generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:37:52Z }
 ---
 
 All merged into `main` on 2026-11-01 (each passed API checks + `tsc`/`lint`, but nobody has clicked through every page yet).
@@ -13,6 +13,7 @@ All merged into `main` on 2026-11-01 (each passed API checks + `tsc`/`lint`, but
 | Han | login/security | #1 | forgot/reset password, login failure limit, auth log · [Auth and security](/architecture/auth-security.md) |
 | Adrian | search + watchlist in DB | #2 | `/watchlist`, `/api/search`, `/api/watchlist`, `watchlist` table |
 | Vincent | questionnaire + save answers to DB | #3 | real Google News, status bar, `/api/news-sentiment`, `/api/data-status`, `sentiment_responses` table · **per-stock questionnaire UI was removed** · the 5-question onboarding questionnaire already existed |
+| Vincent | wallet + trading database | WIP | `wallet.py` / `trading.py`, tests, schema docs · due Friday |
 | Steven | charts | #4 | ticker links to TradingView · [TradingView chart link](/decisions/tradingview-chart-link.md) |
 
 - PR #5 (Fais): personalized matching, big-move badge, Log out button, experiment scripts · merged from `fais-questionire`

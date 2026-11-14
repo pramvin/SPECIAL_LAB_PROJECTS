@@ -3,7 +3,7 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, and next steps (the most frequently updated file)
 tags: [active]
-generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:23:20Z }
+generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:37:52Z }
 ---
 
 **Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: fetch headlines for the current ideas (`pipeline.news`, then `pipeline.sentiment`), then make Stage 5 (LLM) trustworthy and fix the UI bugs below.
@@ -12,13 +12,13 @@ No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/not
 
 # Git status
 
-- `main` = `e645e50` · PR #1–#7 merged, including the Apple-inspired frontend redesign and the local ML news-sentiment model · see [Team](/project/team.md)
-- Local `questionare-branch` has a spacing/density commit on top of main, pending a PR
+- `main` = `e645e50` · PR #1–#7 merged, including the frontend redesign and local ML news sentiment · see [Team](/project/team.md)
+- Current branch: `vincent-wallet-trading` (wallet + trading database, due Friday) · frontend work remains on `questionare-branch`
 - Ask before committing or pushing (rule in `AGENTS.md`)
 
-# Frontend redesign (2026-11-13)
+# Wallet and trading database (Vincent, due Friday)
 
-The active routes were restyled with an Apple-inspired light system: neutral surfaces, system UI font, one blue accent, sticky top navigation, larger type, and a 1280px content container. Dense data stays available through collapsed detail sections. The first redesign is merged into main; a follow-up commit tightens section spacing and widens the layout. See [Apple-inspired light UI](/decisions/apple-inspired-ui.md). The old unused `DashboardView` was left untouched.
+`Backend/app/wallet.py` and `Backend/app/trading.py` follow the watchlist pattern: own `SCHEMA`, own `APIRouter`, included from `main.py` so tables are created at startup. Wallet starts at $1,000; deposits/withdrawals and balance snapshots are logged. Positions support long and short, leverage 1–10, latest `prices` close for entry/exit, and closed trades store P/L and P/L%. See [Wallet](/architecture/wallet.md) and [Simulated trading](/architecture/trading.md). Tests: `python -m unittest tests.test_wallet tests.test_trading`.
 
 # Personalized matching (in main via PR #5)
 
