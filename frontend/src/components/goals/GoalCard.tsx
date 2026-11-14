@@ -42,7 +42,7 @@ export function GoalCard({ goal }: { goal: Goal }) {
   const pct = progressPct(goal.current, goal.target);
 
   return (
-    <Card className="flex flex-col gap-6">
+    <Card className="flex flex-col gap-5">
       <div className="flex items-start justify-between gap-4">
         <div className="flex items-start gap-4">
           <RingProgress value={pct} size={64} stroke={6} tone={goal.accent} />

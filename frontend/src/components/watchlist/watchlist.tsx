@@ -59,7 +59,7 @@ function Row({
   inList?: boolean;
 }) {
   return (
-    <li className="flex flex-wrap items-center gap-4 py-5 first:pt-0 last:pb-0">
+    <li className="flex flex-wrap items-center gap-4 py-4 first:pt-0 last:pb-0">
       <div className="flex min-w-0 flex-1 flex-col gap-1">
         <div className="flex items-center gap-2">
           <span className="font-title-md text-title-md text-on-surface">
@@ -193,7 +193,7 @@ export function WatchlistView({ initial }: { initial: WatchlistItem[] | null }) 
   }
 
   return (
-    <div className="flex flex-col gap-12 lg:gap-16">
+    <div className="flex flex-col gap-8 lg:gap-10">
       <header className="flex flex-col gap-4">
         <SectionLabel>Research</SectionLabel>
         <h1 className="max-w-3xl font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-headline-lg">
@@ -217,7 +217,7 @@ export function WatchlistView({ initial }: { initial: WatchlistItem[] | null }) 
         </p>
       )}
 
-      <Card className="flex flex-col gap-6">
+      <Card className="flex flex-col gap-5">
         <CardHeader
           title="Search the market"
           icon="search"
@@ -289,7 +289,7 @@ export function WatchlistView({ initial }: { initial: WatchlistItem[] | null }) 
         </ul>
       </Card>
 
-      <Card className="flex flex-col gap-6">
+      <Card className="flex flex-col gap-5">
         <CardHeader
           title="Your watchlist"
           icon="star"

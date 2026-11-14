@@ -26,7 +26,7 @@ const TABS: { id: Tab; label: string; count: number }[] = [
 
 function DraftGoalCard() {
   return (
-    <Card className="flex flex-col gap-6">
+    <Card className="flex flex-col gap-5">
       <CardHeader
         icon="edit_note"
         title={DRAFT_GOAL.title}
@@ -94,7 +94,7 @@ export function GoalsView() {
 
   return (
     <>
-      <header className="flex flex-col gap-6">
+      <header className="flex flex-col gap-4">
         <div className="flex flex-col gap-3">
           <SectionLabel>
             {GOALS_SUMMARY.eyebrow} · {GOALS_SUMMARY.activePoolsLabel}
@@ -137,7 +137,7 @@ export function GoalsView() {
         </div>
       </header>
 
-      <Card className="grid gap-8 md:grid-cols-3">
+      <Card className="grid gap-6 md:grid-cols-3">
         <div className="flex flex-col gap-1">
           <span className="font-body-sm text-body-sm text-on-surface-variant">
             Portfolio target velocity
@@ -179,9 +179,9 @@ export function GoalsView() {
         </div>
       </Card>
 
-      <section className="flex flex-col gap-6">
+      <section className="flex flex-col gap-5">
         {visibleGoals.length > 0 ? (
-          <div className="grid gap-6 lg:grid-cols-2">
+          <div className="grid gap-5 lg:grid-cols-2">
             {visibleGoals.map((goal) => (
               <GoalCard key={goal.id} goal={goal} />
             ))}

@@ -31,7 +31,7 @@ function UserBubble() {
 
 function AssistantAnswer() {
   return (
-    <Card className="flex flex-col gap-8 !p-0">
+    <Card className="flex flex-col gap-6 !p-0">
       <div className="flex flex-wrap items-center justify-between gap-3 rounded-t-[24px] bg-primary-fixed px-6 py-4 md:px-8">
         <span className="inline-flex items-center gap-2 font-body-sm text-body-sm font-medium text-on-primary-fixed">
           <Icon name="auto_awesome" className="text-[16px]" />
@@ -42,7 +42,7 @@ function AssistantAnswer() {
         </span>
       </div>
 
-      <div className="flex flex-col gap-8 px-6 pb-8 md:px-8">
+      <div className="flex flex-col gap-6 px-5 pb-6 md:px-7">
         <div className="flex flex-col gap-3">
           <h2 className="font-headline-sm text-headline-sm text-on-surface">
             {ANSWER.headline}
@@ -71,7 +71,7 @@ function AssistantAnswer() {
           ))}
         </div>
 
-        <div className="flex flex-col gap-5 rounded-[20px] border border-surface-container-high p-5 md:p-6">
+        <div className="flex flex-col gap-4 rounded-[20px] border border-surface-container-high p-4 md:p-5">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <span className="inline-flex items-center gap-2 font-title-md text-title-md text-on-surface">
               <Icon name="schema" className="text-[18px]" />
@@ -127,7 +127,7 @@ function AssistantAnswer() {
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3 border-t border-surface-container-high pt-6">
+        <div className="flex flex-wrap items-center gap-3 border-t border-surface-container-high pt-5">
           <Button icon="play_arrow">Apply to simulation</Button>
           <Button variant="secondary" icon="science">
             Challenge assumption
@@ -140,7 +140,7 @@ function AssistantAnswer() {
 
 export function AssistantView() {
   return (
-    <div className="flex flex-col gap-12 lg:gap-16">
+    <div className="flex flex-col gap-8 lg:gap-10">
       <header className="flex flex-col gap-4">
         <SectionLabel>Plan &amp; Assistant</SectionLabel>
         <h1 className="max-w-3xl font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-headline-lg">
@@ -185,9 +185,9 @@ export function AssistantView() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-10 xl:grid-cols-[minmax(0,1fr)_360px]">
-        <div className="flex flex-col gap-10">
-          <div className="flex flex-col gap-8">
+      <div className="grid grid-cols-1 gap-8 xl:grid-cols-[minmax(0,1fr)_360px]">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-6">
             <UserBubble />
             <AssistantAnswer />
           </div>
@@ -203,7 +203,7 @@ export function AssistantView() {
           <ChatComposer />
         </div>
 
-        <div className="flex flex-col gap-6 xl:sticky xl:top-24 xl:self-start">
+        <div className="flex flex-col gap-5 xl:sticky xl:top-20 xl:self-start">
           <ModelInputsPanel />
           <GoalTargetPanel />
         </div>

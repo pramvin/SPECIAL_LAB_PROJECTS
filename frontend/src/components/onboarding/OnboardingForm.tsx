@@ -137,7 +137,7 @@ export function OnboardingForm() {
   }
 
   return (
-    <main className="mx-auto flex min-h-screen w-full max-w-[720px] flex-col gap-10 px-5 py-8 sm:px-8 sm:py-12">
+    <main className="mx-auto flex min-h-screen w-full max-w-[720px] flex-col gap-8 px-5 py-6 sm:px-8 sm:py-10">
       <div className="flex items-center justify-between">
         <LogoWordmark compact />
         <LogoutButton />
@@ -157,7 +157,7 @@ export function OnboardingForm() {
         />
       </div>
 
-      <section className="flex flex-col gap-8 rounded-[28px] bg-surface-container-lowest p-6 sm:p-10">
+      <section className="flex flex-col gap-6 rounded-[28px] bg-surface-container-lowest p-6 sm:p-8">
         <div className="flex flex-col gap-3">
           <SectionLabel>Personalize your ideas</SectionLabel>
           <h1 className="font-headline-lg text-headline-lg-mobile tracking-tight text-on-surface sm:text-[40px] sm:leading-[44px]">

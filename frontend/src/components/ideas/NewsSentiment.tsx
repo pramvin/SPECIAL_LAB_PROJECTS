@@ -27,14 +27,29 @@ export function NewsSentiment({
   if (!dist || total === 0) return null;
 
   const parts = [
-    { key: "positive", label: "Positive", count: dist.positive, bar: "bg-provenance-input-text/80" },
-    { key: "neutral", label: "Neutral", count: dist.neutral, bar: "bg-outline-variant" },
-    { key: "negative", label: "Negative", count: dist.negative, bar: "bg-error/80" },
+    {
+      key: "positive",
+      label: "Positive",
+      count: dist.positive,
+      bar: "bg-provenance-input-text/80",
+    },
+    {
+      key: "neutral",
+      label: "Neutral",
+      count: dist.neutral,
+      bar: "bg-outline-variant",
+    },
+    {
+      key: "negative",
+      label: "Negative",
+      count: dist.negative,
+      bar: "bg-error/80",
+    },
   ] as const;
 
   return (
-    <section className="flex flex-col gap-5 rounded-[20px] bg-surface-container-low p-5 md:p-6">
-      <div className="flex flex-wrap items-center gap-space-sm">
+    <section className="flex flex-col gap-4 rounded-[20px] bg-surface-container-low p-4 md:p-5">
+      <div className="flex flex-wrap items-center gap-2">
         <h3 className="font-title-md text-title-md text-on-surface">
           News mood · {ticker}
         </h3>
@@ -44,10 +59,10 @@ export function NewsSentiment({
         <ProvenanceBadge provenance="ai" label="ML · Not validated" />
       </div>
 
-      <div className="flex flex-col gap-space-xs">
+      <div className="flex flex-col gap-2">
         <SectionLabel>How the headlines were labeled</SectionLabel>
         <div
-          className="flex h-3 overflow-hidden rounded-full bg-surface-container-high"
+          className="flex h-2.5 overflow-hidden rounded-full bg-surface-container-high"
           role="img"
           aria-label={parts
             .map((p) => `${p.label} ${pct(p.count, total)}%`)
@@ -61,7 +76,7 @@ export function NewsSentiment({
             />
           ))}
         </div>
-        <ul className="flex flex-wrap gap-x-space-md gap-y-1 font-label-code text-label-code text-on-surface-variant">
+        <ul className="flex flex-wrap gap-x-4 gap-y-1 font-body-sm text-body-sm text-on-surface-variant">
           {parts.map((p) => (
             <li key={p.key} className="flex items-center gap-1.5">
               <span

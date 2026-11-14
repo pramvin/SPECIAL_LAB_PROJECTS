@@ -91,7 +91,8 @@ Route group `src/app/(app)/` applies the responsive `AppShell` (top navigation o
 
 Apple-inspired light tokens in `src/app/globals.css` (Tailwind v4 `@theme`):
 white and light-gray surfaces, near-black text, one blue accent (`#0071e3`),
-generous section spacing, large typography, subtle hairlines, and pill buttons.
+a 1280px content container, balanced section spacing, large typography,
+subtle hairlines, and pill buttons.
 Fonts: the system UI stack (SF Pro on macOS; Segoe UI/Roboto fallback).
 Navigation: sticky top bar on desktop; bottom tabs on mobile.
 Charts: dependency-free SVG (`LineChart`).
