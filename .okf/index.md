@@ -17,6 +17,8 @@ okf_version: "0.2"
 * [Scoring](/architecture/scoring.md) - Scoring formula and ATR stop/target (guessed values, not backtested)
 * [Tech context](/architecture/tech-context.md) - Stack, ports, tooling cautions
 * [News sentiment](/architecture/news-sentiment.md) - Local ML label for headlines (replaces Laya), training data, limits
+* [Wallet](/architecture/wallet.md) - Simulated $1,000 wallet, deposits, withdrawals, balance history
+* [Simulated trading](/architecture/trading.md) - Long/short positions, leverage, P/L, closed trades
 * [Auth and security](/architecture/auth-security.md) - Login, hashing, rate limit, known limits
 * [Data sources](/architecture/data-sources.md) - Prices, news, FMP, and sources not used
 
@@ -24,6 +26,7 @@ okf_version: "0.2"
 
 * [TradingView chart link](/decisions/tradingview-chart-link.md) - Ticker opens the chart in a new tab, no embedded widget
 * [Apple-inspired light UI](/decisions/apple-inspired-ui.md) - Neutral surfaces, top navigation, system font, and one blue accent
+* [Long and short simulated positions](/decisions/long-short-trading.md) - Recommendations stay long-only; the trading ledger supports both
 
 # Runbooks
 
