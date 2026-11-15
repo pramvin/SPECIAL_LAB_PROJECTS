@@ -44,7 +44,7 @@ There is no test runner configured yet. If tests are added, document them here.
   `AppShell` (sticky top navigation; mobile bottom tab bar).
 - `src/components/ui/` — reusable primitives (Button, Card, Field, Toggle,
   ProgressBar, RingProgress, LineChart, ProvenanceBadge, NoticeBanner, Icon).
-- `src/components/{dashboard,goals,assistant,settings}/` — feature views.
+- `src/components/{ideas,watchlist,wallet,goals,assistant,settings}/` — feature views.
 - `src/lib/data/` — mock data modules (the only source of figures).
 - `src/lib/format.ts` — currency/percent/date helpers. Keep isolated.
 - `src/app/globals.css` — Apple-inspired light design tokens (Tailwind v4

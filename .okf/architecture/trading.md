@@ -3,7 +3,7 @@ type: Architecture
 title: Simulated trading
 description: Long and short positions, leverage, wallet deductions, and closed-trade P/L history.
 tags: [backend, database]
-generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:37:52Z }
+generated: { by: opencode/deepseek-flash, at: 2026-11-15T02:52:18Z }
 sources:
   - id: code
     resource: Backend/app/trading.py
@@ -42,6 +42,10 @@ All tables use `CREATE TABLE IF NOT EXISTS` and are created when the router is i
 | POST | `/api/positions` | Open a position |
 | POST | `/api/positions/{id}/close` | Close a position and write a trade |
 | GET | `/api/trades` | Closed-trade history |
+
+# Frontend
+
+`/wallet` includes the open-position form, open-position list with unrealized P/L and Close actions, and closed-trade history. If the DB has no `prices` row for a ticker, the form shows the backend error instead of creating a position.
 
 # Cautions
 
