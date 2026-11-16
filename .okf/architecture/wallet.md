@@ -3,7 +3,7 @@ type: Architecture
 title: Wallet
 description: Simulated USD wallet with deposits, withdrawals, and balance-history snapshots.
 tags: [backend, database]
-generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:37:52Z }
+generated: { by: opencode/deepseek-flash, at: 2026-11-15T02:52:18Z }
 sources:
   - id: code
     resource: Backend/app/wallet.py
@@ -33,6 +33,10 @@ All tables use `CREATE TABLE IF NOT EXISTS` and are created when the router is i
 | GET | `/api/wallet/history` | Chronological balance snapshots |
 
 Withdrawals fail with `409` when the balance is insufficient. Trades also update the wallet through internal helpers, but only deposit and withdraw appear in `wallet_transactions`.
+
+# Frontend
+
+`/wallet` shows the balance, deposit/withdraw forms, balance-history chart, and transaction log. The page is a server component that loads the five wallet endpoints with the session cookie; client actions refresh the server render after each POST.
 
 # Cautions
 

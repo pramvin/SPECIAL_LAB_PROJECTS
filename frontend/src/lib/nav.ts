@@ -22,11 +22,18 @@ export const NAV_ITEMS: NavItem[] = [
     icon: "flag",
   },
   {
-  id: "watchlist",
-  label: "Watchlist",
-  shortLabel: "Watchlist",
-  href: "/watchlist",
-  icon: "bookmark",
+    id: "watchlist",
+    label: "Watchlist",
+    shortLabel: "Watchlist",
+    href: "/watchlist",
+    icon: "bookmark",
+  },
+  {
+    id: "wallet",
+    label: "Wallet",
+    shortLabel: "Wallet",
+    href: "/wallet",
+    icon: "account_balance_wallet",
   },
   {
     id: "assistant",

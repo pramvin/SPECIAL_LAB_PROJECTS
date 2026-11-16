@@ -23,6 +23,7 @@ contract, no real accounts.
 |---|---|---|
 | `/` | Trade Ideas | Implemented |
 | `/watchlist` | Search & Watchlist | Implemented |
+| `/wallet` | Simulated Wallet & Trading | Implemented |
 | `/goals` | Financial Goals (+ create/simulate drawer) | Implemented |
 | `/assistant` | Plan & Assistant workspace | Implemented |
 | `/settings` | Settings & Privacy | Implemented |
@@ -73,6 +74,18 @@ Route group `src/app/(app)/` applies the responsive `AppShell` (top navigation o
 - Chart candle interval follows the selected holding period: 1w → 4H, 1m → 1D,
   and 3m → 1D.
 - Use a direct chart link; do not embed a widget or require an API key.
+
+### 3.6 Wallet
+- Shows the simulated cash balance, change from $1,000, open positions, and
+  realized P/L.
+- Deposit and withdraw forms with validation and insufficient-balance errors.
+- Balance-history chart from the snapshots returned by the API.
+- Open long/short simulated positions with margin and leverage (1–10x).
+- Open positions show current price, unrealized P/L, and a close action.
+- Closed trades show entry, exit, P/L, P/L%, and timestamps.
+- Transaction log shows deposits, withdrawals, and balance after each change.
+- Every figure is labeled as simulated or user input. Negative balances are
+  shown with a warning, never hidden.
 
 ## 4. Cross-cutting requirements
 
