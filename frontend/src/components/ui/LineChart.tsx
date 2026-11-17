@@ -72,7 +72,7 @@ export function LineChart({
           x2={width - pad}
           y1={targetY}
           y2={targetY}
-          stroke="#c1c8c2"
+          stroke="#d2d2d7"
           strokeWidth="1.5"
           strokeDasharray="6 6"
         />

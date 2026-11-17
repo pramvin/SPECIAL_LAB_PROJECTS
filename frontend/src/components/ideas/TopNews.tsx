@@ -44,11 +44,11 @@ export function TopNews({ items }: { items: TopNewsItem[] }) {
         icon="newspaper"
         subtitle={`Latest headlines on stocks in your ideas${priceDate ? ` · prices are the last close, ${priceDate}, and are not a reaction to the headline` : ""}. ML sentiment labels are not validated yet.`}
       />
-      <ul className="mt-space-md flex flex-col divide-y divide-surface-container-high">
+      <ul className="mt-6 flex flex-col divide-y divide-surface-container-high">
         {items.map((n) => (
           <li
             key={n.ticker}
-            className="flex flex-col gap-space-xs py-space-sm first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-space-md"
+            className="flex flex-col gap-2 py-4 first:pt-0 last:pb-0 sm:flex-row sm:items-start sm:justify-between sm:gap-6"
           >
             <div className="flex min-w-0 flex-col">
               {n.url ? (

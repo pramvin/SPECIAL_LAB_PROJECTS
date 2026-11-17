@@ -15,7 +15,7 @@ export function RingProgress({
   const radius = (size - stroke) / 2;
   const circumference = 2 * Math.PI * radius;
   const offset = circumference - (clamped / 100) * circumference;
-  const color = tone === "secondary" ? "#485f84" : "#1b4332";
+  const color = tone === "secondary" ? "#1d1d1f" : "#0071e3";
   return (
     <span
       className="relative inline-flex shrink-0 items-center justify-center"
@@ -29,7 +29,7 @@ export function RingProgress({
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#dae2fd"
+          stroke="#e8e8ed"
           strokeWidth={stroke}
         />
         <circle

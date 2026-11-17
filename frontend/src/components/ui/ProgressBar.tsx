@@ -15,7 +15,7 @@ export function ProgressBar({
   return (
     <div
       className={`w-full overflow-hidden rounded-full bg-surface-container-high ${
-        size === "sm" ? "h-1.5" : "h-3"
+        size === "sm" ? "h-1.5" : "h-2.5"
       } ${className}`}
       role="progressbar"
       aria-valuenow={Math.round(clamped)}
@@ -25,7 +25,7 @@ export function ProgressBar({
     >
       <div
         className={`h-full rounded-full transition-all ${
-          tone === "secondary" ? "bg-secondary" : "bg-primary-container"
+          tone === "secondary" ? "bg-on-surface" : "bg-primary-container"
         }`}
         style={{ width: `${clamped}%` }}
       />

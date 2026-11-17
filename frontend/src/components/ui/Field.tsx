@@ -1,7 +1,7 @@
 import type { InputHTMLAttributes, SelectHTMLAttributes } from "react";
 
 const FIELD =
-  "h-10 w-full rounded-md border border-outline-variant bg-surface-container-lowest px-space-md font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-tertiary-accent focus:outline-none focus:ring-2 focus:ring-tertiary-accent/20";
+  "h-12 w-full rounded-xl border border-outline-variant bg-surface-container-lowest px-4 font-body-md text-body-md text-on-surface placeholder:text-on-surface-variant/60 focus:border-tertiary-accent focus:outline-none focus:ring-4 focus:ring-tertiary-accent/15";
 
 export function Field({
   label,
@@ -19,10 +19,10 @@ export function Field({
   htmlFor?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1.5">
+    <div className="flex flex-col gap-2">
       <label
         htmlFor={htmlFor}
-        className="flex items-center justify-between font-label-caps text-label-caps uppercase tracking-wide text-on-surface-variant"
+        className="flex items-center justify-between font-body-sm text-body-sm font-medium text-on-surface-variant"
       >
         <span>{label}</span>
         {required && <span className="text-on-surface-variant">Required</span>}
@@ -48,7 +48,7 @@ export function TextInput({
   return (
     <input
       aria-invalid={invalid || undefined}
-      className={`${FIELD} ${invalid ? "border-error focus:border-error focus:ring-error/20" : ""} ${className}`}
+      className={`${FIELD} ${invalid ? "border-error focus:border-error focus:ring-error/15" : ""} ${className}`}
       {...rest}
     />
   );
@@ -63,7 +63,7 @@ export function SelectInput({
   return (
     <select
       aria-invalid={invalid || undefined}
-      className={`${FIELD} appearance-none pr-9 ${invalid ? "border-error" : ""} ${className}`}
+      className={`${FIELD} appearance-none pr-10 ${invalid ? "border-error" : ""} ${className}`}
       {...rest}
     >
       {children}

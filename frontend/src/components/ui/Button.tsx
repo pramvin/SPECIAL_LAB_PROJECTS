@@ -6,17 +6,18 @@ type Size = "sm" | "md";
 
 const VARIANTS: Record<Variant, string> = {
   primary:
-    "bg-primary-container text-on-primary hover:bg-primary-hover shadow-sm",
+    "bg-primary-container text-on-primary hover:bg-primary-hover active:scale-[0.98]",
   secondary:
-    "bg-transparent text-secondary border border-outline-variant hover:bg-surface-container-low",
+    "bg-surface-container-low text-on-surface hover:bg-surface-container-high active:scale-[0.98]",
   ghost:
-    "bg-transparent text-on-surface-variant hover:bg-surface-container-low hover:text-on-surface",
-  subtle: "bg-surface-container-low text-primary hover:bg-surface-container-high",
+    "bg-transparent text-tertiary-accent hover:bg-primary-fixed",
+  subtle:
+    "bg-primary-fixed text-on-primary-fixed hover:bg-tertiary-fixed-dim",
 };
 
 const SIZES: Record<Size, string> = {
-  sm: "h-8 px-space-md text-body-sm gap-1.5",
-  md: "h-10 px-space-lg text-body-sm gap-2",
+  sm: "h-9 px-4 text-body-sm gap-1.5",
+  md: "h-11 px-6 text-[15px] gap-2",
 };
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -41,7 +42,7 @@ export function Button({
   return (
     <button
       type={type}
-      className={`inline-flex items-center justify-center rounded-md font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full font-medium transition-all duration-200 disabled:cursor-not-allowed disabled:opacity-40 ${VARIANTS[variant]} ${SIZES[size]} ${className}`}
       {...rest}
     >
       {icon && <Icon name={icon} className={`text-[18px] ${iconClassName}`} />}

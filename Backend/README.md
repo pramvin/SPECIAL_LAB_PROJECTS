@@ -10,6 +10,52 @@ python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 Endpoints: `POST /api/auth/{register,login,logout}`, `GET /api/me`, `PUT /api/profile`.
 The frontend proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8000`).
 
+## Wallet and simulated trading
+
+Each user starts with a simulated **$1,000** wallet. Tables are created at
+startup by `app/wallet.py` and `app/trading.py`; both follow the same
+`SCHEMA` + `APIRouter` pattern as `app/watchlist.py`.
+
+Wallet:
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/wallet` | balance + change from $1,000 |
+| POST | `/api/wallet/deposit` | `{ "amount": 100, "note": "optional" }` |
+| POST | `/api/wallet/withdraw` | fails with 409 if balance is insufficient |
+| GET | `/api/wallet/transactions` | deposit/withdraw log |
+| GET | `/api/wallet/history` | balance snapshots for the chart |
+
+Trading:
+
+| Method | Path | Notes |
+|---|---|---|
+| GET | `/api/positions` | open positions + unrealized P/L |
+| POST | `/api/positions` | `{ "ticker": "AAPL", "side": "long", "amount": 500, "leverage": 2 }` |
+| POST | `/api/positions/{id}/close` | close at the latest `prices` close |
+| GET | `/api/trades` | closed-trade history |
+
+Rules:
+
+- `amount` is cash margin deducted from the wallet.
+- `notional = amount × leverage`; `quantity = notional ÷ entry_price`.
+- Leverage is 1–10, default 1.
+- Long P/L = `(exit − entry) × quantity`; short P/L = `(entry − exit) × quantity`.
+- `pnl_pct = pnl ÷ amount_deducted × 100`.
+- A leveraged loss may make the wallet balance negative.
+
+Tests (no real DB touched):
+
+```bash
+.venv/bin/python -m unittest tests.test_wallet tests.test_trading -v
+```
+
+For HTTP testing, copy the DB first:
+```bash
+cp planwise.db /tmp/planwise-wallet-test.db
+PLANWISE_DB=/tmp/planwise-wallet-test.db .venv/bin/uvicorn app.main:app --port 8010
+```
+
 ## Data pipeline (steps 1–3)
 
 ```bash

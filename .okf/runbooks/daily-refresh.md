@@ -3,12 +3,12 @@ type: Runbook
 title: Run app and refresh data
 description: Start the backend/frontend and run the pipeline steps in order
 tags: [ops]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-06T11:00:00Z }
+generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:23:20Z }
 ---
 
 ```bash
 Backend/.venv/bin/uvicorn app.main:app --port 8000 --app-dir Backend   # restart after code changes
-cd frontend && npx next dev --webpack                                  # port 3000 · `npm run dev` is broken, see Tech context
+cd frontend && npm run dev                                         # port 3000 · webpack mode
 ```
 
 Run from `Backend/` in this order:
