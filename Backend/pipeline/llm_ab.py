@@ -16,10 +16,11 @@ import argparse
 import json
 import os
 import re
-import sqlite3
 from collections import Counter
 
 import requests
+
+from app.dbcompat import connect
 
 from pipeline.llm import DB_PATH, HERE, MAX_HEADLINES, analyse, load_env
 
@@ -57,7 +58,7 @@ def main() -> None:
     ap.add_argument("--dry-run", action="store_true", help="show the input difference only; no model call")
     args = ap.parse_args()
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect(DB_PATH)
     tickers = conn.execute("SELECT DISTINCT ticker, name FROM recommendations ORDER BY ticker").fetchall()
     if args.limit:
         tickers = tickers[: args.limit]

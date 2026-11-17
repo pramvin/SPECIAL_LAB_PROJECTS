@@ -6,13 +6,14 @@ recorded in `data_issues` so nothing is silently dropped.
 """
 import argparse
 import os
-import sqlite3
 import time
 from io import StringIO
 
 import pandas as pd
 import requests
 import yfinance as yf
+
+from app.dbcompat import connect
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
@@ -124,7 +125,7 @@ def main() -> None:
     args = ap.parse_args()
 
     now = int(time.time())
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect(DB_PATH)
     conn.executescript(SCHEMA)
 
     uni = fetch_universe()
@@ -150,7 +151,9 @@ def main() -> None:
             )
             if not clean.empty:
                 conn.executemany(
-                    "INSERT OR REPLACE INTO prices (ticker, date, open, high, low, close, volume) VALUES (?,?,?,?,?,?,?)",
+                    "INSERT INTO prices (ticker, date, open, high, low, close, volume) VALUES (?,?,?,?,?,?,?) "
+                    "ON CONFLICT(ticker, date) DO UPDATE SET open=excluded.open, high=excluded.high, "
+                    "low=excluded.low, close=excluded.close, volume=excluded.volume",
                     [(ticker, d.strftime("%Y-%m-%d"), float(r.Open), float(r.High), float(r.Low),
                       float(r.Close), int(r.Volume)) for d, r in clean.iterrows()],
                 )
