@@ -8,12 +8,12 @@ Run from Backend/:  .venv/bin/python -m pipeline.rank
 """
 import json
 import os
-import sqlite3
 import time
 
 import numpy as np
 import pandas as pd
 
+from app.dbcompat import column_names, connect, read_df
 from .bigmove import load_bundle
 from .bigmove import score as score_bigmove
 
@@ -59,9 +59,9 @@ def indicators(g: pd.DataFrame) -> dict | None:
 
 
 def main() -> None:
-    conn = sqlite3.connect(DB_PATH)
-    px = pd.read_sql("SELECT ticker, date, high, low, close, volume FROM prices ORDER BY ticker, date", conn)
-    uni = pd.read_sql("SELECT ticker, name, gics_sector, sector FROM universe", conn).set_index("ticker")
+    conn = connect(DB_PATH)
+    px = read_df(conn, "SELECT ticker, date, high, low, close, volume FROM prices ORDER BY ticker, date")
+    uni = read_df(conn, "SELECT ticker, name, gics_sector, sector FROM universe").set_index("ticker")
     if px.empty:
         raise SystemExit("prices is empty: run `python -m pipeline.ingest` first")
 
@@ -125,7 +125,7 @@ def main() -> None:
                         round(float(r["atr_pct"]), 2), int(r["in_top"]),
                         round(float(big_p), 4) if big_p is not None else None))
 
-    cols = {r[1] for r in conn.execute("PRAGMA table_info(recommendations)")}
+    cols = column_names(conn, "recommendations")
     with conn:
         if "as_of" not in cols:
             conn.execute("ALTER TABLE recommendations ADD COLUMN as_of TEXT")

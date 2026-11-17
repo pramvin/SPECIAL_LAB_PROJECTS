@@ -1,46 +1,46 @@
 # PlanWise AI
 
-ความรู้ของโปรเจกต์อยู่ในชุด **OKF** (Open Knowledge Format) ที่ `.okf/` แทน `memory-bank/` เดิม
-เครื่องมือ: skill `okf` และ `validate` อยู่ใน `.claude/skills/` (Claude Code โหลดให้เองเมื่อเปิดโปรเจกต์นี้)
-ส่วน frontend ดูกฎเพิ่มที่ `frontend/AGENTS.md`
+Project knowledge lives in the **OKF** (Open Knowledge Format) bundle at `.okf/`, replacing the old `memory-bank/`.
+Tools: the `okf` and `validate` skills are in `.claude/skills/` (Claude Code loads them automatically when this project is opened).
+For the frontend, see the extra rules in `frontend/AGENTS.md`.
 
-## กฎ: อ่าน `.okf/` ก่อนลงมือทุกครั้ง (mode consume)
+## Rule: read `.okf/` before doing anything (consume mode)
 
-ก่อนเริ่มงานใดๆ ในรีโปนี้ (แก้โค้ด รันคำสั่ง ตอบคำถามเรื่องโปรเจกต์ วางแผน):
+Before starting any work in this repo (editing code, running commands, answering project questions, planning):
 
-1. เปิด `.okf/index.md` แล้วอ่าน `/project/brief.md` และ `/project/active-context.md` เสมอ
-2. เปิดเฉพาะ concept ที่เกี่ยวกับงาน ดูจากรายการและ `description` ใน `index.md` เช่น
-   - แก้ pipeline/คะแนน → `/architecture/system-patterns.md`, `/architecture/scoring.md`
-   - login/ความปลอดภัย → `/architecture/auth-security.md`
-   - รันข้อมูล/เปิด Kaggle → `/runbooks/`
-   - อ้างผลโมเดล → `/experiments/results.md`
-   - ดูว่าอะไรเสร็จแล้ว/ใครทำอะไร → `/project/progress.md`, `/project/team.md`
-3. อย่าโหลดทั้ง `.okf/` และอย่าโหลด `PIPELINE_SPEC.md` ทั้งฉบับ ถ้า concept ตอบได้แล้ว
-4. concept ที่ `status: draft`/`deprecated` หรือไม่มี `verified` = ตรวจกับโค้ดก่อนเชื่อ
-5. `.okf/` ขัดกับโค้ดหรือสถานะจริง → เชื่อของจริง แล้วแก้ `.okf/`
+1. Open `.okf/index.md`, then always read `/project/brief.md` and `/project/active-context.md`
+2. Open only the concepts relevant to the task, based on the list and `description` in `index.md`, for example:
+   - changing the pipeline/scores → `/architecture/system-patterns.md`, `/architecture/scoring.md`
+   - login/security → `/architecture/auth-security.md`
+   - running data/opening Kaggle → `/runbooks/`
+   - citing model results → `/experiments/results.md`
+   - what is done/who does what → `/project/progress.md`, `/project/team.md`
+3. Do not load all of `.okf/`, and do not load the whole of `PIPELINE_SPEC.md` if a concept already answers the question
+4. A concept with `status: draft`/`deprecated`, or without `verified` = check it against the code before trusting it
+5. If `.okf/` conflicts with the code or the real state → trust the real state, then fix `.okf/`
 
-## กฎ: อัปเดต `.okf/` หลังทำงาน (mode maintain)
+## Rule: update `.okf/` after working (maintain mode)
 
-เมื่อจบงานที่เปลี่ยนสถานะ การตัดสินใจ หรือปัญหาค้าง ให้ใช้ skill `okf` (maintain):
+When finishing work that changes status, a decision, or an open problem, use the `okf` skill (maintain):
 
-- แก้ concept ที่ได้รับผลกระทบ **ทุกไฟล์ในรอบเดียว** (ส่วนใหญ่ `/project/active-context.md` และ `/project/progress.md`) และอัปเดต `generated: { by, at }`
-  - `by` ตาม actor convention: เอเจนต์ = `<ชื่อ>/<รุ่น>` เช่น `claude-code/claude-sonnet-5-5` · คน = `human:<id>` · งานอัตโนมัติ = `process:<id>`
-  - ใช้ `human:` เมื่อคนเขียนหรือยืนยันเอง
-- **ทุกครั้งที่ทำงานเสร็จ ให้เพิ่มข้อมูลอัปเดตใหม่ และลบข้อมูลเก่าที่ถูกแทนที่ในรอบเดียวกัน:** เขียนสถานะใหม่ทับของเดิม ห้ามต่อท้ายจนมีทั้งเก่าและใหม่ซ้อนกันหรือขัดกัน (ยกเว้น `log.md` ที่ห้ามลบ)
-- **เก็บเฉพาะสถานะปัจจุบัน:** ปัญหาที่แก้แล้ว/งานที่เสร็จแล้วให้ลบออกจาก concept (ประวัติอยู่ใน git) อย่าขีดฆ่าค้างไว้
-- concept ที่เลิกใช้ → `status: deprecated` แล้วบันทึกใน `log.md` หรือลบถ้าไม่มีค่าแล้ว
-- `log.md` เฉพาะเหตุการณ์วงจรชีวิต (สร้าง bundle, เลิกใช้, แทนที่, สร้างใหม่หลังต้นทางเปลี่ยน, ตรวจยืนยัน) · แก้ปกติไม่ต้องลง · ห้ามลบหรือแก้รายการเก่า · ใหม่สุดอยู่บน
-- รักษารูปแบบ: 1 ไฟล์ = 1 เรื่อง, ลิงก์แบบ `/path/file.md`, ไฟล์สั้น (ไม่ควรเกิน ~3 KB)
-- ไม่ใส่ secret/token และไม่เก็บสิ่งที่อ่านได้จากโค้ดหรือ git history อยู่แล้ว
-- เสร็จแล้วต้อง validate ให้ผ่านก่อนบอกว่าจบ:
+- Edit the affected concepts **all in one pass** (usually `/project/active-context.md` and `/project/progress.md`) and update `generated: { by, at }`
+  - `by` follows the actor convention: agent = `<name>/<version>` e.g. `claude-code/claude-sonnet-5-5` · human = `human:<id>` · automated job = `process:<id>`
+  - Use `human:` when a person wrote or confirmed it themselves
+- **Every time work is finished, add the new information and delete the old information it replaces in the same pass:** write the new state over the old one. Never append so that old and new sit side by side or contradict each other (except `log.md`, which must never be deleted from)
+- **Keep only the current state:** delete solved problems/finished work from the concept (history is in git). Do not leave them struck through
+- A concept that is no longer used → `status: deprecated` and note it in `log.md`, or delete it if it has no value left
+- `log.md` is only for lifecycle events (bundle created, deprecated, replaced, regenerated after the source changed, verified) · ordinary edits are not logged · never delete or edit old entries · newest on top
+- Keep the format: 1 file = 1 topic, links as `/path/file.md`, short files (should not exceed ~3 KB)
+- Do not put in secrets/tokens, and do not store what can already be read from the code or git history
+- When done, validation must pass before saying the work is finished:
 
 ```bash
 uv run .claude/skills/validate/scripts/okf_validate.py .okf --strict
 ```
 
-- concept ใหม่: เริ่มจาก `.claude/skills/okf/templates/concept.md` แล้วเพิ่มบรรทัดใน `.okf/index.md`
-- ข้อบังคับเดียวของ OKF: ทุก `.md` ที่ไม่ใช่ `index.md`/`log.md` ต้องมี frontmatter และ `type` ไม่ว่าง · `description` ที่มี `: ` ต้องใส่เครื่องหมายคำพูด
+- New concept: start from `.claude/skills/okf/templates/concept.md`, then add a line to `.okf/index.md`
+- The only hard requirement of OKF: every `.md` other than `index.md`/`log.md` must have frontmatter and a non-empty `type` · a `description` containing `: ` must be quoted
 
-## ข้อมูลด่วน
+## Quick facts
 
-ตอบผู้ใช้เป็นภาษาไทยคำง่ายและสั้น · ถามก่อน commit/ติดตั้ง/ดาวน์โหลด/ตั้ง scheduled job · รายละเอียดกฎทั้งหมดอยู่ใน `.okf/project/brief.md`
+Reply to the user in simple, short Thai · ask before committing/installing/downloading/setting up a scheduled job · the full rules are in `.okf/project/brief.md`

@@ -12,11 +12,12 @@ import argparse
 import json
 import os
 import re
-import sqlite3
 import time
 from datetime import datetime, timezone
 
 import requests
+
+from app.dbcompat import connect
 
 HERE = os.path.dirname(__file__)
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(HERE, "..", "planwise.db"))
@@ -137,7 +138,7 @@ def main() -> None:
         raise SystemExit("Set LLM_URL and LLM_TOKEN in Backend/.env (printed by the Kaggle notebook)")
     requests.get(f"{url.rstrip('/')}/health", timeout=30).raise_for_status()
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect(DB_PATH)
     conn.executescript(SCHEMA)
     tickers = conn.execute("SELECT DISTINCT ticker, name FROM recommendations ORDER BY ticker").fetchall()
     if args.limit:

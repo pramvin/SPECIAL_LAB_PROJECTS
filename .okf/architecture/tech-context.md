@@ -7,7 +7,7 @@ generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:23:20Z }
 ---
 
 - **Frontend:** Next.js **v16** (breaking changes: read `frontend/node_modules/next/dist/docs/` before writing code) + React + TS · port 3000 (use `-p 3001` if it clashes with another project)
-- **Backend:** Python 3.14, FastAPI, uvicorn, yfinance, pandas, lxml, requests · port 8000 · SQLite `Backend/planwise.db` (git-ignored)
+- **Backend:** Python 3.14, FastAPI, uvicorn, yfinance, pandas, lxml, requests · port 8000 · SQLite `Backend/planwise.db` (git-ignored) locally, Postgres (Neon) when `DATABASE_URL` is set · `Backend/app/dbcompat.py` picks the engine (`PLANWISE_DB` always forces SQLite) · write SQL in the portable subset (`?`, `ON CONFLICT`, `RETURNING id`)
 - **AI:** Ollama `qwen3:8b` on Kaggle T4 x2 (LLM) · news sentiment and the big-move model are scikit-learn files that run locally ([News sentiment](/architecture/news-sentiment.md))
 - Data: [Data sources](/architecture/data-sources.md) · commands: [Daily refresh](/runbooks/daily-refresh.md), [Kaggle gateways](/runbooks/kaggle-gateways.md)
 

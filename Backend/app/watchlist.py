@@ -7,6 +7,8 @@ from typing import Callable, Literal
 from fastapi import APIRouter, Cookie, HTTPException, Query
 from pydantic import BaseModel, Field
 
+from .dbcompat import table_names
+
 # ETFs are kept out of `universe` on purpose: rank.py / news.py read that table
 # and trade ideas are S&P 500 only.
 ETFS: dict[str, str] = {
@@ -34,7 +36,7 @@ def normalize_ticker(raw: str) -> str:
 
 
 def has_table(conn: sqlite3.Connection, name: str) -> bool:
-    return conn.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = ?", (name,)).fetchone() is not None
+    return name in table_names(conn)
 
 
 def like_escape(s: str) -> str:
