@@ -18,7 +18,7 @@ okf_version: "0.2"
 * [Tech context](/architecture/tech-context.md) - Stack, ports, tooling cautions
 * [News sentiment](/architecture/news-sentiment.md) - Local ML label for headlines (replaces Laya), training data, limits
 * [Auth and security](/architecture/auth-security.md) - Login, hashing, rate limit, known limits
-* [Data sources](/architecture/data-sources.md) - Prices, news, FMP, and sources not used
+* [Data sources](/architecture/data-sources.md) - Prices, news, and sources not used
 
 # Decisions
 
