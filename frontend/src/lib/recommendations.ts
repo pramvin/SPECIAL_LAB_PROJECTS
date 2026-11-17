@@ -134,7 +134,7 @@ export interface TickerNewsSentiment {
 }
 
 /**
- * Real Google News headlines per ticker (from the backend pipeline), plus
+ * Real Yahoo Finance headlines per ticker (from the backend pipeline), plus
  * sentiment when the scoring model has been run. No synthetic fallback.
  */
 export async function getNewsSentiment(

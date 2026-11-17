@@ -371,7 +371,7 @@ export function IdeasView({
       {items?.some((r) => r.is_example) ? (
         <NoticeBanner icon="info" tone="neutral" title="Example prices and scores">
           Prices, scores and position sizes below are placeholders until the
-          live data pipeline is connected. Headlines are real (Google News), and
+          live data pipeline is connected. Headlines are real (Yahoo Finance), and
           sentiment labels, when shown, are AI-generated and not validated. This
           is not investment advice.
         </NoticeBanner>

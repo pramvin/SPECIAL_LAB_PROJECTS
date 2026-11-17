@@ -3,7 +3,7 @@ type: Progress
 title: Stage and task status
 description: Status of the 8 pipeline stages and the tasks still open
 tags: [status]
-generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:37:52Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-17T18:00:00Z }
 ---
 
 Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user brings it back) · ❌ Dropped
@@ -12,7 +12,7 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 |---|---|---|---|
 | 0 | Prices | ✅ | `pipeline/ingest.py` |
 | 1 | Earnings trigger | ⏸ | |
-| 2 | Google News | ✅ | `pipeline/news.py` |
+| 2 | Yahoo Finance news (was Google News) | ✅ | `pipeline/news.py` |
 | 2 | SEC EDGAR | ⏸ | |
 | 2 | X/influencer | ❌ | |
 | 3 | Source check | ⬜ | |

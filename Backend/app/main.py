@@ -666,7 +666,7 @@ app.include_router(build_trading_router(db, current_user))
 
 @app.get("/api/news-sentiment")
 def news_sentiment(tickers: str, limit: int = 3):
-    """Real Google News headlines per ticker, plus sentiment when scored.
+    """Real Yahoo Finance headlines per ticker, plus sentiment when scored.
 
     Sentiment is display-only and never changes the trade score. If the
     `news_scores` table is missing/empty (model not run yet), headlines are

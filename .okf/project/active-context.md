@@ -3,7 +3,7 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, and next steps (the most frequently updated file)
 tags: [active]
-generated: { by: opencode/deepseek-flash, at: 2026-11-15T02:52:18Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-17T18:00:00Z }
 ---
 
 **Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: fetch headlines for the current ideas (`pipeline.news`, then `pipeline.sentiment`), then make Stage 5 (LLM) trustworthy and fix the UI bugs below.
@@ -41,7 +41,7 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 
 # Runtime status
 
-- `planwise.db` has prices (last close 2026-11-02) and 879 ranked recommendations (333 with a big-move %), no example rows · 744 Google News headlines for only 12 tickers (`pipeline.news` ran 2026-11-01), so most cards show no news · 530 headlines scored by the local sentiment model on 2026-11-06 · no `llm_analysis` table
+- `planwise.db` has prices (last close 2026-11-02) and 879 ranked recommendations (333 with a big-move %), no example rows · 744 older Google News headlines for only 12 tickers (`pipeline.news` ran 2026-11-01; since 2026-11-17 the source is Yahoo Finance and has only been run on a scratch copy), so most cards show no news · 530 headlines scored by the local sentiment model on 2026-11-06 · no `llm_analysis` table
 - Cards show a delayed Yahoo quote (`/api/quotes`) only for real (non-example) ideas
 - The backend started from a tool session dies after 10 min → run it in the user's own terminal ([runbook](/runbooks/daily-refresh.md))
 - The Kaggle link from the last run is dead and the values in `Backend/.env` are stale (`LAYA_URL`/`LAYA_TOKEN` there are unused now) → **stop any lingering session** to save GPU
@@ -49,7 +49,7 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 # Waiting on the user
 
 1. Approve source tiers + corroboration rule (Proposal)
-2. Run `pipeline.news` for the current ideas (about 9 minutes, Google News)? Install a daily scheduled job for it?
+2. Run `pipeline.news` for the current ideas (about 9 minutes, Yahoo Finance)? Install a daily scheduled job for it?
 3. Want the per-stock questionnaire back in the UI? (the UI was removed)
 4. Email for the SEC User-Agent (when SEC comes back)
 5. Numeric confirmation layer: [Verification layer](/project/verification-layer.md)

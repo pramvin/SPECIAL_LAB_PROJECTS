@@ -74,7 +74,7 @@ Re-running is safe: prices upsert on `(ticker, date)`.
 ```
 
 Appends to `news_items` (unique per ticker+url, `first_seen_at` = when we first fetched it).
-Google News RSS keeps only ~7 days, so the archive only grows if this runs regularly, e.g. cron:
+Yahoo Finance only returns recent headlines, so the archive only grows if this runs regularly, e.g. cron:
 `0 * * * * cd /path/to/Backend && .venv/bin/python -m pipeline.news >> news.log 2>&1`
 
 ## News sentiment (local ML model)
