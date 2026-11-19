@@ -243,17 +243,17 @@ def open_position(
     notional = money(amount * leverage)
     quantity = round(notional / entry, 8)
     now = int(time.time())
-    cur = conn.execute(
+    new_id = conn.execute(
         "INSERT INTO positions "
         "(user_id, ticker, side, entry_price, quantity, leverage, amount_deducted, notional, opened_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
         (user_id, ticker, side, entry, quantity, leverage, amount, notional, now),
-    )
+    ).fetchone()[0]
     wallet, _ = change_balance(conn, user_id, -amount)
     position = conn.execute(
         "SELECT id, user_id, ticker, side, entry_price, quantity, leverage, "
         "amount_deducted, notional, opened_at FROM positions WHERE id = ?",
-        (cur.lastrowid,),
+        (new_id,),
     ).fetchone()
     return position, wallet
 
@@ -280,11 +280,11 @@ def close_position(
     pnl_pct = round(pnl / amount * 100, 2) if amount else 0.0
     now = int(time.time())
 
-    cur = conn.execute(
+    new_id = conn.execute(
         "INSERT INTO trades "
         "(position_id, user_id, ticker, side, entry_price, exit_price, quantity, leverage, "
         "amount_deducted, pnl, pnl_pct, opened_at, closed_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
         (
             position["id"],
             user_id,
@@ -300,14 +300,14 @@ def close_position(
             position["opened_at"],
             now,
         ),
-    )
+    ).fetchone()[0]
     conn.execute("DELETE FROM positions WHERE id = ? AND user_id = ?", (position_id, user_id))
     wallet, _ = change_balance(conn, user_id, amount + pnl)
     trade = conn.execute(
         "SELECT id, position_id, user_id, ticker, side, entry_price, exit_price, quantity, "
         "leverage, amount_deducted, pnl, pnl_pct, opened_at, closed_at "
         "FROM trades WHERE id = ?",
-        (cur.lastrowid,),
+        (new_id,),
     ).fetchone()
     return trade, wallet
 

@@ -20,7 +20,6 @@ generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-06T11:00:00Z }
 
 # Ask first
 
-- Pulling historical news from FMP (a download)
 - Using 5/10/15 days instead of 1w/1m/3m (the locked frame is 1w/1m/3m)
 
 # Prohibition

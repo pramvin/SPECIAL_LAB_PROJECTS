@@ -98,16 +98,16 @@ def change_balance(
 
     transaction = None
     if kind is not None:
-        cur = conn.execute(
+        new_id = conn.execute(
             "INSERT INTO wallet_transactions "
             "(user_id, kind, amount, balance_after, note, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
             (user_id, kind, money(abs(delta)), balance_after, note, now),
-        )
+        ).fetchone()[0]
         transaction = conn.execute(
             "SELECT id, kind, amount, balance_after, note, created_at "
             "FROM wallet_transactions WHERE id = ?",
-            (cur.lastrowid,),
+            (new_id,),
         ).fetchone()
 
     wallet = conn.execute(

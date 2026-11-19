@@ -14,13 +14,14 @@ import argparse
 import json
 import os
 import re
-import sqlite3
 import time
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
 from email.utils import parsedate_to_datetime
 
 import requests
+
+from app.dbcompat import connect
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 RSS = "https://news.google.com/rss/search"
@@ -90,7 +91,7 @@ def main() -> None:
     ap.add_argument("--all", action="store_true", help="whole universe instead of current ideas")
     args = ap.parse_args()
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect(DB_PATH)
     conn.executescript(SCHEMA)
     if args.all:
         pairs = conn.execute("SELECT ticker, name FROM universe").fetchall()
@@ -112,8 +113,8 @@ def main() -> None:
         with conn:
             for n in items:
                 cur = conn.execute(
-                    "INSERT OR IGNORE INTO news_items (ticker, title, source, url, published_at, first_seen_at, "
-                    "last_seen_at, rule_noise) VALUES (?,?,?,?,?,?,?,?)",
+                    "INSERT INTO news_items (ticker, title, source, url, published_at, first_seen_at, "
+                    "last_seen_at, rule_noise) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING",
                     (ticker, n["title"], n["source"], n["url"], n["published_at"], now, now, int(n["noise"])),
                 )
                 if cur.rowcount:

@@ -18,6 +18,8 @@ from datetime import datetime, timezone
 
 import numpy as np
 
+from app.dbcompat import connect
+
 HERE = os.path.dirname(__file__)
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(HERE, "..", "planwise.db"))
 MODEL_PATH = os.path.join(os.path.dirname(HERE), "models", "news_sentiment_model.joblib")
@@ -118,7 +120,10 @@ def score_pending(conn: sqlite3.Connection, bundle, all_: bool = False, limit: i
         now = datetime.now(timezone.utc).isoformat()
         with conn:
             conn.executemany(
-                "INSERT OR REPLACE INTO news_scores VALUES (?,?,?,?,?,?,?,?,?)",
+                "INSERT INTO news_scores (news_id, model, sentiment, p_bearish, p_bullish, p_neutral, kind, p_filler, scored_at) "
+                "VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(news_id, model) DO UPDATE SET sentiment=excluded.sentiment, "
+                "p_bearish=excluded.p_bearish, p_bullish=excluded.p_bullish, p_neutral=excluded.p_neutral, "
+                "kind=excluded.kind, p_filler=excluded.p_filler, scored_at=excluded.scored_at",
                 [(nid, model, r["sentiment"], r["p_bearish"], r["p_bullish"], r["p_neutral"], "n/a", None, now)
                  for (nid, _), r in zip(chunk, scored)],
             )
@@ -163,7 +168,7 @@ def main() -> None:
     print(f"model {model} | trained through {bundle.get('trained_through', 'unknown')} | "
           f"sklearn {bundle.get('sklearn_version', 'unknown')}")
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = connect(DB_PATH)
     conn.executescript(SCHEMA)
     score_pending(conn, bundle, args.all, args.limit)
     n = refresh_cards(conn, model)

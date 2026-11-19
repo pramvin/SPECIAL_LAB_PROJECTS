@@ -1,7 +1,7 @@
 @AGENTS.md
 
-## เฉพาะ Claude Code
+## Claude Code only
 
-- skill `okf` และ `validate` อยู่ใน `.claude/skills/` ของรีโปนี้ ใช้ได้ทันที (`/okf`, `/validate`) ไม่ต้องติดตั้งเพิ่ม
-- ก่อนอัปเดต `.okf/` ให้เรียก skill `okf` ทุกครั้ง ไม่เดารูปแบบเอง
-- ก่อนบอกว่างานจบ ให้อ่านทวน concept ที่แก้ว่ามีข้อความเก่าที่ขัดกับสถานะใหม่ค้างอยู่หรือไม่ ถ้ามีให้ลบออก (กฎ "เพิ่มอัปเดตใหม่ + ลบของเก่า" ใน `AGENTS.md`)
+- The `okf` and `validate` skills are in this repo's `.claude/skills/` and work immediately (`/okf`, `/validate`) with no extra install
+- Before updating `.okf/`, always call the `okf` skill. Do not guess the format
+- Before saying the work is finished, re-read the concepts you edited for old text that contradicts the new state, and delete it if found (the "add the new update + delete the old" rule in `AGENTS.md`)

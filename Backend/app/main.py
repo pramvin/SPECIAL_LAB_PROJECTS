@@ -1,4 +1,4 @@
-"""PlanWise AI backend: auth + 5-question investor profile on SQLite."""
+"""PlanWise AI backend: auth + 5-question investor profile (SQLite locally, Postgres when DATABASE_URL is set)."""
 import hashlib
 import hmac
 import os
@@ -19,6 +19,7 @@ from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
 from . import matching
+from .dbcompat import IntegrityError, column_names, connect, table_names
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
 from .wallet import build_router as build_wallet_router, ensure_wallet
@@ -115,16 +116,13 @@ CREATE TABLE IF NOT EXISTS recommendations (
 """
 
 
-def db() -> sqlite3.Connection:
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
-    return conn
+def db():
+    return connect(DB_PATH)
 
 
 with db() as _c:
     _c.executescript(SCHEMA)
-    _rec_cols = {r[1] for r in _c.execute("PRAGMA table_info(recommendations)")}
+    _rec_cols = column_names(_c, "recommendations")
     if "as_of" not in _rec_cols:
         _c.execute("ALTER TABLE recommendations ADD COLUMN as_of TEXT")
     if "atr_pct" not in _rec_cols:
@@ -265,17 +263,18 @@ def register(body: Credentials, request: Request, response: Response):
         raise HTTPException(422, "Invalid email")
     with db() as conn:
         try:
-            cur = conn.execute(
-                "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
+            new_id = conn.execute(
+                "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?) RETURNING id",
                 (email, hash_password(body.password), int(time.time())),
-            )
-        except sqlite3.IntegrityError:
+            ).fetchone()[0]
+        except IntegrityError:
+            conn.rollback()  # Postgres aborts the transaction on a failed statement.
             record_auth_event(conn, email, "registration_duplicate", ip_address)
             conn.commit()  # Preserve the security event even though registration failed.
             raise HTTPException(409, "Email already registered")
-        ensure_wallet(conn, cur.lastrowid)
-        record_auth_event(conn, email, "registration_success", ip_address, cur.lastrowid)
-        start_session(conn, response, cur.lastrowid)
+        ensure_wallet(conn, new_id)
+        record_auth_event(conn, email, "registration_success", ip_address, new_id)
+        start_session(conn, response, new_id)
     return {"email": email}
 
 
@@ -522,7 +521,7 @@ TOP_N_SERVED = 20  # ideas shown per horizon
 
 def latest_llm(conn: sqlite3.Connection, tickers: list[str]) -> dict:
     """Newest successful LLM analysis per ticker, with the cited headlines resolved (display-only, unvalidated)."""
-    if not conn.execute("SELECT 1 FROM sqlite_master WHERE name = 'llm_analysis'").fetchone():
+    if "llm_analysis" not in table_names(conn):
         return {}
     out = {}
     for t in tickers:
@@ -638,7 +637,7 @@ def top_news(limit: int = 5, session: str | None = Cookie(default=None)):
     """Newest headline per recommended stock, with the stock's last close and 1-day change."""
     with db() as conn:
         current_user(conn, session)
-        rows = conn.execute("SELECT ticker, name, news FROM recommendations GROUP BY ticker").fetchall()
+        rows = conn.execute("SELECT ticker, MIN(name) AS name, MIN(news) AS news FROM recommendations GROUP BY ticker").fetchall()
         items = []
         for r in rows:
             news = [n for n in json.loads(r["news"]) if n.get("published_at")]
@@ -683,10 +682,7 @@ def news_sentiment(tickers: str, limit: int = 3):
     wanted = wanted[:60]
     result: dict[str, dict] = {}
     with db() as conn:
-        tables = {
-            r[0]
-            for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        }
+        tables = table_names(conn)
         if "news_items" not in tables:
             return {
                 "generated_at": datetime.now(timezone.utc).isoformat(),
@@ -717,7 +713,7 @@ def news_sentiment(tickers: str, limit: int = 3):
                     "  SELECT (SELECT s.sentiment FROM news_scores s WHERE s.news_id = n.id "
                     "          ORDER BY s.scored_at DESC LIMIT 1) AS sentiment "
                     "  FROM news_items n WHERE n.ticker = ? AND n.rule_noise = 0"
-                    ") WHERE sentiment IS NOT NULL GROUP BY sentiment",
+                    ") AS scored WHERE sentiment IS NOT NULL GROUP BY sentiment",
                     (t,),
                 ).fetchall()
                 by = {r["sentiment"]: r["n"] for r in counts}
@@ -748,10 +744,7 @@ def data_status():
     `sentiment_updated_at` is the latest scoring run (null until it runs).
     """
     with db() as conn:
-        tables = {
-            r[0]
-            for r in conn.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        }
+        tables = table_names(conn)
         news_count = 0
         news_updated_at = None
         sentiment_updated_at = None
@@ -798,11 +791,10 @@ def ensure_demo_user() -> None:
             "SELECT id FROM users WHERE email = ?", (DEMO_EMAIL,)
         ).fetchone()
         if exists is None:
-            cur = conn.execute(
-                "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
+            user_id = conn.execute(
+                "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?) RETURNING id",
                 (DEMO_EMAIL, hash_password(DEMO_PASSWORD), int(time.time())),
-            )
-            user_id = cur.lastrowid
+            ).fetchone()[0]
         else:
             user_id = exists["id"]
         ensure_wallet(conn, user_id)
