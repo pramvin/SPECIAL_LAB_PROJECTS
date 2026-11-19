@@ -6,6 +6,8 @@ import { NoticeBanner } from "@/components/ui/NoticeBanner";
 import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
 import { AiRatingBadge } from "./AiRatingBadge";
 import { AgentPanel } from "./AgentPanel";
+import { TradeRow, WatchButton } from "./CardActions";
+import type { Portfolio } from "@/lib/wallet";
 import { NewsSentiment } from "./NewsSentiment";
 import { TopNews } from "./TopNews";
 import { DataStatus as DataStatusBar } from "./DataStatus";
@@ -267,13 +269,18 @@ function IdeaCard({
   horizon,
   news,
   quote,
+  portfolio,
+  watching,
 }: {
   r: Recommendation;
   rank: number;
   horizon: Horizon;
   news?: TickerNewsSentiment | null;
   quote?: Quote | null;
+  portfolio: Portfolio | null;
+  watching: boolean;
 }) {
+  const trade = portfolio !== null && !r.is_example;
   const chartInterval = CHART_INTERVAL[horizon];
 
   return (
@@ -314,6 +321,8 @@ function IdeaCard({
           <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
             Score {r.score}
           </span>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
+          {trade && <WatchButton ticker={r.ticker} watching={watching} />}
           {r.is_example ? (
             <ProvenanceBadge provenance="example" />
           ) : r.ai ? (
@@ -332,6 +341,7 @@ function IdeaCard({
               Rule-based · AI pending
             </span>
           )}
+          </div>
         </div>
       </div>
 
@@ -383,6 +393,21 @@ function IdeaCard({
         )}
       </div>
 
+      {trade && (
+        <TradeRow
+          ticker={r.ticker}
+          entry={r.entry}
+          stop={r.stop}
+          target={r.target}
+          positionPct={r.position_pct}
+          balance={portfolio.balance}
+          position={
+            portfolio.positions.find((p) => p.ticker === r.ticker) ?? null
+          }
+          livePrice={quote?.price ?? null}
+        />
+      )}
+
       <details className="group border-t border-surface-container-high pt-5">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-title-md text-title-md text-on-surface">
           <span>Why this stock and the news</span>
@@ -415,6 +440,8 @@ export function IdeasView({
   newsSentiment,
   quotes,
   dataStatus,
+  portfolio,
+  watchlist,
 }: {
   horizon: Horizon;
   items: Recommendation[] | null;
@@ -422,6 +449,8 @@ export function IdeasView({
   newsSentiment: Record<string, TickerNewsSentiment>;
   quotes: Record<string, Quote>;
   dataStatus: DataStatusData | null;
+  portfolio: Portfolio | null;
+  watchlist: Set<string>;
 }) {
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
@@ -507,6 +536,8 @@ export function IdeasView({
                 horizon={horizon}
                 news={newsSentiment[r.ticker] ?? null}
                 quote={quotes[r.ticker] ?? null}
+                portfolio={portfolio}
+                watching={watchlist.has(r.ticker)}
               />
             ))}
           </div>

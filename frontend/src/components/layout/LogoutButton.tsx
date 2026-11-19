@@ -26,7 +26,7 @@ export function LogoutButton({ className = "" }: { className?: string }) {
       disabled={pending}
       aria-label="Log out"
       title="Log out"
-      className={`inline-flex items-center gap-space-xs font-body-sm text-body-sm text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-60 ${className}`}
+      className={`inline-flex items-center gap-space-xs whitespace-nowrap font-body-sm text-body-sm text-on-surface-variant transition-colors hover:text-on-surface disabled:opacity-60 ${className}`}
     >
       <Icon name="logout" className="text-body-sm" />
       <span className="hidden sm:inline">{pending ? "Logging out…" : "Log out"}</span>

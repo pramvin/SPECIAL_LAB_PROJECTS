@@ -1,5 +1,6 @@
 import { LogoWordmark, MaskedAvatar } from "@/components/brand/Logo";
 import { PROFILE } from "@/lib/data/profile";
+import { BalancePill } from "./BalancePill";
 import { LogoutButton } from "./LogoutButton";
 import { NavList } from "./NavList";
 
@@ -12,6 +13,7 @@ export function DesktopHeader() {
           <NavList variant="top" />
         </div>
         <div className="flex items-center gap-3">
+          <BalancePill />
           <LogoutButton className="hidden sm:inline-flex" />
           <MaskedAvatar name={PROFILE.name} size={32} />
         </div>

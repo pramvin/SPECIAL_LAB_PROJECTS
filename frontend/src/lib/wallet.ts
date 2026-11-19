@@ -121,3 +121,29 @@ export async function getWalletData(): Promise<WalletData> {
     error: wallet ? null : "Could not load your wallet. Is the backend running?",
   };
 }
+
+export interface Portfolio {
+  balance: number;
+  changePct: number;
+  positions: Position[];
+}
+
+/** Balance and open positions for the signed-in user; null when signed out or the backend is down. */
+export async function getPortfolio(): Promise<Portfolio | null> {
+  const session = (await cookies()).get("session")?.value;
+  const [wallet, positions] = await Promise.all([
+    getJson<WalletSummary>("/api/wallet", session),
+    getJson<{ items: Position[] }>("/api/positions", session),
+  ]);
+  if (!wallet) return null;
+  const open = positions?.items ?? [];
+  // Margin sits outside the cash balance while a position is open, so P/L
+  // is measured on total equity: cash + margin + unrealized P/L.
+  const equity =
+    wallet.balance +
+    open.reduce((sum, p) => sum + p.amount_deducted + (p.unrealized_pnl ?? 0), 0);
+  const changePct = wallet.starting_balance
+    ? ((equity - wallet.starting_balance) / wallet.starting_balance) * 100
+    : 0;
+  return { balance: wallet.balance, changePct, positions: open };
+}
