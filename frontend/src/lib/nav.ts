@@ -30,8 +30,8 @@ export const NAV_ITEMS: NavItem[] = [
   },
   {
     id: "wallet",
-    label: "Wallet",
-    shortLabel: "Wallet",
+    label: "Paper Trading",
+    shortLabel: "Trading",
     href: "/wallet",
     icon: "account_balance_wallet",
   },

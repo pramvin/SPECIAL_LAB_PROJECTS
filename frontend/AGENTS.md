@@ -32,7 +32,8 @@ There is no test runner configured yet. If tests are added, document them here.
 2. Do not invent balances, formulas, data sources, or recommendation reasons.
    All figures must be synthetic and **visibly labeled** (Example Data /
    provenance badge).
-3. Do not add bank connections, payments, trading, or external data flows.
+3. Do not add bank connections, payments, real-money trading, or unapproved
+   external data flows.
 4. Never store secrets/API keys in frontend code or send data to services the
    team has not chosen.
 5. Keep the view separate from data sources and domain rules so mock data can be

@@ -8,7 +8,7 @@ generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-02T15:00:00Z }
 
 | Source | Status | Notes |
 |---|---|---|
-| yfinance prices | in use (decided 2026-11-01: free, no paid feed) | daily closes only, **not real-time and not a 15-min feed** · UI says so · 2 years · the S&P 500 list comes from Wikipedia and is stored in the DB |
+| yfinance prices | in use (decided 2026-11-01: free, no paid feed) | pipeline stores 2 years of daily prices; simulated position entry/close fetches the latest daily bar on demand · **not real-time and not a 15-min feed** |
 | Yahoo quotes (`/api/quotes`) | in use, unofficial | latest 1-min bar via yfinance, cached 60 s · UI labels it "delayed, usually about 15 minutes" and shows the real quote time · the 15-min figure is Yahoo's usual delay, **not verified by us** |
 | TradingView | link only | the ticker opens tradingview.com (their own live data) · see [TradingView chart link](/decisions/tradingview-chart-link.md) |
 | Google News RSS | in use | unofficial, no key · ~7 days · may be rate-limited · run `pipeline.news` manually |

@@ -1,7 +1,7 @@
 """Simulated wallet: balance, deposit/withdraw log, and balance history."""
 import sqlite3
 import time
-from typing import Callable
+from typing import Callable, Literal
 
 from fastapi import APIRouter, Cookie, HTTPException, Query
 from pydantic import BaseModel, Field
@@ -167,6 +167,43 @@ def transaction_payload(row: sqlite3.Row) -> dict:
     }
 
 
+def transaction_history(
+    conn: sqlite3.Connection,
+    user_id: int,
+    limit: int,
+    offset: int = 0,
+    search: str = "",
+    kind: Literal["deposit", "withdraw"] | None = None,
+) -> dict:
+    clauses = ["user_id = ?"]
+    params: list[object] = [user_id]
+    search = search.strip()
+    if search:
+        clauses.append("(instr(lower(note), lower(?)) > 0 OR instr(kind, lower(?)) > 0)")
+        params.extend((search, search))
+    if kind is not None:
+        clauses.append("kind = ?")
+        params.append(kind)
+    where = " AND ".join(clauses)
+
+    total = conn.execute(
+        f"SELECT COUNT(*) FROM wallet_transactions WHERE {where}", params
+    ).fetchone()[0]
+    rows = conn.execute(
+        "SELECT id, kind, amount, balance_after, note, created_at "
+        f"FROM wallet_transactions WHERE {where} "
+        "ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
+        [*params, limit, offset],
+    ).fetchall()
+    return {
+        "items": [transaction_payload(row) for row in rows],
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "has_more": offset + len(rows) < total,
+    }
+
+
 def history_payload(conn: sqlite3.Connection, user_id: int, limit: int) -> dict:
     wallet = ensure_wallet(conn, user_id)
     starting = money(wallet["starting_balance"])
@@ -236,18 +273,18 @@ def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -
     @router.get("/wallet/transactions")
     def get_transactions(
         limit: int = Query(DEFAULT_TRANSACTION_LIMIT, ge=1, le=MAX_TRANSACTION_LIMIT),
+        offset: int = Query(0, ge=0, le=1_000_000),
+        search: str = Query("", max_length=80),
+        kind: Literal["deposit", "withdraw"] | None = None,
         session: str | None = Cookie(default=None),
     ):
         with db() as conn:
             user = current_user(conn, session)
             ensure_wallet(conn, user["id"])
-            rows = conn.execute(
-                "SELECT id, kind, amount, balance_after, note, created_at "
-                "FROM wallet_transactions WHERE user_id = ? "
-                "ORDER BY created_at DESC, id DESC LIMIT ?",
-                (user["id"], limit),
-            ).fetchall()
-        return {"items": [transaction_payload(r) for r in rows]}
+            result = transaction_history(
+                conn, user["id"], limit, offset, search, kind
+            )
+        return result
 
     @router.get("/wallet/history")
     def get_history(

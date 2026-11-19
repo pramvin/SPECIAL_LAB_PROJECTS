@@ -21,7 +21,7 @@ from pydantic import BaseModel, Field
 from . import matching
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
-from .wallet import build_router as build_wallet_router
+from .wallet import build_router as build_wallet_router, ensure_wallet
 from .trading import build_router as build_trading_router
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
@@ -273,6 +273,7 @@ def register(body: Credentials, request: Request, response: Response):
             record_auth_event(conn, email, "registration_duplicate", ip_address)
             conn.commit()  # Preserve the security event even though registration failed.
             raise HTTPException(409, "Email already registered")
+        ensure_wallet(conn, cur.lastrowid)
         record_auth_event(conn, email, "registration_success", ip_address, cur.lastrowid)
         start_session(conn, response, cur.lastrowid)
     return {"email": email}
@@ -794,13 +795,17 @@ DEMO_PASSWORD = "planwise123"
 def ensure_demo_user() -> None:
     with db() as conn:
         exists = conn.execute(
-            "SELECT 1 FROM users WHERE email = ?", (DEMO_EMAIL,)
+            "SELECT id FROM users WHERE email = ?", (DEMO_EMAIL,)
         ).fetchone()
         if exists is None:
-            conn.execute(
+            cur = conn.execute(
                 "INSERT INTO users (email, password_hash, created_at) VALUES (?, ?, ?)",
                 (DEMO_EMAIL, hash_password(DEMO_PASSWORD), int(time.time())),
             )
+            user_id = cur.lastrowid
+        else:
+            user_id = exists["id"]
+        ensure_wallet(conn, user_id)
 
 
 ensure_demo_user()
