@@ -16,6 +16,7 @@ okf_version: "0.2"
 * [System patterns](/architecture/system-patterns.md) - Pipeline structure and patterns in use
 * [Scoring](/architecture/scoring.md) - Scoring formula and ATR stop/target (guessed values, not backtested)
 * [Tech context](/architecture/tech-context.md) - Stack, ports, tooling cautions
+* [AI agent review](/architecture/agent-review.md) - LLM agent team reviewing each idea, plus a cheap one-call quick review (built, live-tested with Grok)
 * [News sentiment](/architecture/news-sentiment.md) - Local ML label for headlines (replaces Laya), training data, limits
 * [Wallet](/architecture/wallet.md) - Simulated $1,000 wallet, deposits, withdrawals, balance history
 * [Simulated trading](/architecture/trading.md) - Long/short positions, leverage, P/L, closed trades

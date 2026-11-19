@@ -3,7 +3,7 @@ type: Scoring Rules
 title: Scoring and ATR stop/target
 description: The scoring formula, filters, and ATR multipliers in pipeline/rank.py (guessed values, not backtested)
 tags: [architecture, scoring]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-01T11:00:00Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-17T20:00:00Z }
 ---
 
 ⚠ All weights and multipliers are **guesses, not backtested** (task T8 in [Progress](/project/progress.md))
@@ -12,6 +12,8 @@ generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-01T11:00:00Z }
 - **Filters:** liquidity ≥ $50M/day · price > SMA50 (+SMA200 for 1m/3m) · at most 25% above SMA50
 - **Personal fit (served by `/api/recommendations`):** `final = 0.7*score + 0.3*100*cosine(stock, user)` · constants in `app/matching.py` are guesses
 - **Storage:** every stock that passes is saved in `recommendations` (~144–171 per horizon) with `atr_pct`; `in_top=1` marks the curated list (≤ 4 per sector, top 20) that `/api/recommendations` serves for now
+
+- **Card fields:** Entry = last daily close in `prices` (not live) · `BUY` is the column default (long-only, no sell logic) · Score is a real calculation from real prices but unvalidated · Position and "you lose about X%" are computed per user in `/api/recommendations` (cap by risk level, 10/20/30%, and the user's max loss)
 
 | Horizon | stop | target |
 |---|---|---|
