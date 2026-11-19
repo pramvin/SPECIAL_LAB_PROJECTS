@@ -23,7 +23,7 @@ contract, no real accounts.
 |---|---|---|
 | `/` | Trade Ideas | Implemented |
 | `/watchlist` | Search & Watchlist | Implemented |
-| `/wallet` | Simulated Wallet & Trading | Implemented |
+| `/wallet` | Paper Trading | Implemented |
 | `/goals` | Financial Goals (+ create/simulate drawer) | Implemented |
 | `/assistant` | Plan & Assistant workspace | Implemented |
 | `/settings` | Settings & Privacy | Implemented |
@@ -79,11 +79,23 @@ Route group `src/app/(app)/` applies the responsive `AppShell` (top navigation o
 - Shows the simulated cash balance, change from $1,000, open positions, and
   realized P/L.
 - Deposit and withdraw forms with validation and insufficient-balance errors.
-- Balance-history chart from the snapshots returned by the API.
+- Balance-history chart shows percentage change from the initial $1,000 balance.
+- Every successful deposit or withdrawal shows an accessible confirmation
+  using the saved transaction amount and resulting balance.
 - Open long/short simulated positions with margin and leverage (1–10x).
+- Entry and close prices come from Yahoo Finance daily bars, not a real-time feed.
 - Open positions show current price, unrealized P/L, and a close action.
 - Closed trades show entry, exit, P/L, P/L%, and timestamps.
-- Transaction log shows deposits, withdrawals, and balance after each change.
+- Closed-trade history supports ticker search, side/result filters, and loading
+  additional matching records.
+- Performance summary shows all-time realized/unrealized P/L, open margin,
+  closed-trade count, win rate, average P/L, and best/worst trade. Win rate is
+  wins divided by all closed trades, including break-even trades; per-trade
+  metrics show unavailable until a closed trade exists.
+- Open positions can be sorted by recency, ticker, or unrealized P/L. Closing
+  requires an accessible confirmation that explains daily-bar pricing.
+- Transaction log supports note/type search, deposit/withdrawal filters, and
+  loading additional matching records.
 - Every figure is labeled as simulated or user input. Negative balances are
   shown with a warning, never hidden.
 
@@ -118,6 +130,12 @@ Charts: dependency-free SVG (`LineChart`).
 - [x] Goal create form shows a validation error and cannot save while invalid.
 - [x] Trade Ideas tickers open their TradingView chart in a new tab with the
       candle interval mapped from the selected holding period.
+- [x] Every new account receives a simulated $1,000 wallet; successful deposits
+      and withdrawals show an accessible confirmation from the saved transaction.
+- [x] Wallet history charts percentage change from the initial balance.
+- [x] Paper Trading performance aggregates all saved trades and identifies missing prices rather than showing unknown P/L as zero.
+- [x] Transaction and trade histories can be searched, filtered, and paged without exposing another user's records.
+- [x] Open positions can be sorted, and close actions require confirmation.
 - [x] `npx tsc --noEmit` passes.
 - [x] `npm run lint` passes with no errors/warnings.
 - [x] `npm run build` succeeds.

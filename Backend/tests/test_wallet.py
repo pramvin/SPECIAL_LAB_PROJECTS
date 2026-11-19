@@ -102,6 +102,27 @@ class WalletTest(unittest.TestCase):
         self.assertEqual(wallet.money(wallet.ensure_wallet(self.conn, 2)["balance"]), 1000.0)
         self.assertEqual(len(wallet.history_payload(self.conn, 2, 10)["items"]), 1)
 
+    def test_transaction_history_filters_search_and_paginates(self):
+        wallet.deposit(self.conn, 1, 25, "monthly savings")
+        wallet.withdraw(self.conn, 1, 5, "test purchase")
+        wallet.deposit(self.conn, 2, 10, "monthly savings")
+
+        filtered = wallet.transaction_history(
+            self.conn, 1, 10, search="MONTHLY", kind="deposit"
+        )
+        self.assertEqual(filtered["total"], 1)
+        self.assertFalse(filtered["has_more"])
+        self.assertEqual(filtered["items"][0]["note"], "monthly savings")
+
+        first_page = wallet.transaction_history(self.conn, 1, 1)
+        second_page = wallet.transaction_history(self.conn, 1, 1, offset=1)
+        self.assertEqual(first_page["total"], 2)
+        self.assertTrue(first_page["has_more"])
+        self.assertFalse(second_page["has_more"])
+        self.assertNotEqual(
+            first_page["items"][0]["id"], second_page["items"][0]["id"]
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
