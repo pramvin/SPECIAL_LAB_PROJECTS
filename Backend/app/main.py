@@ -18,7 +18,7 @@ from fastapi import Request
 from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from . import matching
+from . import agents_api, matching
 from .dbcompat import IntegrityError, column_names, connect, table_names
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
@@ -560,6 +560,7 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
         ranked = [{**c, "fit": None, "match_reasons": []} for c in cands if c["in_top"]][:TOP_N_SERVED]
     with db() as conn:
         llm = latest_llm(conn, [c["ticker"] for c in ranked])
+        ai = agents_api.latest_ai(conn, [c["ticker"] for c in ranked], horizon)
     out = []
     for r in ranked:  # each item is a recommendations row (dict) plus fit / match_reasons
         stop_pct = (r["entry"] - r["stop"]) / r["entry"] * 100
@@ -582,6 +583,7 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
             "bigmove_p": (round(float(r["bigmove_p"]), 4)
                           if horizon == "1w" and r["bigmove_p"] is not None else None),
             "llm": llm.get(r["ticker"]),
+            "ai": ai.get(r["ticker"]),
         })
     return {"horizon": horizon, "items": out}
 
@@ -663,10 +665,11 @@ def top_news(limit: int = 5, session: str | None = Cookie(default=None)):
 app.include_router(build_watchlist_router(db, current_user))
 app.include_router(build_wallet_router(db, current_user))
 app.include_router(build_trading_router(db, current_user))
+app.include_router(agents_api.router)
 
 @app.get("/api/news-sentiment")
 def news_sentiment(tickers: str, limit: int = 3):
-    """Real Google News headlines per ticker, plus sentiment when scored.
+    """Real Yahoo Finance headlines per ticker, plus sentiment when scored.
 
     Sentiment is display-only and never changes the trade score. If the
     `news_scores` table is missing/empty (model not run yet), headlines are

@@ -1,5 +1,8 @@
 # Update Log
 
+## 2026-11-18
+* **Replaced**: the agent review's LLM `gateway.9arm.co` (qwen3.8-27b-fp8) is superseded by xAI `grok-4.3`; the gateway was too slow and could not disable thinking — [AI agent review](/architecture/agent-review.md).
+
 ## 2026-11-06
 * **Retired**: Laya (the Kaggle event/filler/sentiment model) and its filler step are removed from code and UI; the local ML headline label replaces it — [News sentiment](/architecture/news-sentiment.md). The Kaggle runbook now covers the LLM only — [Kaggle gateways](/runbooks/kaggle-gateways.md).
 * **Retired**: up/down prediction as a product claim, after every test failed — [Direction prediction](/experiments/direction-prediction.md).

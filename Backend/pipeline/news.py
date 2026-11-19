@@ -1,6 +1,6 @@
 """Pipeline step 4/5 (light): collect headlines, archive them, attach the best to each idea.
 
-Source: Google News RSS (free, no key, unofficial; only ~7 days of history).
+Source: Yahoo Finance via yfinance (free, no key, unofficial; only recent headlines).
 Every relevant headline is APPENDED to `news_items` with the time we first saw
 it, so history accumulates for later experiments (labeling, latency, price
 reaction). Headlines shown on cards are the top few non-noise ones; they do NOT
@@ -15,16 +15,14 @@ import json
 import os
 import re
 import time
-import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
-from email.utils import parsedate_to_datetime
 
-import requests
+import yfinance as yf
 
 from app.dbcompat import connect
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
-RSS = "https://news.google.com/rss/search"
+PER_QUERY = 20
 PER_STOCK = 3
 MAX_AGE_DAYS = 7
 DELAY_S = 0.4
@@ -63,24 +61,24 @@ def keyword(name: str) -> str:
 
 
 def fetch(ticker: str, name: str) -> list[dict]:
-    q = f'"{SUFFIX.sub("", name).strip()}" {ticker} stock when:{MAX_AGE_DAYS}d'
-    r = requests.get(RSS, params={"q": q, "hl": "en-US", "gl": "US", "ceid": "US:en"},
-                     headers={"User-Agent": "Mozilla/5.0"}, timeout=20)
-    r.raise_for_status()
+    company = SUFFIX.sub("", name).replace("&", " ")  # an "&" in the query makes Yahoo return nothing
+    news = yf.Search(f"{' '.join(company.split())} {ticker}", news_count=PER_QUERY, enable_fuzzy_query=False).news
     key, seen, out = keyword(name), set(), []
-    for it in ET.fromstring(r.text).findall("./channel/item"):
-        source = it.findtext("source") or ""
-        title = (it.findtext("title") or "").strip()
-        if source and title.endswith(f" - {source}"):
-            title = title[: -len(source) - 3]
-        # Relevance filter: headline must mention the company or its ticker as a word.
-        if key not in title.lower() and not re.search(rf"\b{re.escape(ticker)}\b", title):
+    cutoff = datetime.now(timezone.utc).timestamp() - MAX_AGE_DAYS * 86400
+    for it in news:
+        title = (it.get("title") or "").strip()
+        when_ts = it.get("providerPublishTime")
+        if not title or not it.get("link") or not when_ts or when_ts < cutoff:
+            continue
+        # Relevance filter: tagged with the ticker, or the headline mentions the company or its ticker as a word.
+        if ticker not in (it.get("relatedTickers") or []) and key not in title.lower() \
+                and not re.search(rf"\b{re.escape(ticker)}\b", title):
             continue
         if title.lower() in seen:
             continue
         seen.add(title.lower())
-        when = parsedate_to_datetime(it.findtext("pubDate")).astimezone(timezone.utc)
-        out.append({"title": title, "source": source or "Unknown", "url": it.findtext("link"),
+        when = datetime.fromtimestamp(when_ts, timezone.utc)
+        out.append({"title": title, "source": it.get("publisher") or "Unknown", "url": it["link"],
                     "published": when.strftime("%Y-%m-%d"), "published_at": when.isoformat(),
                     "noise": bool(NOISE.search(title))})
     return out

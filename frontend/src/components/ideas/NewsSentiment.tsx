@@ -10,7 +10,7 @@ function pct(part: number, total: number): number {
 }
 
 /**
- * Summary of how the ML model labeled this ticker's Google News headlines
+ * Summary of how the ML model labeled this ticker's Yahoo Finance headlines
  * (`news_scores`). The headlines themselves are listed once, in the card's
  * News column, so this panel only shows the split. It renders nothing when
  * the ticker has no scored headlines: no empty frame, no invented labels.
@@ -54,7 +54,7 @@ export function NewsSentiment({
           News mood · {ticker}
         </h3>
         <Badge tone="neutral" icon="public">
-          Google News
+          Yahoo Finance
         </Badge>
         <ProvenanceBadge provenance="ai" label="ML · Not validated" />
       </div>

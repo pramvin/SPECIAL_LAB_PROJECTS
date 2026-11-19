@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { Badge } from "@/components/ui/Badge";
-import { Card, SectionLabel } from "@/components/ui/Card";
+import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { NoticeBanner } from "@/components/ui/NoticeBanner";
 import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
-import { SentimentBadge } from "./SentimentBadge";
+import { AiRatingBadge } from "./AiRatingBadge";
+import { AgentPanel } from "./AgentPanel";
 import { NewsSentiment } from "./NewsSentiment";
 import { TopNews } from "./TopNews";
 import { DataStatus as DataStatusBar } from "./DataStatus";
@@ -72,7 +73,7 @@ function Level({
   tone?: string;
 }) {
   return (
-    <div className="flex flex-col gap-1">
+    <div className="flex flex-col gap-1 rounded-[16px] bg-surface-container-low px-4 py-3">
       <span className="font-body-sm text-body-sm text-on-surface-variant">
         {label}
       </span>
@@ -81,6 +82,72 @@ function Level({
       >
         {value}
       </span>
+    </div>
+  );
+}
+
+/** Top stripe colour: how the AI review sits against the rule-based idea. */
+const ACCENT: Record<string, string> = {
+  agree: "bg-provenance-input-text",
+  caution: "bg-amber-500",
+  disagree: "bg-error",
+  review: "bg-surface-container-highest",
+  none: "bg-surface-container-high",
+};
+
+/** Stop → target track with the entry (and latest price, if inside) marked. */
+function PriceRange({
+  stop,
+  entry,
+  target,
+  latest,
+}: {
+  stop: number;
+  entry: number;
+  target: number;
+  latest?: number | null;
+}) {
+  const span = target - stop;
+  if (!(span > 0)) return null;
+  const pct = (v: number) => Math.min(100, Math.max(0, ((v - stop) / span) * 100));
+  const entryAt = pct(entry);
+  const latestAt =
+    latest != null && latest >= stop && latest <= target ? pct(latest) : null;
+  return (
+    <div
+      className="flex flex-col gap-2"
+      role="img"
+      aria-label={`Stop ${usd(stop)}, entry ${usd(entry)}, target ${usd(target)}`}
+    >
+      <div className="relative h-2 rounded-full bg-surface-container-high">
+        <div
+          className="absolute inset-y-0 left-0 rounded-l-full bg-error/30"
+          style={{ width: `${entryAt}%` }}
+        />
+        <div
+          className="absolute inset-y-0 right-0 rounded-r-full bg-tertiary-accent/30"
+          style={{ width: `${100 - entryAt}%` }}
+        />
+        <span
+          className="absolute top-1/2 h-4 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-on-surface"
+          style={{ left: `${entryAt}%` }}
+          title={`Entry ${usd(entry)}`}
+        />
+        {latestAt !== null && (
+          <span
+            className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-tertiary-accent"
+            style={{ left: `${latestAt}%` }}
+            title={`Latest ${usd(latest as number)}`}
+          />
+        )}
+      </div>
+      <div className="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
+        <span>Stop</span>
+        <span>
+          {latestAt !== null ? "● latest · " : ""}| entry
+        </span>
+        <span>Target</span>
+      </div>
     </div>
   );
 }
@@ -95,29 +162,59 @@ function ReasonText({
   text: string;
   cited: LlmAnalysis["cited"];
 }) {
-  const byId = new Map(cited.map((c) => [String(c.id), c]));
+  const byId = new Map(
+    cited.map((c, i) => [String(c.id), { cited: c, n: i + 1 }]),
+  );
+  const chip = (
+    c: LlmAnalysis["cited"][number],
+    n: number,
+    key: string,
+    className = "",
+  ) =>
+    c.url ? (
+      <a
+        key={key}
+        href={c.url}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={c.title}
+        className={`text-tertiary-accent hover:underline ${className}`}
+      >
+        [{n}]
+      </a>
+    ) : (
+      <span key={key} title={c.title} className={`text-on-surface-variant ${className}`}>
+        [{n}]
+      </span>
+    );
+
   return (
     <>
       {text.split(ID_REF).map((part, i) => {
         if (i % 2 === 0) return part;
-        const links = (part.match(/\d+/g) ?? []).map((id) => byId.get(id));
-        if (links.every((c) => !c)) return part;
+        if (part.startsWith("[")) {
+          const known = [...new Set(part.match(/\d+/g) ?? [])]
+            .map((id) => byId.get(id))
+            .filter(
+              (x): x is { cited: LlmAnalysis["cited"][number]; n: number } =>
+                x !== undefined,
+            );
+          if (known.length === 0) return null;
+          return (
+            <span key={i}>
+              {known.map(({ cited: c, n }, k) =>
+                chip(c, n, c.id.toString(), k > 0 ? "ml-1" : ""),
+              )}
+            </span>
+          );
+        }
         return (
           <span key={i}>
-            {links.map((c, k) =>
-              c ? (
-                <a
-                  key={c.id}
-                  href={c.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  title={c.title}
-                  className="text-tertiary-accent hover:underline"
-                >
-                  [{k + 1}]
-                </a>
-              ) : null,
-            )}
+            {part.split(/(\d+)/).map((piece, k) => {
+              if (k % 2 === 0) return piece;
+              const hit = byId.get(piece);
+              return hit ? chip(hit.cited, hit.n, `${piece}-${k}`, "") : null;
+            })}
           </span>
         );
       })}
@@ -180,8 +277,12 @@ function IdeaCard({
   const chartInterval = CHART_INTERVAL[horizon];
 
   return (
-    <Card as="article" className="flex flex-col gap-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+    <Card as="article" className="relative flex flex-col gap-6 overflow-hidden">
+      <span
+        aria-hidden
+        className={`absolute inset-x-0 top-0 h-1.5 ${ACCENT[r.ai?.agrees ?? "none"]}`}
+      />
+      <div className="flex flex-col gap-4 pt-1 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
           <span className="pt-1 font-body-sm text-body-sm font-medium tabular-nums text-on-surface-variant">
             {String(rank).padStart(2, "0")}
@@ -215,17 +316,38 @@ function IdeaCard({
           </span>
           {r.is_example ? (
             <ProvenanceBadge provenance="example" />
+          ) : r.ai ? (
+            <AiRatingBadge
+              rating={r.ai.rating}
+              label={
+                r.ai.mode === "quick" ? `AI quick · ${r.ai.rating}` : undefined
+              }
+            />
           ) : (
-            <ProvenanceBadge provenance="ai" label="Rule-based" />
+            <span
+              title="No AI review yet. This card shows the rule-based idea."
+              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-surface-container-highest px-3 py-1 font-body-sm text-body-sm text-on-surface-variant"
+            >
+              <Icon name="hourglass_top" className="text-[16px]" />
+              Rule-based · AI pending
+            </span>
           )}
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-5 border-y border-surface-container-high py-5 sm:grid-cols-4">
-        <Level label="Entry" value={usd(r.entry)} />
-        <Level label="Stop" value={usd(r.stop)} tone="text-error" />
-        <Level label="Target" value={usd(r.target)} tone="text-tertiary-accent" />
-        <Level label="Position" value={`${r.position_pct}%`} />
+      <div className="flex flex-col gap-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <Level label="Entry" value={usd(r.entry)} />
+          <Level label="Stop" value={usd(r.stop)} tone="text-error" />
+          <Level label="Target" value={usd(r.target)} tone="text-tertiary-accent" />
+          <Level label="Position" value={`${r.position_pct}%`} />
+        </div>
+        <PriceRange
+          stop={r.stop}
+          entry={r.entry}
+          target={r.target}
+          latest={quote?.price}
+        />
       </div>
 
       <div className="flex flex-col gap-2 font-body-sm text-body-sm text-on-surface-variant">
@@ -269,48 +391,15 @@ function IdeaCard({
             className="text-[22px] text-on-surface-variant transition-transform group-open:rotate-180"
           />
         </summary>
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="flex flex-col gap-3">
-            <SectionLabel>Reasons</SectionLabel>
-            <ul className="flex list-disc flex-col gap-2 pl-5 font-body-md text-body-md text-on-surface">
-              {[...r.match_reasons, ...r.reasons].map((x) => (
-                <li key={x}>{x}</li>
-              ))}
-            </ul>
-          </div>
-          <div className="flex flex-col gap-3">
-            <SectionLabel>News</SectionLabel>
-            <ul className="flex flex-col gap-3 font-body-sm text-body-sm text-on-surface">
-              {r.news.length === 0 && (
-                <li className="text-on-surface-variant">
-                  No recent headlines found.
-                </li>
-              )}
-              {r.news.map((n) => (
-                <li key={n.title} className="flex flex-col gap-1">
-                  {n.url ? (
-                    <a
-                      href={n.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-body-md text-body-md leading-snug text-on-surface hover:text-tertiary-accent"
-                    >
-                      {n.title}
-                    </a>
-                  ) : (
-                    n.title
-                  )}
-                  <span className="flex flex-wrap items-center gap-2 text-on-surface-variant">
-                    <SentimentBadge sentiment={n.sentiment} />
-                    {n.source}
-                    {n.published ? ` · ${n.published}` : ""}
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
         <div className="mt-6 flex flex-col gap-5">
+          <AgentPanel
+            ticker={r.ticker}
+            horizon={horizon}
+            ai={r.ai}
+            reasons={r.reasons}
+            matchReasons={r.match_reasons}
+            news={r.news}
+          />
           {r.llm && <LlmBlock llm={r.llm} />}
           <NewsSentiment ticker={r.ticker} data={news} />
         </div>
@@ -371,7 +460,7 @@ export function IdeasView({
       {items?.some((r) => r.is_example) ? (
         <NoticeBanner icon="info" tone="neutral" title="Example prices and scores">
           Prices, scores and position sizes below are placeholders until the
-          live data pipeline is connected. Headlines are real (Google News), and
+          live data pipeline is connected. Headlines are real (Yahoo Finance), and
           sentiment labels, when shown, are AI-generated and not validated. This
           is not investment advice.
         </NoticeBanner>

@@ -3,17 +3,17 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, and next steps (the most frequently updated file)
 tags: [active]
-generated: { by: opencode/deepseek-flash, at: 2026-11-15T02:52:18Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-19T10:00:00Z }
 ---
 
-**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: fetch headlines for the current ideas (`pipeline.news`, then `pipeline.sentiment`), then make Stage 5 (LLM) trustworthy and fix the UI bugs below.
+**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: build the **AI agent review** (user, 2026-11-17): a TradingAgents-style team of LLM agents reviews each home-page idea; built by two OpenCode agents (uncommitted, all tests pass) and live-tested on Grok 4.3; on 2026-11-19 a cheap one-call **quick review** (triage, then funnel to the full 12-agent review) was added so many more stocks can get an AI opinion · see [AI agent review](/architecture/agent-review.md). Also pending: the 2-hour news refresh on GitHub (see Waiting on the user).
 
 No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/notebook9b0675f2f8` remains on the user's Kaggle (not saved as a version).
 
 # Git status
 
 - `main` = `e645e50` · PR #1–#7 merged, including the frontend redesign and local ML news sentiment · see [Team](/project/team.md)
-- Current branch: `vincent-wallet-trading` (wallet + trading database, due Friday) · frontend work remains on `questionare-branch`
+- Current branch: `fais-yahoo-news` (Yahoo Finance news + `.github/workflows/refresh-news.yml`; committed, **not pushed**, no PR) · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
 - Ask before committing or pushing (rule in `AGENTS.md`)
 
 # Wallet and trading database (Vincent, due Friday)
@@ -41,7 +41,7 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 
 # Runtime status
 
-- `planwise.db` has prices (last close 2026-11-02) and 879 ranked recommendations (333 with a big-move %), no example rows · 744 Google News headlines for only 12 tickers (`pipeline.news` ran 2026-11-01), so most cards show no news · 530 headlines scored by the local sentiment model on 2026-11-06 · no `llm_analysis` table
+- `planwise.db` has prices (last close 2026-11-02) and 879 ranked recommendations (333 with a big-move %), no example rows · 744 older Google News headlines for only 12 tickers (`pipeline.news` ran 2026-11-01; since 2026-11-17 the source is Yahoo Finance and has only been run on a scratch copy), so most cards show no news · 530 headlines scored by the local sentiment model on 2026-11-06 · no `llm_analysis` table
 - Cards show a delayed Yahoo quote (`/api/quotes`) only for real (non-example) ideas
 - The backend started from a tool session dies after 10 min → run it in the user's own terminal ([runbook](/runbooks/daily-refresh.md))
 - The Kaggle link from the last run is dead and the values in `Backend/.env` are stale (`LAYA_URL`/`LAYA_TOKEN` there are unused now) → **stop any lingering session** to save GPU
@@ -49,13 +49,13 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 # Waiting on the user
 
 1. Approve source tiers + corroboration rule (Proposal)
-2. Run `pipeline.news` for the current ideas (about 9 minutes, Google News)? Install a daily scheduled job for it?
+2. Push `fais-yahoo-news`, merge to `main`, add the repo secret `DATABASE_URL` (Neon), then run the workflow once by hand (Actions → Run workflow) · it runs `pipeline.news` + `pipeline.sentiment` every 2 hours (cron, may lag 5–15 min, never run on GitHub yet) · prices are not refreshed by it (`pipeline.ingest` last ran for 2026-11-02) · also add `DATABASE_URL` on Render and reset the exposed Neon password
 3. Want the per-stock questionnaire back in the UI? (the UI was removed)
-4. Email for the SEC User-Agent (when SEC comes back)
+4. For the agent review, `Backend/.env` already has the xAI key (`AGENT_LLM_*`, Grok 4.3, `AGENT_LLM_TRIAGE_MODEL` for the quick review); decide whether to run `--mode funnel` on the top 100 (about 100 quick calls plus up to 15 full reviews, uses xAI credits); still optional: `SEC_EDGAR_USER_AGENT` (contact email, gives fundamentals because FMP free key returns 402), `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`, `FRED_API_KEY` · refresh with `pipeline.ingest` + `pipeline.rank` + `pipeline.news` before real runs · real runs without `PLANWISE_DB` write to Neon and show on the live site (confirm first)
 5. Numeric confirmation layer: [Verification layer](/project/verification-layer.md)
 
 # Next
 
-T0 (user labels) ∥ T2, fix `ReasonText` → T1 → rerun T5 (LLM) + T6 → T4/T7 when the user asks → T8 · task table: [Progress](/project/progress.md)
+T14 agent review (includes T4 SEC and the `ReasonText` fix) → user tests → T0 (user labels) ∥ T2 → T1 → T7 when the user asks → T8 · task table: [Progress](/project/progress.md)
 
 Experiments with code already written: `python -m pipeline.llm_ab --arm anon` (done) · `--arm think` (failed, keep think off) · results in [Results](/experiments/results.md)

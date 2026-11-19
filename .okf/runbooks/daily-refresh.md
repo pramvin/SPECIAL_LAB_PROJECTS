@@ -3,7 +3,7 @@ type: Runbook
 title: Run app and refresh data
 description: Start the backend/frontend and run the pipeline steps in order
 tags: [ops]
-generated: { by: opencode/deepseek-flash, at: 2026-11-13T17:23:20Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-17T20:00:00Z }
 ---
 
 ```bash
@@ -22,6 +22,7 @@ Run from `Backend/` in this order:
 ```
 
 - Run news/sentiment/llm **after every rank** (`llm_analysis` keeps old rows; the API uses the latest successful row per ticker)
-- News only accumulates if `news` runs regularly (Google News keeps ~7 days) · installing a cron job requires **asking the user first**
+- News only accumulates if `news` runs regularly (Yahoo returns only recent headlines) · installing a cron job requires **asking the user first**
+- Automatic: `.github/workflows/refresh-news.yml` runs `news` + `sentiment` every 2 hours against Neon (needs secret `DATABASE_URL`; only runs from `main`; GitHub disables it after 60 days without repo activity) · written, not yet run on GitHub
 - The Refresh button in the web app only re-reads the DB; it does not run the pipeline
 - Cautions: [Tech context](/architecture/tech-context.md)
