@@ -14,7 +14,7 @@ sources:
     title: TauricResearch/TradingAgents (pattern source, code not copied)
 ---
 
-Decided by the user 2026-11-17: use an LLM again, mixed with the existing rules/ML, and bring in **all** TradingAgents roles.[^ta] Built 2026-11-17 by two OpenCode agents (uncommitted): engine `Backend/agents/`, API `Backend/app/agents_api.py`, UI `frontend/src/components/ideas/AgentPanel.tsx` · agent + API tests pass (38), frontend tsc/lint pass · live full runs on `grok-4.3` 2026-11-18: TYL, COST, TSN, ROP, AAPL, MSI finished (12 roles, ~2–5 min each; the validator rejected invented evidence ids and forced retries) · spec in `specs/trading-agents/`.[^spec]
+Decided by the user 2026-11-17: use an LLM again, mixed with the existing rules/ML, and bring in **all** TradingAgents roles.[^ta] Built 2026-11-17 by two OpenCode agents (committed in PR #13, branch `fais-agent-review`): engine `Backend/agents/`, API `Backend/app/agents_api.py`, UI `frontend/src/components/ideas/AgentPanel.tsx` · agent + API tests pass (91 in the backend suite), frontend tsc/lint pass · live full runs on `grok-4.3` 2026-11-18: TYL, COST, TSN, ROP, AAPL, MSI finished (ROP and TYL re-run 2026-11-19: both Hold with caution) (12 roles, ~2–5 min each; the validator rejected invented evidence ids and forced retries) · spec in `specs/trading-agents/`.[^spec]
 
 Run: `cd Backend && .venv/bin/python -m agents.run --tickers TYL --horizon 1w` · `--fake` refuses to run without `PLANWISE_DB` (a fake run once wrote into Neon via `DATABASE_URL`; cleaned up).
 
@@ -43,7 +43,7 @@ One LLM call per stock on a one-page brief: rule idea + price metrics (+ big-mov
 
 # Data status (checked 2026-11-18)
 
-SEC EDGAR 200 OK but skipped (no `SEC_EDGAR_USER_AGENT`) · StockTwits worked (was 403 the day before) · anonymous Reddit RSS 403 · FMP free key returns 402 → fundamentals `no_data` · UI note: summaries contain raw `[metric:..]` tags, strip or render them as chips · see [Data sources](/architecture/data-sources.md)
+SEC EDGAR 200 OK but skipped (no `SEC_EDGAR_USER_AGENT`) · StockTwits worked (was 403 the day before) · anonymous Reddit RSS 403 · FMP free key returns 402 → fundamentals `no_data` · UI renders evidence ids as `[n]` chips (browser check pending) · see [Data sources](/architecture/data-sources.md)
 
 [^spec]: specs/trading-agents/SPEC.md
 [^ta]: TauricResearch/TradingAgents

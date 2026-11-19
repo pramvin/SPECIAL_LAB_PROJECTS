@@ -110,6 +110,16 @@ function chipOrder(...groups: string[][]): Map<string, number> {
   return order;
 }
 
+// The model sometimes writes raw evidence ids ("metric:rsi14", "agent:bear") inside a
+// sentence; the [n] chips already cite them, so show plain words instead.
+const RAW_ID = /\b(?:metric|news|fund|sec|social|macro|rule|agent|memory):([\w.-]+)/g;
+
+function prose(text: string): string {
+  return text
+    .replace(RAW_ID, (_m, name: string) => name.replace(/[_-]+/g, " "))
+    .replace(/\s{2,}/g, " ");
+}
+
 function evidenceTooltip(e: Evidence): string {
   return [e.label, e.value ? `· ${e.value}` : "", e.published_at ? `· ${e.published_at}` : ""]
     .filter(Boolean)
@@ -181,7 +191,7 @@ function Points({
     <ul className="flex list-disc flex-col gap-2 pl-5 font-body-sm text-body-sm text-on-surface">
       {points.map((p, i) => (
         <li key={i}>
-          {p.text}
+          {prose(p.text)}
           <Chips ids={p.evidence} order={order} byId={byId} />
         </li>
       ))}
@@ -231,7 +241,7 @@ function AnalystCard({
       {analyst ? (
         <>
           <p className="font-body-sm text-body-sm text-on-surface">
-            {analyst.summary}
+            {prose(analyst.summary)}
           </p>
           <Points points={analyst.points} order={order} byId={byId} />
           {analyst.data_gaps.length > 0 && (
@@ -400,7 +410,7 @@ export function AgentPanel({
                 <ProvenanceBadge provenance="ai" label="AI" />
               </div>
               <p className="font-body-sm text-body-sm text-on-surface">
-                {manager.rationale}
+                {prose(manager.rationale)}
                 <Chips ids={manager.evidence} order={summaryOrder} byId={evidence} />
               </p>
             </div>
@@ -475,7 +485,7 @@ export function AgentPanel({
           </div>
           {manager ? (
             <p className="font-body-sm text-body-sm text-on-surface">
-              {manager.rationale}
+              {prose(manager.rationale)}
               <Chips ids={manager.evidence} order={debateOrder} byId={evidence} />
             </p>
           ) : (
@@ -549,7 +559,7 @@ export function AgentPanel({
           </div>
           {r.trader ? (
             <p className="font-body-sm text-body-sm text-on-surface">
-              {r.trader.rationale}
+              {prose(r.trader.rationale)}
               <Chips ids={r.trader.evidence} order={planOrder} byId={evidence} />
             </p>
           ) : (
@@ -708,7 +718,7 @@ export function AgentPanel({
             {isDemo && <ProvenanceBadge provenance="example" label="Example data" />}
           </div>
           <p className="font-body-md text-body-md text-on-surface">
-            {r.summary}
+            {prose(r.summary)}
             <Chips
               ids={Array.from(summaryOrder.keys())}
               order={summaryOrder}
@@ -842,12 +852,12 @@ export function AgentPanel({
             </Badge>
           </div>
           <p className="font-body-md text-body-md text-on-surface">
-            {ai.summary}
+            {prose(ai.summary)}
           </p>
           {(ai.points ?? []).length > 0 && (
             <ul className="flex list-disc flex-col gap-2 pl-5 font-body-md text-body-md text-on-surface">
               {(ai.points ?? []).map((p) => (
-                <li key={p.text}>{p.text}</li>
+                <li key={p.text}>{prose(p.text)}</li>
               ))}
             </ul>
           )}

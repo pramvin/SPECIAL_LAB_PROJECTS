@@ -37,7 +37,7 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 | T8 | Backtest, event study, latency (state survivorship bias) | ⬜ |
 | T11 | Numeric confirmation layer | ⬜ waiting on user approval · [Verification layer](/project/verification-layer.md) |
 | T12 | Per-stock sentiment questionnaire | 🟡 backend ready, no UI |
-| T14 | AI agent review: engine + API + UI built (uncommitted) · 6 stocks reviewed live on Grok 4.3 (2–5 min each) · quick one-call review (`--mode triage`/`funnel`) built 2026-11-19: ~24x fewer tokens per stock, tested on 20 ideas · next: user tests, then funnel on the top 100 | 🟡 · [AI agent review](/architecture/agent-review.md) |
+| T14 | AI agent review: engine + API + UI built and committed (PR #13) · 6 stocks reviewed live on Grok 4.3 (2–5 min each) · quick one-call review (`--mode triage`/`funnel`) built 2026-11-19: ~24x fewer tokens per stock, tested on 20 ideas · next: merge PR #13, user tests, then funnel on the top 100 | 🟡 · [AI agent review](/architecture/agent-review.md) |
 | T13 | Personalized matching (branch `fais-questionire`): step 1 store all filtered stocks + `atr_pct` ✅ · step 2 matcher `app/matching.py` + `tests/test_matching.py` ✅ · step 3 API `/api/recommendations` ranks all stocks per user + UI shows match reasons ✅ · onboarding now 11 GICS sectors ✅ · real data needs `ingest` + `rank` ⬜ | 🟡 |
 | T14 | Big-move badge (chart-only model, 1w): train on Kaggle ✅ · serve in `rank.py` + API + UI badge ✅ · needs real `ingest` + `rank` to show numbers ⬜ | 🟡 |
 | T15 | Direction (up/down) prediction from news, chart, RSI/MACD, ML | ❌ dropped 2026-11-06 · [Direction prediction](/experiments/direction-prediction.md) |

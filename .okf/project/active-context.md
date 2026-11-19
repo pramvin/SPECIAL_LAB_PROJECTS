@@ -6,19 +6,19 @@ tags: [active]
 generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-19T10:00:00Z }
 ---
 
-**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: build the **AI agent review** (user, 2026-11-17): a TradingAgents-style team of LLM agents reviews each home-page idea; built by two OpenCode agents (uncommitted, all tests pass) and live-tested on Grok 4.3; on 2026-11-19 a cheap one-call **quick review** (triage, then funnel to the full 12-agent review) was added so many more stocks can get an AI opinion · see [AI agent review](/architecture/agent-review.md). Also pending: the 2-hour news refresh on GitHub (see Waiting on the user).
+**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: build the **AI agent review** (user, 2026-11-17): a TradingAgents-style team of LLM agents reviews each home-page idea; built by two OpenCode agents, live-tested on Grok 4.3 and committed in PR #13 (91 backend tests pass, tsc clean); on 2026-11-19 a cheap one-call **quick review** (triage, then funnel to the full 12-agent review) was added so many more stocks can get an AI opinion · see [AI agent review](/architecture/agent-review.md). Also pending: the 2-hour news refresh on GitHub (see Waiting on the user).
 
 No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/notebook9b0675f2f8` remains on the user's Kaggle (not saved as a version).
 
 # Git status
 
 - `main` = `e645e50` · PR #1–#7 merged, including the frontend redesign and local ML news sentiment · see [Team](/project/team.md)
-- Current branch: `fais-yahoo-news` (Yahoo Finance news + `.github/workflows/refresh-news.yml`; committed, **not pushed**, no PR) · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
+- Current branch: `fais-agent-review`, pushed, **PR #13** open against `main` (agent review + the Yahoo news commit `130aeba` + `.github/workflows/refresh-news.yml`; mergeable) · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
 - Ask before committing or pushing (rule in `AGENTS.md`)
 
 # Wallet and trading database (Vincent, due Friday)
 
-`Backend/app/wallet.py` and `Backend/app/trading.py` follow the watchlist pattern: own `SCHEMA`, own `APIRouter`, included from `main.py` so tables are created at startup. Wallet starts at $1,000; deposits/withdrawals and balance snapshots are logged. Positions support long and short, leverage 1–10, latest `prices` close for entry/exit, and closed trades store P/L and P/L%. See [Wallet](/architecture/wallet.md) and [Simulated trading](/architecture/trading.md). Tests: `python -m unittest tests.test_wallet tests.test_trading`. The `/wallet` page now shows the balance, deposit/withdraw forms, history chart, open positions, closed trades, and transaction log.
+`Backend/app/wallet.py` and `Backend/app/trading.py` follow the watchlist pattern: own `SCHEMA`, own `APIRouter`, included from `main.py` so tables are created at startup. Wallet starts at $1,000; deposits/withdrawals and balance snapshots are logged. Positions support long and short, leverage 1–10, latest `prices` close for entry/exit, and closed trades store P/L and P/L%. See [Wallet](/architecture/wallet.md) and [Simulated trading](/architecture/trading.md). Tests: `python -m unittest tests.test_wallet tests.test_trading`. Idea cards now have ★ Watch, Open/Close position (long only, 1–10x, fills at the latest daily close in the DB, not the live quote) and a header balance pill (P/L on total equity), all in `CardActions.tsx` / `BalancePill.tsx`; tried on a scratch DB only. The `/wallet` page now shows the balance, deposit/withdraw forms, history chart, open positions, closed trades, and transaction log.
 
 # Personalized matching (in main via PR #5)
 
@@ -32,7 +32,7 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 
 # Open problems
 
-1. `ReasonText` (`IdeasView.tsx`) puts `[1]` on every link; ids not in `cited_news_ids` render as bare numbers
+1. Check in the browser that real ROP/TYL reviews render `[n]` chips with no raw `metric:` ids (not yet seen)
 2. News sentiment labels are word-list copies: 64% Neutral, price words (down, slips, up) missed, no human labels yet · see [News sentiment](/architecture/news-sentiment.md)
 3. LLM leans bullish (up 36 / down 2 / none 6)
 4. The LLM does not use the sentiment labels (it reads every headline with `rule_noise=0`)
@@ -49,7 +49,7 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 # Waiting on the user
 
 1. Approve source tiers + corroboration rule (Proposal)
-2. Push `fais-yahoo-news`, merge to `main`, add the repo secret `DATABASE_URL` (Neon), then run the workflow once by hand (Actions → Run workflow) · it runs `pipeline.news` + `pipeline.sentiment` every 2 hours (cron, may lag 5–15 min, never run on GitHub yet) · prices are not refreshed by it (`pipeline.ingest` last ran for 2026-11-02) · also add `DATABASE_URL` on Render and reset the exposed Neon password
+2. Review and merge PR #13 to `main`, add the repo secret `DATABASE_URL` (Neon), then run the workflow once by hand (Actions → Run workflow) · it runs `pipeline.news` + `pipeline.sentiment` every 2 hours (cron, may lag 5–15 min, never run on GitHub yet) · prices are not refreshed by it (`pipeline.ingest` last ran for 2026-11-02) · also add `DATABASE_URL` on Render and reset the exposed Neon password
 3. Want the per-stock questionnaire back in the UI? (the UI was removed)
 4. For the agent review, `Backend/.env` already has the xAI key (`AGENT_LLM_*`, Grok 4.3, `AGENT_LLM_TRIAGE_MODEL` for the quick review); decide whether to run `--mode funnel` on the top 100 (about 100 quick calls plus up to 15 full reviews, uses xAI credits); still optional: `SEC_EDGAR_USER_AGENT` (contact email, gives fundamentals because FMP free key returns 402), `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`, `FRED_API_KEY` · refresh with `pipeline.ingest` + `pipeline.rank` + `pipeline.news` before real runs · real runs without `PLANWISE_DB` write to Neon and show on the live site (confirm first)
 5. Numeric confirmation layer: [Verification layer](/project/verification-layer.md)
