@@ -3,7 +3,7 @@ type: Architecture
 title: Simulated trading
 description: Long and short positions, leverage, wallet deductions, and closed-trade P/L history.
 tags: [backend, database]
-generated: { by: codex/gpt-6, at: 2026-11-20T16:43:58Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T17:41:55Z }
 sources:
   - id: code
     resource: Backend/app/trading.py
@@ -19,12 +19,14 @@ Simulated positions fetch the latest daily bar from Yahoo Finance for entry and 
 - `positions`: open trades with `ticker`, `side`, `entry_price`, `quantity`, `leverage`, `amount_deducted`, `notional`, `opened_at`
 - `trades`: closed trades with `exit_price`, `pnl`, `pnl_pct`, `opened_at`, `closed_at`
 
-The router creates `prices`, `positions`, and `trades` with `CREATE TABLE IF NOT EXISTS` at startup. The pipeline and trading module use the same `prices` schema.
+The router creates `prices`, `positions`, and `trades` at startup. Trading and ingest upgrade existing SQLite `prices` with internal `observed_at_ns` metadata (legacy rows default to zero).
 
 # Rules
 
 - `amount` is the cash margin deducted from the wallet.
-- Opening's final debit uses the shared locked wallet funds guard; a stale precheck cannot authorize overspending. Funds rejection retains HTTP 409 and outer rollback removes the position. Close settlements retain the unguarded signed-delta policy. Duplicate-close protection is deferred.
+- Opening's final debit uses the shared funds guard; rejection retains HTTP 409 and outer rollback removes the position. SQLite opening allocates an integer ID above both live IDs and retained `trades.position_id`, under writer protection. Closed-trade IDs must not be purged; existing reused IDs are not repaired.
+- SQLite closing fetches the external quote after an owner-filtered lookup and before acquiring writer protection. The protected `DELETE ... RETURNING` rereads and claims the owned position; only its winner saves the price, trade, and signed settlement. Losers retain HTTP 404. The outer transaction rolls back all database changes on failure, including failed commit. Default/WAL tests verify deposits finish during paused quote fetching, concurrent closes settle once, and quote failures leave financial state unchanged; other engines remain unverified.
+- Shared SQLite price-cache upserts atomically accept only a strictly newer local receipt timestamp for the same ticker/date; equal or older observations leave all OHLCV fields unchanged. Trading and ingest use the same rule. Each trade settles from its own fetched quote even when that quote loses the cache comparison. Receipt time is local observation ordering, not a provider freshness guarantee.
 - `notional = amount × leverage`
 - `quantity = notional ÷ entry_price`
 - Leverage is **1–10**, default `1`.

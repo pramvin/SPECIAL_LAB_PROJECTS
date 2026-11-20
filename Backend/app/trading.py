@@ -8,6 +8,8 @@ import yfinance as yf
 from fastapi import APIRouter, Cookie, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
+from .dbcompat import begin_financial_write
+from .price_cache import init_price_observations, price_upsert_sql, price_values
 from .wallet import (
     InsufficientFunds as WalletInsufficientFunds,
     change_balance, ensure_wallet, finite_number, money, request_number, validate_amount, wallet_payload,
@@ -96,6 +98,7 @@ class PriceBar(TypedDict):
 
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(PRICES_SCHEMA)
+    init_price_observations(conn)
     conn.executescript(SCHEMA)
 
 
@@ -141,13 +144,16 @@ def fetch_latest_bar(ticker: str) -> PriceBar:
 
 def refresh_latest_close(conn: sqlite3.Connection, ticker: str) -> float:
     bar = fetch_latest_bar(ticker)
+    observed_at_ns = time.time_ns()
+    return save_price_bar(conn, ticker, bar, observed_at_ns)
+
+
+def save_price_bar(
+    conn: sqlite3.Connection, ticker: str, bar: PriceBar, observed_at_ns: int
+) -> float:
     conn.execute(
-        "INSERT INTO prices (ticker, date, open, high, low, close, volume) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?) "
-        "ON CONFLICT(ticker, date) DO UPDATE SET "
-        "open=excluded.open, high=excluded.high, low=excluded.low, "
-        "close=excluded.close, volume=excluded.volume",
-        (
+        price_upsert_sql(conn),
+        price_values(conn, (
             ticker,
             bar["date"],
             bar["open"],
@@ -155,7 +161,7 @@ def refresh_latest_close(conn: sqlite3.Connection, ticker: str) -> float:
             bar["low"],
             bar["close"],
             bar["volume"],
-        ),
+        ), observed_at_ns),
     )
     return float(bar["close"])
 
@@ -218,6 +224,22 @@ def trade_payload(row: sqlite3.Row) -> dict:
     }
 
 
+def _next_position_id(conn: sqlite3.Connection) -> int:
+    """Allocate under the caller's writer lock; closed trade IDs must be retained."""
+    begin_financial_write(conn)
+    cur = conn.execute(
+        "SELECT COALESCE(MAX(position_id), 0) FROM ("
+        "SELECT id AS position_id FROM positions UNION ALL SELECT position_id FROM trades)"
+    )
+    try:
+        highest = cur.fetchone()[0]
+    finally:
+        cur.close()
+    if highest >= 9_223_372_036_854_775_807:
+        raise TradingError("Position ID space exhausted")
+    return highest + 1
+
+
 def open_position(
     conn: sqlite3.Connection,
     user_id: int,
@@ -247,12 +269,17 @@ def open_position(
     notional = money(amount * leverage)
     quantity = round(notional / entry, 8)
     now = int(time.time())
-    new_id = conn.execute(
+    new_id = _next_position_id(conn)
+    cur = conn.execute(
         "INSERT INTO positions "
-        "(user_id, ticker, side, entry_price, quantity, leverage, amount_deducted, notional, opened_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
-        (user_id, ticker, side, entry, quantity, leverage, amount, notional, now),
-    ).fetchone()[0]
+        "(id, user_id, ticker, side, entry_price, quantity, leverage, amount_deducted, notional, opened_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
+        (new_id, user_id, ticker, side, entry, quantity, leverage, amount, notional, now),
+    )
+    try:
+        new_id = cur.fetchone()[0]
+    finally:
+        cur.close()
     try:
         wallet, _ = change_balance(conn, user_id, -amount, require_funds=True)
     except WalletInsufficientFunds as exc:
@@ -268,16 +295,34 @@ def open_position(
 def close_position(
     conn: sqlite3.Connection, user_id: int, position_id: int
 ) -> tuple[sqlite3.Row, sqlite3.Row]:
-    position = conn.execute(
-        "SELECT id, user_id, ticker, side, entry_price, quantity, leverage, "
-        "amount_deducted, notional, opened_at "
-        "FROM positions WHERE id = ? AND user_id = ?",
+    cur = conn.execute(
+        "SELECT ticker FROM positions WHERE id = ? AND user_id = ?",
         (position_id, user_id),
-    ).fetchone()
+    )
+    try:
+        candidate = cur.fetchone()
+    finally:
+        cur.close()
+    if candidate is None:
+        raise PositionNotFound("Open position not found")
+    bar = fetch_latest_bar(candidate["ticker"])
+    observed_at_ns = time.time_ns()
+
+    begin_financial_write(conn)
+    cur = conn.execute(
+        "DELETE FROM positions WHERE id = ? AND user_id = ? "
+        "RETURNING id, user_id, ticker, side, entry_price, quantity, leverage, "
+        "amount_deducted, notional, opened_at",
+        (position_id, user_id),
+    )
+    try:
+        position = cur.fetchone()
+    finally:
+        cur.close()
     if position is None:
         raise PositionNotFound("Open position not found")
 
-    exit_price = refresh_latest_close(conn, position["ticker"])
+    exit_price = save_price_bar(conn, position["ticker"], bar, observed_at_ns)
 
     entry = float(position["entry_price"])
     quantity = float(position["quantity"])
@@ -308,7 +353,6 @@ def close_position(
             now,
         ),
     ).fetchone()[0]
-    conn.execute("DELETE FROM positions WHERE id = ? AND user_id = ?", (position_id, user_id))
     wallet, _ = change_balance(conn, user_id, amount + pnl)
     trade = conn.execute(
         "SELECT id, position_id, user_id, ticker, side, entry_price, exit_price, quantity, "

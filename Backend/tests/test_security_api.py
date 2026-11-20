@@ -1,10 +1,12 @@
 """API contracts with injected disposable DB; real registration in a child process."""
 import os
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from pathlib import Path
 import subprocess
 import sys
 import tempfile
+import threading
 import unittest
 from unittest.mock import patch
 
@@ -129,6 +131,97 @@ class SecurityApiTest(unittest.TestCase):
                              headers={"Content-Type": "application/json"}).status_code, 422)
         with self.db() as conn:
             self.assertEqual(conn.execute("SELECT COUNT(*) FROM wallets").fetchone()[0], 0)
+
+    def test_wrong_owner_repeated_close_and_old_url_have_no_effects(self):
+        response = self.client.post("/api/positions", json={
+            "ticker": "AAPL", "side": "long", "amount": 100, "leverage": 1})
+        self.assertEqual(response.status_code, 200)
+        old_id = response.json()["position"]["id"]
+        old_url = f"/api/positions/{old_id}/close"
+
+        def state():
+            with self.db() as conn:
+                return {table: [dict(row) for row in conn.execute(
+                    f"SELECT * FROM {table} ORDER BY {order}").fetchall()]
+                    for table, order in (("wallets", "user_id"), ("positions", "id"),
+                                         ("trades", "id"), ("balance_history", "id"),
+                                         ("wallet_transactions", "id"), ("prices", "ticker, date"))}
+
+        def assert_rejected():
+            before = state()
+            response = self.client.post(old_url)
+            self.assertEqual(response.status_code, 404)
+            self.assertEqual(response.json(), {"detail": "Open position not found"})
+            self.assertEqual(state(), before)
+
+        self.client.cookies.set("session", "two")
+        assert_rejected()
+        self.client.cookies.set("session", "one")
+        response = self.client.post(old_url)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(set(response.json()), {"trade", "wallet"})
+        self.assertEqual(response.json()["trade"]["position_id"], old_id)
+        assert_rejected()
+        response = self.client.post("/api/positions", json={
+            "ticker": "AAPL", "side": "short", "amount": 100, "leverage": 1})
+        self.assertEqual(response.status_code, 200)
+        self.assertGreater(response.json()["position"]["id"], old_id)
+        assert_rejected()
+
+    def test_slow_close_quote_does_not_block_other_users_deposit(self):
+        other_user = {"Cookie": "session=two"}
+        self.assertEqual(self.client.get("/api/wallet", headers=other_user).status_code, 200)
+        for mode in ("delete", "wal"):
+            with self.subTest(journal_mode=mode):
+                with self.db() as conn:
+                    self.assertEqual(conn.execute(f"PRAGMA journal_mode={mode}").fetchone()[0], mode)
+                opened = self.client.post("/api/positions", json={
+                    "ticker": "AAPL", "side": "long", "amount": 100, "leverage": 1})
+                self.assertEqual(opened.status_code, 200)
+                position_id = opened.json()["position"]["id"]
+                close_url = f"/api/positions/{position_id}/close"
+                balance = self.client.get("/api/wallet", headers=other_user).json()["balance"]
+                fetching = threading.Event()
+                release = threading.Event()
+
+                def slow_quote(_ticker):
+                    fetching.set()
+                    if not release.wait(10):
+                        raise RuntimeError("quote was not released")
+                    return {"date": "2026-01-02", "open": 110, "high": 110,
+                            "low": 110, "close": 110, "volume": 2}
+
+                with patch.object(trading, "fetch_latest_bar", side_effect=slow_quote), \
+                        ThreadPoolExecutor(max_workers=2) as pool:
+                    close = pool.submit(self.client.post, close_url)
+                    try:
+                        self.assertTrue(fetching.wait(5), "close did not request a quote")
+                        deposit = pool.submit(self.client.post, "/api/wallet/deposit",
+                                              json={"amount": 10}, headers=other_user)
+                        response = deposit.result(timeout=3)
+                        self.assertEqual(response.status_code, 200)
+                        self.assertEqual(response.json()["wallet"]["balance"], balance + 10)
+                        self.assertFalse(close.done())
+                        self.assertFalse(release.is_set())
+                    finally:
+                        release.set()
+                    response = close.result(timeout=5)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response.json()["trade"]["pnl"], 10)
+                self.assertEqual(self.client.post(close_url).status_code, 404)
+                with self.db() as conn:
+                    self.assertEqual(conn.execute(
+                        "SELECT COUNT(*) FROM trades WHERE position_id = ?", (position_id,)
+                    ).fetchone()[0], 1)
+                    self.assertEqual(conn.execute(
+                        "SELECT COUNT(*) FROM positions WHERE id = ?", (position_id,)
+                    ).fetchone()[0], 0)
+                    self.assertEqual(conn.execute(
+                        "SELECT COUNT(*) FROM balance_history WHERE user_id = 1"
+                    ).fetchone()[0], 3 if mode == "delete" else 5)
+                    self.assertEqual(conn.execute(
+                        "SELECT balance FROM wallets WHERE user_id = 1"
+                    ).fetchone()[0], 1010 if mode == "delete" else 1020)
 
     def test_real_registration_and_late_registration_failure(self):
         self.check_registration_rollback("ensure_wallet")
