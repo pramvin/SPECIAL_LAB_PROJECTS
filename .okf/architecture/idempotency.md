@@ -3,7 +3,7 @@ type: Architecture
 title: Financial request idempotency
 description: SQLite financial request keys, atomic result storage, and replay behavior
 tags: [backend, database, security]
-generated: { by: codex/gpt-6, at: 2026-11-20T17:59:32Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T18:15:11Z }
 sources:
   - id: code
     resource: Backend/app/idempotency.py
@@ -28,6 +28,6 @@ Keys are unique per authenticated user across all four operations. The versioned
 
 `financial_requests` stores `user_id`, `key`, version-prefixed `fingerprint`, `status_code` (200), `response_json`, and `created_at`, with primary key `(user_id, key)`. SQLite startup creates the table for existing databases. Only successful operations consume keys; failed attempts may be retried. No expiration or cleanup is automatic.
 
-Replays return the original JSON and status, including historical wallet/position snapshots. They do not reprice a trade or recreate a closed position. SQLite BUSY/LOCKED failures return HTTP 503 with `Retry-After: 1`; clients should retry with the same key. No persistent pending reservations are used.
+Replays return the original JSON and status, including historical wallet/position snapshots. They do not reprice a trade or recreate a closed position. SQLite BUSY/LOCKED failures return HTTP 503 with `Retry-After: 1`; clients should retry with the same key. No persistent pending reservations are used. Selected failure diagnostics run only after connection contexts unwind; [logging failures](/architecture/financial-audit.md) cannot replace the original outcome.
 
 See [Wallet](/architecture/wallet.md) and [Simulated trading](/architecture/trading.md). Their funds guards, close-once claims, ID allocation, settlement quotes, and shared cache ordering remain in force.

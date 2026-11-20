@@ -3,7 +3,7 @@ type: Architecture
 title: Simulated trading
 description: Long and short positions, leverage, wallet deductions, and closed-trade P/L history.
 tags: [backend, database]
-generated: { by: codex/gpt-6, at: 2026-11-20T17:59:32Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T18:15:11Z }
 sources:
   - id: code
     resource: Backend/app/trading.py
@@ -34,7 +34,7 @@ The router creates `prices`, `positions`, and `trades` at startup. Trading and i
 - Long P/L: `(exit − entry) × quantity`
 - Short P/L: `(entry − exit) × quantity`
 - `pnl_pct = pnl ÷ amount_deducted × 100`
-- On close, `amount_deducted + pnl` is returned to the wallet.
+- On close, `amount_deducted + pnl` is returned to the wallet. SQLite [audit history](/architecture/financial-audit.md) links the signed settlement to both trade and historical position IDs, including zero or negative settlements.
 - Win rate = winning closed trades ÷ all closed trades; break-even trades remain in the denominator.
 - Win rate and average/best/worst trade metrics are `null` until a closed trade exists.
 - A leveraged loss may make the wallet balance negative; the UI must warn rather than hide it.

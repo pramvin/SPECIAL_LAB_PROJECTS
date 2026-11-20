@@ -9,6 +9,7 @@ import time
 from fastapi import HTTPException, Response
 
 from .dbcompat import begin_financial_write, is_pg
+from . import financial_logging
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS financial_requests (
@@ -56,7 +57,8 @@ def lookup(conn, user_id: int, key: str, digest: str):
     if row is None:
         return None
     if row["fingerprint"] != digest:
-        raise HTTPException(409, "Idempotency-Key was already used with different request inputs")
+        raise financial_logging.RequestError(
+            409, "Idempotency-Key was already used with different request inputs", "idempotency_conflict")
     return Response(content=row["response_json"], status_code=row["status_code"],
                     media_type="application/json")
 
@@ -71,7 +73,7 @@ def record(conn, user_id: int, key: str, digest: str, payload: dict) -> Response
     return Response(content=encoded, status_code=200, media_type="application/json")
 
 
-def run(db, current_user, session, key, operation, inputs, execute, prepare=None):
+def _run(db, current_user, session, key, operation, inputs, execute, prepare=None):
     """Cache successful keyed effects only; all exceptions escape for outer rollback."""
     try:
         if key is None:
@@ -85,7 +87,8 @@ def run(db, current_user, session, key, operation, inputs, execute, prepare=None
         with connection(db) as conn:
             user_id = current_user(conn, session)["id"]
             if not KEY_RE.fullmatch(key):
-                raise HTTPException(422, "Idempotency-Key must be 1-128 visible ASCII characters")
+                raise financial_logging.RequestError(
+                    422, "Idempotency-Key must be 1-128 visible ASCII characters", "invalid_idempotency_key")
             if is_pg(conn):
                 raise HTTPException(501, "Financial idempotency is supported only on SQLite")
             result = lookup(conn, user_id, key, digest)
@@ -116,6 +119,23 @@ def run(db, current_user, session, key, operation, inputs, execute, prepare=None
     except sqlite3.OperationalError as exc:
         code = getattr(exc, "sqlite_errorcode", 0)
         if code & 0xFF in (sqlite3.SQLITE_BUSY, sqlite3.SQLITE_LOCKED):
-            raise HTTPException(503, "Financial database is busy. Try again.",
-                                headers={"Retry-After": "1"}) from exc
+            raise financial_logging.RequestError(
+                503, "Financial database is busy. Try again.", "database_contention",
+                headers={"Retry-After": "1"}) from exc
+        raise
+
+
+def run(db, current_user, session, key, operation, inputs, execute, prepare=None):
+    user_id = None
+
+    def authenticate(conn, token):
+        nonlocal user_id
+        user = current_user(conn, token)
+        user_id = user["id"]
+        return user
+
+    try:
+        return _run(db, authenticate, session, key, operation, inputs, execute, prepare)
+    except Exception as exc:
+        financial_logging.emit_failure(operation, user_id, exc)
         raise

@@ -69,23 +69,26 @@ CREATE INDEX IF NOT EXISTS idx_trades_user_time
 
 
 class TradingError(Exception):
-    pass
+    financial_status = 422
+    financial_reason = None
 
 
 class UnknownTicker(TradingError):
-    pass
+    financial_status = 404
 
 
 class InsufficientFunds(TradingError):
-    pass
+    financial_status = 409
 
 
 class PositionNotFound(TradingError):
-    pass
+    financial_status = 404
+    financial_reason = "position_unavailable"
 
 
 class MarketDataUnavailable(TradingError):
-    pass
+    financial_status = 502
+    financial_reason = "market_data_unavailable"
 
 
 class PriceBar(TypedDict):
@@ -285,7 +288,8 @@ def open_position(
     finally:
         cur.close()
     try:
-        wallet, _ = change_balance(conn, user_id, -amount, require_funds=True)
+        wallet, _ = change_balance(conn, user_id, -amount, require_funds=True,
+                                   operation_type="trade_open", position_id=new_id)
     except WalletInsufficientFunds as exc:
         raise InsufficientFunds(str(exc)) from exc
     position = conn.execute(
@@ -371,7 +375,8 @@ def close_position(
             now,
         ),
     ).fetchone()[0]
-    wallet, _ = change_balance(conn, user_id, amount + pnl)
+    wallet, _ = change_balance(conn, user_id, amount + pnl, operation_type="trade_close",
+                               position_id=position["id"], trade_id=new_id)
     trade = conn.execute(
         "SELECT id, position_id, user_id, ticker, side, entry_price, exit_price, quantity, "
         "leverage, amount_deducted, pnl, pnl_pct, opened_at, closed_at "

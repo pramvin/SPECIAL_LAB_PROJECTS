@@ -7,7 +7,7 @@ from typing import Callable, Literal
 from fastapi import APIRouter, Cookie, Header, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
-from .dbcompat import begin_financial_write, lock_wallet
+from .dbcompat import begin_financial_write, is_pg, lock_wallet
 from . import idempotency
 
 STARTING_BALANCE = 1000.0
@@ -48,6 +48,34 @@ CREATE INDEX IF NOT EXISTS idx_balance_history_user_time
 
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    if not is_pg(conn):
+        # Initialization owns its transaction; existing rows deliberately stay NULL.
+        with conn:
+            begin_financial_write(conn)
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(balance_history)").fetchall()}
+            for name, column_type in (
+                ("operation_type", "TEXT"), ("delta", "REAL"),
+                ("wallet_transaction_id", "INTEGER"), ("position_id", "INTEGER"), ("trade_id", "INTEGER"),
+            ):
+                if name not in columns:
+                    conn.execute(f"ALTER TABLE balance_history ADD COLUMN {name} {column_type}").close()
+
+
+def record_balance_history(
+    conn, user_id, balance, created_at, operation_type, delta,
+    wallet_transaction_id=None, position_id=None, trade_id=None,
+) -> None:
+    if is_pg(conn):
+        conn.execute("INSERT INTO balance_history (user_id, balance, created_at) VALUES (?, ?, ?)",
+                     (user_id, balance, created_at)).close()
+    else:
+        conn.execute(
+            "INSERT INTO balance_history "
+            "(user_id, balance, created_at, operation_type, delta, wallet_transaction_id, position_id, trade_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, balance, created_at, operation_type, delta,
+             wallet_transaction_id, position_id, trade_id),
+        ).close()
 
 
 def money(value: float) -> float:
@@ -106,10 +134,7 @@ def ensure_wallet(conn: sqlite3.Connection, user_id: int) -> sqlite3.Row:
     finally:
         cur.close()
     if created:
-        conn.execute(
-            "INSERT INTO balance_history (user_id, balance, created_at) VALUES (?, ?, ?)",
-            (user_id, STARTING_BALANCE, now),
-        )
+        record_balance_history(conn, user_id, STARTING_BALANCE, now, "initialization", STARTING_BALANCE)
     return conn.execute(
         "SELECT user_id, balance, starting_balance, created_at, updated_at "
         "FROM wallets WHERE user_id = ?",
@@ -125,6 +150,9 @@ def change_balance(
     note: str = "",
     *,
     require_funds: bool = False,
+    operation_type: str | None = None,
+    position_id: int | None = None,
+    trade_id: int | None = None,
 ) -> tuple[sqlite3.Row, sqlite3.Row | None]:
     """Mutate under a DB lock; the outer caller must roll back on any error."""
     delta = finite_number(delta)  # Internal settlements have no external amount cap.
@@ -136,7 +164,8 @@ def change_balance(
     begin_financial_write(conn)
     ensure_wallet(conn, user_id)
     wallet = lock_wallet(conn, user_id)
-    balance_after = money(finite_number(wallet["balance"]) + delta)
+    balance_before = finite_number(wallet["balance"])
+    balance_after = money(balance_before + delta)
     finite_number(balance_after)
     now = int(time.time())
     guarded = require_funds and delta < 0
@@ -152,11 +181,6 @@ def change_balance(
         cur.close()
     if wallet is None:
         raise InsufficientFunds("Insufficient wallet balance")
-    conn.execute(
-        "INSERT INTO balance_history (user_id, balance, created_at) VALUES (?, ?, ?)",
-        (user_id, balance_after, now),
-    )
-
     transaction = None
     if kind is not None:
         new_id = conn.execute(
@@ -171,11 +195,18 @@ def change_balance(
             (new_id,),
         ).fetchone()
 
+    event_type = ("withdrawal" if kind == "withdraw" else kind) or operation_type or "adjustment"
+    record_balance_history(
+        conn, user_id, balance_after, now, event_type, money(balance_after - balance_before),
+        None if transaction is None else transaction["id"], position_id, trade_id,
+    )
+
     return wallet, transaction
 
 
 class InsufficientFunds(Exception):
-    pass
+    financial_status = 409
+    financial_reason = None
 
 
 def deposit(

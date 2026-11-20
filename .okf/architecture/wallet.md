@@ -3,7 +3,7 @@ type: Architecture
 title: Wallet
 description: Simulated USD wallet with deposits, withdrawals, and balance-history snapshots.
 tags: [backend, database]
-generated: { by: codex/gpt-6, at: 2026-11-20T17:59:32Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T18:15:11Z }
 sources:
   - id: code
     resource: Backend/app/wallet.py
@@ -18,7 +18,7 @@ Each user gets one simulated wallet. It starts at **$1,000** and is created at r
 
 - `wallets`: `user_id` primary key, `balance`, `starting_balance`, `created_at`, `updated_at`
 - `wallet_transactions`: deposit/withdraw log with `amount`, `balance_after`, `note`, `created_at`
-- `balance_history`: one snapshot after every wallet change, used for the percentage change chart from the initial balance
+- `balance_history`: one snapshot per wallet change; SQLite adds nullable operation type, signed delta, and transaction/position/trade references. See [Financial audit](/architecture/financial-audit.md).
 
 All tables use `CREATE TABLE IF NOT EXISTS` and are created when the router is included in `main.py`.
 
