@@ -6,9 +6,12 @@ from typing import Callable, Literal, TypedDict
 
 import yfinance as yf
 from fastapi import APIRouter, Cookie, HTTPException, Query
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
-from .wallet import change_balance, ensure_wallet, money, wallet_payload
+from .wallet import (
+    InsufficientFunds as WalletInsufficientFunds,
+    change_balance, ensure_wallet, finite_number, money, request_number, validate_amount, wallet_payload,
+)
 from .watchlist import TICKER_RE, normalize_ticker
 
 MIN_LEVERAGE = 1.0
@@ -228,10 +231,11 @@ def open_position(
         raise UnknownTicker("Invalid ticker")
     if side not in ("long", "short"):
         raise TradingError("Side must be long or short")
-    amount = money(amount)
-    leverage = float(leverage)
-    if amount <= 0:
-        raise TradingError("Amount must be positive")
+    try:
+        amount = validate_amount(amount)
+        leverage = finite_number(leverage)
+    except ValueError as exc:
+        raise TradingError(str(exc)) from exc
     if not MIN_LEVERAGE <= leverage <= MAX_LEVERAGE:
         raise TradingError(f"Leverage must be between {MIN_LEVERAGE:g} and {MAX_LEVERAGE:g}")
 
@@ -249,7 +253,10 @@ def open_position(
         "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
         (user_id, ticker, side, entry, quantity, leverage, amount, notional, now),
     ).fetchone()[0]
-    wallet, _ = change_balance(conn, user_id, -amount)
+    try:
+        wallet, _ = change_balance(conn, user_id, -amount, require_funds=True)
+    except WalletInsufficientFunds as exc:
+        raise InsufficientFunds(str(exc)) from exc
     position = conn.execute(
         "SELECT id, user_id, ticker, side, entry_price, quantity, leverage, "
         "amount_deducted, notional, opened_at FROM positions WHERE id = ?",
@@ -420,6 +427,16 @@ class OpenPositionBody(BaseModel):
     side: Literal["long", "short"]
     amount: float = Field(gt=0, le=MAX_AMOUNT)
     leverage: float = Field(default=1, ge=MIN_LEVERAGE, le=MAX_LEVERAGE)
+
+    @field_validator("amount", mode="before")
+    @classmethod
+    def valid_amount(cls, value):
+        return validate_amount(request_number(value))
+
+    @field_validator("leverage", mode="before")
+    @classmethod
+    def valid_leverage(cls, value):
+        return request_number(value)
 
 
 def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -> APIRouter:

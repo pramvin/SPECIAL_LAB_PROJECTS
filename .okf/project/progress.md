@@ -3,7 +3,7 @@ type: Progress
 title: Stage and task status
 description: Status of the 8 pipeline stages and the tasks still open
 tags: [status]
-generated: { by: copilot-sdk/ai-assistant, at: 2026-11-17T00:49:47+08:00 }
+generated: { by: codex/gpt-6, at: 2026-11-20T17:05:29Z }
 ---
 
 Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user brings it back) · ❌ Dropped
@@ -42,5 +42,6 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 | T15 | Direction (up/down) prediction from news, chart, RSI/MACD, ML | ❌ dropped 2026-11-06 · [Direction prediction](/experiments/direction-prediction.md) |
 | T16 | News sentiment: Laya removed, local ML model trained on Kaggle (2026-11-06), `pipeline.sentiment` run on 530 headlines, card UI shows labels + News mood bar ✅ · headlines exist for only 12 tickers, so run `pipeline.news` for the current ideas ⬜ · labels unvalidated vs humans ⬜ | 🟡 |
 | T17 | Wallet + simulated trading: $1,000 wallet, all-time performance summary, searchable/filterable paginated histories, sortable positions, close confirmation, endpoints, tests, and docs | ✅ |
+| T18 | Han transaction security Stage 1: 84 tests pass, including forced SQLite contention, WAL error codes, commit-failure and post-session registration rollback. Live PostgreSQL unverified; close-once, replay protection, and financial audits remain later work | 🟡 review pending |
 
 Experiment results: [Results](/experiments/results.md)

@@ -3,7 +3,7 @@ type: Architecture
 title: Simulated trading
 description: Long and short positions, leverage, wallet deductions, and closed-trade P/L history.
 tags: [backend, database]
-generated: { by: copilot-sdk/ai-assistant, at: 2026-11-17T00:49:47+08:00 }
+generated: { by: codex/gpt-6, at: 2026-11-20T16:43:58Z }
 sources:
   - id: code
     resource: Backend/app/trading.py
@@ -24,6 +24,7 @@ The router creates `prices`, `positions`, and `trades` with `CREATE TABLE IF NOT
 # Rules
 
 - `amount` is the cash margin deducted from the wallet.
+- Opening's final debit uses the shared locked wallet funds guard; a stale precheck cannot authorize overspending. Funds rejection retains HTTP 409 and outer rollback removes the position. Close settlements retain the unguarded signed-delta policy. Duplicate-close protection is deferred.
 - `notional = amount × leverage`
 - `quantity = notional ÷ entry_price`
 - Leverage is **1–10**, default `1`.

@@ -3,7 +3,7 @@ type: Architecture
 title: Wallet
 description: Simulated USD wallet with deposits, withdrawals, and balance-history snapshots.
 tags: [backend, database]
-generated: { by: copilot-sdk/ai-assistant, at: 2026-11-17T00:49:47+08:00 }
+generated: { by: codex/gpt-6, at: 2026-11-20T16:43:58Z }
 sources:
   - id: code
     resource: Backend/app/wallet.py
@@ -33,6 +33,12 @@ All tables use `CREATE TABLE IF NOT EXISTS` and are created when the router is i
 | GET | `/api/wallet/history` | Chronological balance snapshots |
 
 Withdrawals fail with `409` when the balance is insufficient. Trades also update the wallet through internal helpers, but only deposit and withdraw appear in `wallet_transactions`.
+
+# Mutation protection
+
+`change_balance` is the shared mutation path. SQLite acquires writer protection before the authoritative balance read; PostgreSQL locks the wallet row. Withdrawals and position openings use a conditional funds guard. Helpers never commit; exceptions must escape to the outer transaction for rollback. Initialization uses conflict-safe insertion and creates its initial snapshot only for the insert winner.
+
+External amounts are finite JSON numbers, positive, at most $1,000,000, rounded with existing Python `money()` before use; rounded zero is rejected. Internal settlements remain signed and uncapped. SQLite concurrency/rollback/API tests passed; live PostgreSQL locking remains unverified. Replay and duplicate-close protection are deferred.
 
 # Frontend
 
