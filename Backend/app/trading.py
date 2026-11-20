@@ -5,10 +5,11 @@ import time
 from typing import Callable, Literal, TypedDict
 
 import yfinance as yf
-from fastapi import APIRouter, Cookie, HTTPException, Query
+from fastapi import APIRouter, Cookie, Header, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
 from .dbcompat import begin_financial_write
+from . import idempotency
 from .price_cache import init_price_observations, price_upsert_sql, price_values
 from .wallet import (
     InsufficientFunds as WalletInsufficientFunds,
@@ -247,6 +248,8 @@ def open_position(
     side: Literal["long", "short"],
     amount: float,
     leverage: float,
+    *,
+    quote: tuple[PriceBar, int] | None = None,
 ) -> tuple[sqlite3.Row, sqlite3.Row]:
     ticker = normalize_ticker(ticker)
     if not TICKER_RE.fullmatch(ticker):
@@ -265,7 +268,8 @@ def open_position(
     if amount > wallet["balance"] + 1e-9:
         raise InsufficientFunds("Insufficient wallet balance")
 
-    entry = refresh_latest_close(conn, ticker)
+    entry = (refresh_latest_close(conn, ticker) if quote is None
+             else save_price_bar(conn, ticker, *quote))
     notional = money(amount * leverage)
     quantity = round(notional / entry, 8)
     now = int(time.time())
@@ -292,9 +296,7 @@ def open_position(
     return position, wallet
 
 
-def close_position(
-    conn: sqlite3.Connection, user_id: int, position_id: int
-) -> tuple[sqlite3.Row, sqlite3.Row]:
+def owned_position_ticker(conn: sqlite3.Connection, user_id: int, position_id: int) -> str:
     cur = conn.execute(
         "SELECT ticker FROM positions WHERE id = ? AND user_id = ?",
         (position_id, user_id),
@@ -305,8 +307,24 @@ def close_position(
         cur.close()
     if candidate is None:
         raise PositionNotFound("Open position not found")
-    bar = fetch_latest_bar(candidate["ticker"])
-    observed_at_ns = time.time_ns()
+    return candidate["ticker"]
+
+
+def prepare_quote(ticker: str) -> tuple[PriceBar, int]:
+    ticker = normalize_ticker(ticker)
+    if not TICKER_RE.fullmatch(ticker):
+        raise UnknownTicker("Invalid ticker")
+    bar = fetch_latest_bar(ticker)
+    return bar, time.time_ns()
+
+
+def close_position(
+    conn: sqlite3.Connection, user_id: int, position_id: int,
+    *, quote: tuple[PriceBar, int] | None = None,
+) -> tuple[sqlite3.Row, sqlite3.Row]:
+    if quote is None:
+        quote = prepare_quote(owned_position_ticker(conn, user_id, position_id))
+    bar, observed_at_ns = quote
 
     begin_financial_write(conn)
     cur = conn.execute(
@@ -486,6 +504,7 @@ class OpenPositionBody(BaseModel):
 def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -> APIRouter:
     with db() as conn:
         init_schema(conn)
+        idempotency.init_schema(conn)
 
     router = APIRouter(prefix="/api")
 
@@ -498,51 +517,49 @@ def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -
 
     @router.post("/positions")
     def post_position(
-        body: OpenPositionBody, session: str | None = Cookie(default=None)
+        body: OpenPositionBody, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ):
-        with db() as conn:
-            user = current_user(conn, session)
-            try:
-                position, wallet = open_position(
-                    conn,
-                    user["id"],
-                    body.ticker,
-                    body.side,
-                    body.amount,
-                    body.leverage,
-                )
-            except UnknownTicker as exc:
-                raise HTTPException(404, str(exc))
-            except MarketDataUnavailable:
-                raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
-            except InsufficientFunds as exc:
-                raise HTTPException(409, str(exc))
-            except TradingError as exc:
-                raise HTTPException(422, str(exc))
+        def execute(conn, user_id, quote):
+            position, wallet = open_position(
+                conn, user_id, body.ticker, body.side, body.amount, body.leverage, quote=quote)
             current = latest_close(conn, position["ticker"])
-        return {
-            "position": position_payload(position, current),
-            "wallet": wallet_payload(wallet),
-        }
+            return {"position": position_payload(position, current), "wallet": wallet_payload(wallet)}
+        try:
+            return idempotency.run(
+                db, current_user, session, idempotency_key, "positions.open",
+                {"ticker": normalize_ticker(body.ticker), "side": body.side,
+                 "amount": body.amount, "leverage": float(body.leverage)},
+                execute, prepare=lambda _user_id: prepare_quote(body.ticker))
+        except UnknownTicker as exc:
+            raise HTTPException(404, str(exc))
+        except MarketDataUnavailable:
+            raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
+        except InsufficientFunds as exc:
+            raise HTTPException(409, str(exc))
+        except TradingError as exc:
+            raise HTTPException(422, str(exc))
 
     @router.post("/positions/{position_id}/close")
     def post_close(
-        position_id: int, session: str | None = Cookie(default=None)
+        position_id: int, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ):
-        with db() as conn:
-            user = current_user(conn, session)
-            try:
-                trade, wallet = close_position(conn, user["id"], position_id)
-            except PositionNotFound as exc:
-                raise HTTPException(404, str(exc))
-            except UnknownTicker as exc:
-                raise HTTPException(404, str(exc))
-            except MarketDataUnavailable:
-                raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
-        return {
-            "trade": trade_payload(trade),
-            "wallet": wallet_payload(wallet),
-        }
+        def prepare(user_id):
+            with idempotency.connection(db) as conn:
+                ticker = owned_position_ticker(conn, user_id, position_id)
+            return prepare_quote(ticker)
+
+        def execute(conn, user_id, quote):
+            trade, wallet = close_position(conn, user_id, position_id, quote=quote)
+            return {"trade": trade_payload(trade), "wallet": wallet_payload(wallet)}
+        try:
+            return idempotency.run(db, current_user, session, idempotency_key, "positions.close",
+                                   {"position_id": position_id}, execute, prepare)
+        except (PositionNotFound, UnknownTicker) as exc:
+            raise HTTPException(404, str(exc))
+        except MarketDataUnavailable:
+            raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
 
     @router.get("/trades")
     def get_trades(

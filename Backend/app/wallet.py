@@ -4,10 +4,11 @@ import sqlite3
 import time
 from typing import Callable, Literal
 
-from fastapi import APIRouter, Cookie, HTTPException, Query
+from fastapi import APIRouter, Cookie, Header, HTTPException, Query
 from pydantic import BaseModel, Field, field_validator
 
 from .dbcompat import begin_financial_write, lock_wallet
+from . import idempotency
 
 STARTING_BALANCE = 1000.0
 DEFAULT_TRANSACTION_LIMIT = 50
@@ -291,6 +292,7 @@ class AmountBody(BaseModel):
 def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -> APIRouter:
     with db() as conn:
         init_schema(conn)
+        idempotency.init_schema(conn)
 
     router = APIRouter(prefix="/api")
 
@@ -301,31 +303,31 @@ def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -
             return wallet_payload(ensure_wallet(conn, user["id"]))
 
     @router.post("/wallet/deposit")
-    def deposit_funds(body: AmountBody, session: str | None = Cookie(default=None)):
-        with db() as conn:
-            user = current_user(conn, session)
+    def deposit_funds(
+        body: AmountBody, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ):
+        def execute(conn, user_id, _prepared):
             wallet, transaction = deposit(
-                conn, user["id"], body.amount, note=body.note.strip()
+                conn, user_id, body.amount, note=body.note.strip()
             )
-        return {
-            "wallet": wallet_payload(wallet),
-            "transaction": transaction_payload(transaction),
-        }
+            return {"wallet": wallet_payload(wallet), "transaction": transaction_payload(transaction)}
+        return idempotency.run(db, current_user, session, idempotency_key, "wallet.deposit",
+                               {"amount": body.amount, "note": body.note.strip()}, execute)
 
     @router.post("/wallet/withdraw")
-    def withdraw_funds(body: AmountBody, session: str | None = Cookie(default=None)):
-        with db() as conn:
-            user = current_user(conn, session)
-            try:
-                wallet, transaction = withdraw(
-                    conn, user["id"], body.amount, note=body.note.strip()
-                )
-            except InsufficientFunds as exc:
-                raise HTTPException(409, str(exc))
-        return {
-            "wallet": wallet_payload(wallet),
-            "transaction": transaction_payload(transaction),
-        }
+    def withdraw_funds(
+        body: AmountBody, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ):
+        def execute(conn, user_id, _prepared):
+            wallet, transaction = withdraw(conn, user_id, body.amount, note=body.note.strip())
+            return {"wallet": wallet_payload(wallet), "transaction": transaction_payload(transaction)}
+        try:
+            return idempotency.run(db, current_user, session, idempotency_key, "wallet.withdraw",
+                                   {"amount": body.amount, "note": body.note.strip()}, execute)
+        except InsufficientFunds as exc:
+            raise HTTPException(409, str(exc))
 
     @router.get("/wallet/transactions")
     def get_transactions(

@@ -3,7 +3,7 @@ type: Architecture
 title: Simulated trading
 description: Long and short positions, leverage, wallet deductions, and closed-trade P/L history.
 tags: [backend, database]
-generated: { by: codex/gpt-6, at: 2026-11-20T17:41:55Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T17:59:32Z }
 sources:
   - id: code
     resource: Backend/app/trading.py
@@ -27,6 +27,7 @@ The router creates `prices`, `positions`, and `trades` at startup. Trading and i
 - Opening's final debit uses the shared funds guard; rejection retains HTTP 409 and outer rollback removes the position. SQLite opening allocates an integer ID above both live IDs and retained `trades.position_id`, under writer protection. Closed-trade IDs must not be purged; existing reused IDs are not repaired.
 - SQLite closing fetches the external quote after an owner-filtered lookup and before acquiring writer protection. The protected `DELETE ... RETURNING` rereads and claims the owned position; only its winner saves the price, trade, and signed settlement. Losers retain HTTP 404. The outer transaction rolls back all database changes on failure, including failed commit. Default/WAL tests verify deposits finish during paused quote fetching, concurrent closes settle once, and quote failures leave financial state unchanged; other engines remain unverified.
 - Shared SQLite price-cache upserts atomically accept only a strictly newer local receipt timestamp for the same ticker/date; equal or older observations leave all OHLCV fields unchanged. Trading and ingest use the same rule. Each trade settles from its own fetched quote even when that quote loses the cache comparison. Receipt time is local observation ordering, not a provider freshness guarantee.
+- Open/close endpoints support optional SQLite [financial idempotency](/architecture/idempotency.md). Keyed requests prepare quotes before the protected second key lookup and atomically store the successful response with settlement.
 - `notional = amount × leverage`
 - `quantity = notional ÷ entry_price`
 - Leverage is **1–10**, default `1`.

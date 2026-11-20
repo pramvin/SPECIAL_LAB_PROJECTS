@@ -3,7 +3,7 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, and next steps (the most frequently updated file)
 tags: [active]
-generated: { by: codex/gpt-6, at: 2026-11-20T17:41:55Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T17:59:32Z }
 ---
 
 **Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: fetch headlines for the current ideas (`pipeline.news`, then `pipeline.sentiment`), then make Stage 5 (LLM) trustworthy and fix the UI bugs below.
@@ -12,12 +12,12 @@ No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/not
 
 # Git status
 
-- Current branch: `feature/Security`; Stage 1 is committed; Stage 2 changes are uncommitted for review.
+- Current branch: `feature/Security`; Stages 1 and 2 are committed and reviewed. Stage 3 financial idempotency is implemented, uncommitted, and awaiting review.
 - Ask before committing or pushing (rule in `AGENTS.md`)
 
 # Paper trading
 
-Han Security Stage 1 is committed. Stage 2 adds SQLite close-once claiming and protected integer ID allocation above live and historical IDs. The SQLite-focused suite passes 101 tests. Closing fetches its quote before writer protection, then atomically claims and settles the position. Default/WAL regressions cover deposits during paused quotes, simultaneous close quotes, out-of-order cache updates with each trade retaining its own quote, quote failures, rollback after claim and failed commit, and old-URL rejection after reopening. Closed-trade history must be retained; existing databases were not audited for prior ID reuse. Wallet ownership, APIs, P/L, and leveraged negative losses remain unchanged. Live PostgreSQL remains unverified. Trading and ingest atomically keep newer cache observations; SQLite startup adds observation metadata to legacy prices. General replay/idempotency and financial audits remain later work.
+Security Stage 3 adds optional SQLite financial request keys for deposit, withdrawal, opening, and closing. Successful responses are stored atomically with financial changes and replayed after retries or restart. The initial read connection closes before quote fetching; a protected second lookup takes precedence over preparation errors. All 143 relevant tests pass, including default/WAL concurrency and rollback and Stage 1/2 regressions. See [Financial idempotency](/architecture/idempotency.md). Unkeyed clients retain legacy behavior; no frontend adoption or automatic record expiration was added. Existing databases were not audited for legacy position ID reuse; financial audits remain later work.
 
 `Backend/app/wallet.py` and `Backend/app/trading.py` provide each user a simulated $1,000 wallet, deposit/withdrawal records, balance snapshots, positions, and closed trades. The `/wallet` page is labeled Paper Trading, alerts on successful deposits/withdrawals, and charts percentage change from the starting balance. Added all-time performance metrics, user-scoped searchable/paginated trade and transaction history, sortable positions, and a close-confirmation step. Position entry/close fetches the latest Yahoo Finance daily bar and persists it in `prices`; prices are not real-time. See [Wallet](/architecture/wallet.md), [Simulated trading](/architecture/trading.md), and [Data sources](/architecture/data-sources.md). Tests: `python -m unittest tests.test_wallet tests.test_trading`.
 

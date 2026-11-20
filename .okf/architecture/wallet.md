@@ -3,7 +3,7 @@ type: Architecture
 title: Wallet
 description: Simulated USD wallet with deposits, withdrawals, and balance-history snapshots.
 tags: [backend, database]
-generated: { by: codex/gpt-6, at: 2026-11-20T17:24:46Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T17:59:32Z }
 sources:
   - id: code
     resource: Backend/app/wallet.py
@@ -38,7 +38,7 @@ Withdrawals fail with `409` when the balance is insufficient. Trades also update
 
 `change_balance` is the shared mutation path. SQLite acquires writer protection before the authoritative balance read; PostgreSQL locks the wallet row. Withdrawals and position openings use a conditional funds guard. Helpers never commit; exceptions must escape to the outer transaction for rollback. Initialization uses conflict-safe insertion and creates its initial snapshot only for the insert winner.
 
-External amounts are finite JSON numbers, positive, at most $1,000,000, rounded with existing Python `money()` before use; rounded zero is rejected. Internal settlements remain signed and uncapped. SQLite concurrency/rollback/API tests passed; live PostgreSQL locking remains unverified. SQLite close-once claiming now lives in [Trading](/architecture/trading.md); wallet helpers and transaction ownership are unchanged. General replay protection remains deferred.
+External amounts are finite JSON numbers, positive, at most $1,000,000, rounded with existing Python `money()` before use; rounded zero is rejected. Internal settlements remain signed and uncapped. SQLite concurrency/rollback/API tests passed; live PostgreSQL locking remains unverified. SQLite close-once claiming now lives in [Trading](/architecture/trading.md); wallet helpers and transaction ownership are unchanged. Optional SQLite request keys now provide [financial idempotency](/architecture/idempotency.md); unkeyed requests retain legacy behavior.
 
 # Frontend
 

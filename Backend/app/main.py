@@ -18,7 +18,7 @@ from fastapi import Request
 from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from . import matching
+from . import idempotency, matching
 from .dbcompat import IntegrityError, column_names, connect, table_names
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
@@ -122,6 +122,7 @@ def db():
 
 with db() as _c:
     _c.executescript(SCHEMA)
+    idempotency.init_schema(_c)
     _rec_cols = column_names(_c, "recommendations")
     if "as_of" not in _rec_cols:
         _c.execute("ALTER TABLE recommendations ADD COLUMN as_of TEXT")
