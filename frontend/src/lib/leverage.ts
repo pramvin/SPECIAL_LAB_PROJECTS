@@ -1,0 +1,1 @@
+export const LEVERAGE_OPTIONS = [1, 2, 3, 4, 5, 10, 50, 100] as const;
