@@ -5,7 +5,8 @@ import { Badge } from "@/components/ui/Badge";
 import { SectionLabel } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
-import { AiRatingBadge, ratingTone } from "./AiRatingBadge";
+import { ratingTone } from "./AiRatingBadge";
+import { AiVerdict, MoreInfo, MoreRow } from "./AiVerdict";
 import { SentimentBadge } from "./SentimentBadge";
 import type {
   AgentReview,
@@ -20,15 +21,6 @@ import type {
 } from "@/lib/recommendations";
 
 
-
-const TABS = [
-  "Summary",
-  "Analysts",
-  "Bull vs Bear",
-  "Trade plan & risk",
-  "News & social",
-  "Track record",
-] as const;
 
 const ANALYST_LABEL: Record<keyof AgentReview["review"]["analysts"], string> = {
   market: "Market",
@@ -56,32 +48,6 @@ const SIGNAL: Record<
   no_data: { label: "No data", tone: "neutral" },
 };
 
-const AGREE: Record<
-  AgentReview["review"]["agrees"],
-  { label: string; tone: "success" | "warning" | "danger" | "neutral"; icon: string }
-> = {
-  agree: {
-    label: "Agrees with the rules",
-    tone: "success",
-    icon: "check_circle",
-  },
-  caution: {
-    label: "Caution — the AI is less positive than the rules",
-    tone: "warning",
-    icon: "error",
-  },
-  disagree: {
-    label: "Disagrees with the rules — the idea is still shown",
-    tone: "danger",
-    icon: "cancel",
-  },
-  review: {
-    label: "Needs review",
-    tone: "neutral",
-    icon: "help",
-  },
-};
-
 const STANCE: Record<
   "enter" | "wait" | "avoid",
   { label: string; tone: "success" | "warning" | "danger" }
@@ -93,10 +59,6 @@ const STANCE: Record<
 
 type PanelState = "idle" | "loading" | "ok" | "missing" | "error";
 
-const usd = (n: number) =>
-  n.toLocaleString("en-US", { style: "currency", currency: "USD" });
-const money = (n: number | null | undefined) =>
-  n === null || n === undefined ? "—" : usd(n);
 const signedPct = (n: number | null | undefined) =>
   n === null || n === undefined ? "—" : `${n >= 0 ? "+" : ""}${n.toFixed(1)}%`;
 
@@ -108,6 +70,27 @@ function chipOrder(...groups: string[][]): Map<string, number> {
     }
   }
   return order;
+}
+
+// The model sometimes writes raw evidence ids ("metric:rsi14", "agent:bear") inside a
+// sentence; the [n] chips already cite them, so show plain words instead.
+const RAW_ID = /\b(?:metric|news|fund|sec|social|macro|rule|agent|memory):([\w.-]+)/g;
+
+// Bare internal metric names in brackets, e.g. "(r60)" or "(ma200_gap, sma200)": a token with a digit or underscore.
+const BARE_NAMES = /\s*\(\s*[a-z][a-z0-9_]*(?:\s*,\s*[a-z][a-z0-9_]*)*\s*\)/g;
+
+// A bracket holding only evidence ids, e.g. "(metric:r60, metric:r20)"; the [n] chips already cite them.
+const ID_GROUP =
+  /\s*\(\s*(?:metric|news|fund|sec|social|macro|rule|agent|memory):[\w.-]+(?:\s*,\s*(?:metric|news|fund|sec|social|macro|rule|agent|memory):[\w.-]+)*\s*\)/g;
+
+function prose(text: string): string {
+  return text
+    .replace(ID_GROUP, "")
+    .replace(BARE_NAMES, (m) =>
+      m.replace(/[()\s]/g, "").split(",").every((t) => /[\d_]/.test(t)) ? "" : m,
+    )
+    .replace(RAW_ID, (_m, name: string) => name.replace(/[_-]+/g, " "))
+    .replace(/\s{2,}/g, " ");
 }
 
 function evidenceTooltip(e: Evidence): string {
@@ -181,7 +164,7 @@ function Points({
     <ul className="flex list-disc flex-col gap-2 pl-5 font-body-sm text-body-sm text-on-surface">
       {points.map((p, i) => (
         <li key={i}>
-          {p.text}
+          {prose(p.text)}
           <Chips ids={p.evidence} order={order} byId={byId} />
         </li>
       ))}
@@ -231,7 +214,7 @@ function AnalystCard({
       {analyst ? (
         <>
           <p className="font-body-sm text-body-sm text-on-surface">
-            {analyst.summary}
+            {prose(analyst.summary)}
           </p>
           <Points points={analyst.points} order={order} byId={byId} />
           {analyst.data_gaps.length > 0 && (
@@ -272,10 +255,8 @@ export function AgentPanel({
   const [state, setState] = useState<PanelState>(ai ? "idle" : "missing");
   const [review, setReview] = useState<AgentReview | null>(null);
   const [isDemo, setIsDemo] = useState(false);
-  const [tab, setTab] = useState(0);
   const requested = useRef(false);
   const rootRef = useRef<HTMLDivElement>(null);
-  const tabRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   const load = useCallback(async () => {
     if (requested.current) return;
@@ -344,6 +325,8 @@ export function AgentPanel({
     [review],
   );
 
+  let moreRows: React.ReactNode = null;
+
   if (state === "ok" && review) {
     const r = review.review;
     const manager = r.debate.manager;
@@ -367,79 +350,62 @@ export function AgentPanel({
         (key) => r.risk[key]?.evidence ?? [],
       ),
     );
-    const agree = AGREE[r.agrees];
     const newsEvidence = review.evidence.filter(
       (e) => e.kind === "news" || e.kind === "social",
     );
 
-    const summaryTab = (
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="flex flex-col gap-3">
-          <SectionLabel>From the rules</SectionLabel>
-          <ul className="flex list-disc flex-col gap-2 pl-5 font-body-md text-body-md text-on-surface">
-            {[...matchReasons, ...reasons].map((x) => (
-              <li key={x}>{x}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="flex flex-col gap-3">
-          <SectionLabel>AI key points</SectionLabel>
-          <Points
-            points={r.key_risks}
-            order={summaryOrder}
-            byId={evidence}
-            empty="The AI did not add key points."
-          />
-          {manager && (
-            <div className="flex flex-col gap-2 rounded-[20px] bg-surface-container-low p-4">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="font-title-md text-title-md text-on-surface">
-                  Research manager
-                </span>
-                <RatingPill rating={manager.lean} />
-                <ProvenanceBadge provenance="ai" label="AI" />
-              </div>
-              <p className="font-body-sm text-body-sm text-on-surface">
-                {manager.rationale}
-                <Chips ids={manager.evidence} order={summaryOrder} byId={evidence} />
-              </p>
+    const keyPoints = (
+      <div className="flex flex-col gap-3">
+        <Points
+          points={r.key_risks}
+          order={summaryOrder}
+          byId={evidence}
+          empty="The AI did not add key points."
+        />
+        {manager && (
+          <div className="flex flex-col gap-2 rounded-[20px] bg-surface-container-low p-4">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="font-title-md text-title-md text-on-surface">Research manager</span>
+              <RatingPill rating={manager.lean} />
+              <ProvenanceBadge provenance="ai" label="AI" />
             </div>
-          )}
-        </div>
+            <p className="font-body-sm text-body-sm text-on-surface">
+              {prose(manager.rationale)}
+              <Chips ids={manager.evidence} order={summaryOrder} byId={evidence} />
+            </p>
+          </div>
+        )}
       </div>
     );
 
-    const analystsTab = (
-      <div className="flex flex-col gap-4">
-        <div className="grid gap-4 md:grid-cols-2">
-          {(Object.keys(ANALYST_LABEL) as (keyof typeof ANALYST_LABEL)[]).map(
-            (key) => (
-              <AnalystCard
-                key={key}
-                title={ANALYST_LABEL[key]}
-                analyst={r.analysts[key]}
-                order={analystOrder}
-                byId={evidence}
-              />
-            ),
-          )}
-        </div>
-        <div className="flex flex-col gap-1 rounded-[20px] bg-surface-container-low p-4 font-body-sm text-body-sm text-on-surface-variant">
-          <SectionLabel>Data sources</SectionLabel>
-          <ul className="flex flex-col gap-1">
-            {(Object.keys(SOURCE_LABEL) as (keyof typeof SOURCE_LABEL)[]).map(
-              (key) => {
-                const source = review.sources[key];
-                return (
-                  <li key={key} className="tabular-nums">
-                    {SOURCE_LABEL[key]}: {source.status}
-                    {source.reason ? ` — ${source.reason}` : ""}
-                  </li>
-                );
-              },
-            )}
-          </ul>
-        </div>
+    const analystsCards = (
+      <div className="grid gap-4 md:grid-cols-2">
+        {(Object.keys(ANALYST_LABEL) as (keyof typeof ANALYST_LABEL)[]).map((key) => (
+          <AnalystCard
+            key={key}
+            title={ANALYST_LABEL[key]}
+            analyst={r.analysts[key]}
+            order={analystOrder}
+            byId={evidence}
+          />
+        ))}
+      </div>
+    );
+
+    const sourcesBox = (
+      <div className="flex flex-col gap-1 rounded-[20px] bg-surface-container-low p-4 font-body-sm text-body-sm text-on-surface-variant">
+        <SectionLabel>Data sources</SectionLabel>
+        <ul className="flex flex-col gap-1">
+          {(Object.keys(SOURCE_LABEL) as (keyof typeof SOURCE_LABEL)[]).map((key) => {
+            const source = review.sources[key];
+            return (
+              <li key={key} className="tabular-nums">
+                {SOURCE_LABEL[key]}: {source.status}
+                {source.reason ? ` \u2014 ${source.reason}` : ""}
+              </li>
+            );
+          })}
+        </ul>
       </div>
     );
 
@@ -475,7 +441,7 @@ export function AgentPanel({
           </div>
           {manager ? (
             <p className="font-body-sm text-body-sm text-on-surface">
-              {manager.rationale}
+              {prose(manager.rationale)}
               <Chips ids={manager.evidence} order={debateOrder} byId={evidence} />
             </p>
           ) : (
@@ -489,54 +455,6 @@ export function AgentPanel({
 
     const planTab = (
       <div className="flex flex-col gap-4">
-        <div className="overflow-x-auto">
-          <table className="w-full min-w-[320px] border-collapse text-left font-body-sm text-body-sm">
-            <caption className="sr-only">
-              The card&apos;s rule levels compared with the AI suggestion
-            </caption>
-            <thead>
-              <tr className="text-on-surface-variant">
-                <th scope="col" className="py-2 pr-4 font-medium">
-                  Level
-                </th>
-                <th scope="col" className="py-2 pr-4 font-medium">
-                  Rules (used)
-                </th>
-                <th scope="col" className="py-2 font-medium">
-                  AI suggestion
-                </th>
-              </tr>
-            </thead>
-            <tbody className="tabular-nums text-on-surface">
-              <tr className="border-t border-surface-container-high">
-                <th scope="row" className="py-2 pr-4 font-normal">
-                  Entry
-                </th>
-                <td className="py-2 pr-4">{money(r.rules.entry)}</td>
-                <td className="py-2">—</td>
-              </tr>
-              <tr className="border-t border-surface-container-high">
-                <th scope="row" className="py-2 pr-4 font-normal">
-                  Stop
-                </th>
-                <td className="py-2 pr-4">{money(r.rules.stop)}</td>
-                <td className="py-2">{money(r.trader?.suggested_stop)}</td>
-              </tr>
-              <tr className="border-t border-surface-container-high">
-                <th scope="row" className="py-2 pr-4 font-normal">
-                  Target
-                </th>
-                <td className="py-2 pr-4">{money(r.rules.target)}</td>
-                <td className="py-2">{money(r.trader?.suggested_target)}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        <p className="font-body-sm text-body-sm text-on-surface-variant">
-          The card&apos;s entry, stop and target always come from the rules. The
-          AI suggestion is stored and shown separately and never changes them.
-        </p>
-
         <div className="flex flex-col gap-2 rounded-[20px] bg-surface-container-low p-4">
           <div className="flex flex-wrap items-center gap-2">
             <h4 className="font-title-md text-title-md text-on-surface">Trader plan</h4>
@@ -549,7 +467,7 @@ export function AgentPanel({
           </div>
           {r.trader ? (
             <p className="font-body-sm text-body-sm text-on-surface">
-              {r.trader.rationale}
+              {prose(r.trader.rationale)}
               <Chips ids={r.trader.evidence} order={planOrder} byId={evidence} />
             </p>
           ) : (
@@ -578,14 +496,6 @@ export function AgentPanel({
                     <p className="font-body-sm text-body-sm text-on-surface">
                       {view.view}
                       <Chips ids={view.evidence} order={planOrder} byId={evidence} />
-                    </p>
-                    <p className="font-body-sm text-body-sm text-on-surface-variant">
-                      Suggested position{" "}
-                      <span className="tabular-nums text-on-surface">
-                        {view.suggested_position_pct === null
-                          ? "—"
-                          : `${view.suggested_position_pct}%`}
-                      </span>
                     </p>
                   </>
                 ) : (
@@ -697,118 +607,35 @@ export function AgentPanel({
         </div>
       );
 
-    const tabContent = [summaryTab, analystsTab, debateTab, planTab, newsTab, trackTab][tab];
+    moreRows = (
+      <MoreInfo>
+        <MoreRow title="Key points from the AI">{keyPoints}</MoreRow>
+        <MoreRow title="Why each analyst thinks so" hint="Market, news, fundamentals, social">
+          {analystsCards}
+        </MoreRow>
+        <MoreRow title="Bull vs bear debate">{debateTab}</MoreRow>
+        <MoreRow title="Trade plan and risk views" hint="The trader and three risk analysts">
+          {planTab}
+        </MoreRow>
+        <MoreRow title="Numbers and sources">
+          {sourcesBox}
+          {newsTab}
+        </MoreRow>
+        <MoreRow title="Track record of this AI">{trackTab}</MoreRow>
+      </MoreInfo>
+    );
 
-    return (
-      <div ref={rootRef} className="flex flex-col gap-4">
-        <div className="flex flex-col gap-3 rounded-[20px] bg-surface-container-low p-4 md:p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <AiRatingBadge rating={r.rating} label={`AI · ${r.rating}`} />
-            <ProvenanceBadge provenance="ai" label="AI opinion · not backtested" />
-            {isDemo && <ProvenanceBadge provenance="example" label="Example data" />}
-          </div>
-          <p className="font-body-md text-body-md text-on-surface">
-            {r.summary}
-            <Chips
-              ids={Array.from(summaryOrder.keys())}
-              order={summaryOrder}
-              byId={evidence}
-            />
-          </p>
-          <span title={agree.label}>
-            <Badge tone={agree.tone} icon={agree.icon}>
-              {agree.label}
-            </Badge>
-          </span>
-          <p className="font-body-sm text-body-sm text-on-surface-variant">
-            AI opinion · not backtested · not investment advice
-          </p>
-        </div>
-
-        <div
-          role="tablist"
-          aria-label="AI review sections"
-          className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1"
-        >
-          {TABS.map((label, i) => (
-            <button
-              key={label}
-              ref={(el) => {
-                tabRefs.current[i] = el;
-              }}
-              type="button"
-              role="tab"
-              id={`agent-tab-${i}`}
-              aria-selected={tab === i}
-              aria-controls="agent-tabpanel"
-              tabIndex={tab === i ? 0 : -1}
-              onClick={() => setTab(i)}
-              onKeyDown={(event) => {
-                let next: number | null = null;
-                if (event.key === "ArrowRight") next = (i + 1) % TABS.length;
-                if (event.key === "ArrowLeft") next = (i - 1 + TABS.length) % TABS.length;
-                if (event.key === "Home") next = 0;
-                if (event.key === "End") next = TABS.length - 1;
-                if (next !== null) {
-                  event.preventDefault();
-                  setTab(next);
-                  tabRefs.current[next]?.focus();
-                }
-              }}
-              className={`whitespace-nowrap rounded-full px-4 py-2 font-body-sm text-body-sm font-medium transition-colors ${
-                tab === i
-                  ? "bg-on-surface text-white"
-                  : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
-              }`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        <div
-          role="tabpanel"
-          id="agent-tabpanel"
-          aria-labelledby={`agent-tab-${tab}`}
-          tabIndex={0}
-          className="flex flex-col gap-4 rounded-[20px] border border-surface-container-high p-4 md:p-5"
-        >
-          {tabContent}
-        </div>
-
-        <footer className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-surface-container-high pt-3 font-body-sm text-body-sm text-on-surface-variant">
-          <span>{review.model}</span>
-          <span aria-hidden>·</span>
-          <span>{review.prompt_version}</span>
-          <span aria-hidden>·</span>
-          <span className="tabular-nums">
-            reviewed{" "}
-            {new Date(review.created_at).toLocaleString("en-US", {
-              dateStyle: "medium",
-              timeStyle: "short",
-            })}
-          </span>
-          <span aria-hidden>·</span>
-          <span>Not investment advice.</span>
-        </footer>
+  } else if (state === "loading") {
+    moreRows = (
+      <div className="flex flex-col gap-3" aria-busy="true">
+        <span className="sr-only">Loading the AI review details\u2026</span>
+        <div className="h-9 animate-pulse rounded-full bg-surface-container-low" />
+        <div className="h-9 animate-pulse rounded-full bg-surface-container-low" />
       </div>
     );
-  }
-
-  if (state === "loading") {
-    return (
-      <div ref={rootRef} className="flex flex-col gap-3" aria-busy="true">
-        <span className="sr-only">Loading the AI review…</span>
-        <div className="h-28 animate-pulse rounded-[20px] bg-surface-container-low" />
-        <div className="h-9 w-2/3 animate-pulse rounded-full bg-surface-container-low" />
-        <div className="h-32 animate-pulse rounded-[20px] bg-surface-container-low" />
-      </div>
-    );
-  }
-
-  if (state === "error") {
-    return (
-      <div ref={rootRef} className="flex flex-col gap-3">
+  } else if (state === "error") {
+    moreRows = (
+      <div className="flex flex-col gap-3">
         <p className="font-body-md text-body-md text-error">
           Could not load the AI review for {ticker}.
         </p>
@@ -822,87 +649,132 @@ export function AgentPanel({
         </button>
       </div>
     );
-  }
-
-  return (
-    <div ref={rootRef} className="flex flex-col gap-4">
-      {ai?.mode === "quick" && (
-        <div className="flex flex-col gap-3 rounded-[20px] border border-surface-container-high p-4 md:p-5">
-          <div className="flex flex-wrap items-center gap-2">
-            <AiRatingBadge
-              rating={ai.rating}
-              label={`AI quick · ${ai.rating}`}
-            />
-            <Badge tone="neutral">Confidence: {ai.confidence ?? "low"}</Badge>
-            <Badge
-              tone={AGREE[ai.agrees].tone}
-              icon={AGREE[ai.agrees].icon}
-            >
-              {AGREE[ai.agrees].label}
-            </Badge>
-          </div>
-          <p className="font-body-md text-body-md text-on-surface">
-            {ai.summary}
-          </p>
+  } else if (ai?.mode === "quick") {
+    moreRows = (
+      <MoreInfo>
+        <MoreRow title="The AI's full reasoning" hint="A short paragraph and four points">
+          <p className="font-body-md text-body-md text-on-surface">{prose(ai.summary)}</p>
           {(ai.points ?? []).length > 0 && (
             <ul className="flex list-disc flex-col gap-2 pl-5 font-body-md text-body-md text-on-surface">
               {(ai.points ?? []).map((p) => (
-                <li key={p.text}>{p.text}</li>
+                <li key={p.text}>{prose(p.text)}</li>
               ))}
             </ul>
           )}
+        </MoreRow>
+        <MoreRow title="About this quick check">
           <p className="font-body-sm text-body-sm text-on-surface-variant">
-            Quick AI check from a one-page brief (the rule idea, price metrics
-            and a few headlines). The full 12-agent review has not run for this
-            idea. AI opinion · not backtested · not investment advice.
+            One AI call on a one-page brief: the rule idea, price indicators, company figures, market
+            conditions and a few headlines. The full 12-agent review has not run for this idea. AI
+            opinion \u00b7 not backtested \u00b7 not investment advice.
           </p>
-        </div>
+        </MoreRow>
+      </MoreInfo>
+    );
+  }
+
+  const shown: AiSummary | null =
+    ai ??
+    (review
+      ? {
+          run_id: 0,
+          mode: "full",
+          rating: review.review.rating,
+          summary: review.review.summary,
+          agrees: review.review.agrees,
+          as_of: "",
+          created_at: review.created_at,
+          model: review.model,
+        }
+      : null);
+
+  return (
+    <div ref={rootRef} className="flex flex-col gap-5">
+      {shown && (
+        <AiVerdict
+          ai={shown}
+          label={`AI says: ${shown.rating}`}
+          fallback={prose(shown.summary)}
+          footnote={
+            shown.mode === "full"
+              ? "Reviewed by 12 AI agents. AI opinion \u00b7 not backtested \u00b7 not investment advice."
+              : "Quick AI check from one AI call. AI opinion \u00b7 not backtested \u00b7 not investment advice."
+          }
+        />
       )}
-      <div className="grid gap-6 md:grid-cols-2">
-        <div className="flex flex-col gap-3">
-          <SectionLabel>Reasons</SectionLabel>
-          <ul className="flex list-disc flex-col gap-2 pl-5 font-body-md text-body-md text-on-surface">
-            {[...matchReasons, ...reasons].map((x) => (
-              <li key={x}>{x}</li>
-            ))}
-          </ul>
-        </div>
-        <div className="flex flex-col gap-3">
-          <SectionLabel>News</SectionLabel>
-          <ul className="flex flex-col gap-3 font-body-sm text-body-sm text-on-surface">
-            {news.length === 0 && (
-              <li className="text-on-surface-variant">No recent headlines found.</li>
-            )}
-            {news.map((n) => (
-              <li key={n.title} className="flex flex-col gap-1">
-                {n.url ? (
-                  <a
-                    href={n.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="font-body-md text-body-md leading-snug text-on-surface hover:text-tertiary-accent"
-                  >
-                    {n.title}
-                  </a>
-                ) : (
-                  n.title
-                )}
-                <span className="flex flex-wrap items-center gap-2 text-on-surface-variant">
-                  <SentimentBadge sentiment={n.sentiment} />
-                  {n.source}
-                  {n.published ? ` · ${n.published}` : ""}
-                </span>
-              </li>
-            ))}
-          </ul>
-        </div>
-      </div>
-      {ai?.mode !== "quick" && (
+      {isDemo && <ProvenanceBadge provenance="example" label="Example data" />}
+      <RulesAndNews reasons={[...matchReasons, ...reasons]} news={news} />
+      {!shown && (
         <p className="font-body-sm text-body-sm text-on-surface-variant">
-          AI review pending — this card shows the rule-based idea until the
-          agent team has reviewed it.
+          AI review pending \u2014 this card shows the rule-based idea until the agent team has reviewed it.
         </p>
       )}
+      {moreRows}
+      {state === "ok" && review && (
+        <footer className="flex flex-wrap items-center gap-x-2 gap-y-1 border-t border-surface-container-high pt-3 font-body-sm text-body-sm text-on-surface-variant">
+          <span>{review.model}</span>
+          <span aria-hidden>\u00b7</span>
+          <span>{review.prompt_version}</span>
+          <span aria-hidden>\u00b7</span>
+          <span className="tabular-nums">
+            reviewed{" "}
+            {new Date(review.created_at).toLocaleString("en-US", {
+              dateStyle: "medium",
+              timeStyle: "short",
+            })}
+          </span>
+        </footer>
+      )}
+    </div>
+  );
+}
+
+function RulesAndNews({
+  reasons,
+  news,
+}: {
+  reasons: string[];
+  news: Recommendation["news"];
+}) {
+  return (
+    <div className="grid gap-6 md:grid-cols-2">
+      <div className="flex flex-col gap-3">
+        <SectionLabel>Reasons</SectionLabel>
+        <ul className="flex list-disc flex-col gap-2 pl-5 font-body-md text-body-md text-on-surface">
+          {reasons.map((x) => (
+            <li key={x}>{x}</li>
+          ))}
+        </ul>
+      </div>
+      <div className="flex flex-col gap-3">
+        <SectionLabel>News</SectionLabel>
+        <ul className="flex flex-col gap-3 font-body-sm text-body-sm text-on-surface">
+          {news.length === 0 && (
+            <li className="text-on-surface-variant">No recent headlines found.</li>
+          )}
+          {news.map((n) => (
+            <li key={n.title} className="flex flex-col gap-1">
+              {n.url ? (
+                <a
+                  href={n.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-body-md text-body-md leading-snug text-on-surface hover:text-tertiary-accent"
+                >
+                  {n.title}
+                </a>
+              ) : (
+                n.title
+              )}
+              <span className="flex flex-wrap items-center gap-2 text-on-surface-variant">
+                <SentimentBadge sentiment={n.sentiment} />
+                {n.source}
+                {n.published ? ` \u00b7 ${n.published}` : ""}
+              </span>
+            </li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }

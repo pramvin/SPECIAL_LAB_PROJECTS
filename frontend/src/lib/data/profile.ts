@@ -11,8 +11,6 @@ export const PROFILE: Profile = {
   incompleteReviewCount: 2,
 };
 
-export const SOURCE_NOTE = "Source: User-Entered & Demo Model";
-
 export const REGULATORY_NOTICE =
   "This system is an exploratory financial planning demonstration using synthetic " +
   "client profiles and user-entered approximations. All calculations, projections, " +

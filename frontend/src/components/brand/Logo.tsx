@@ -1,5 +1,3 @@
-import { Icon } from "@/components/ui/Icon";
-
 /**
  * PlanWise AI mark. SVG traced from images/planwise_ai_mark/code.html
  * so the brand renders crisply without an external asset request.
@@ -75,23 +73,6 @@ export function MaskedAvatar({
       style={{ width: size, height: size }}
     >
       {initials}
-    </span>
-  );
-}
-
-export function IconLabel({
-  icon,
-  children,
-  className = "",
-}: {
-  icon: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <span className={`inline-flex items-center gap-1.5 ${className}`}>
-      <Icon name={icon} className="text-body-sm" />
-      <span>{children}</span>
     </span>
   );
 }

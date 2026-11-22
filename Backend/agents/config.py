@@ -20,7 +20,7 @@ SETTLE_DAYS = 5
 MAX_NEWS = 15
 MAX_SOCIAL = 20
 TEMPERATURE = 0.2
-MAX_TOKENS = 6000
+MAX_TOKENS = 14000
 REQUEST_TIMEOUT = 300
 
 RATINGS = ("Buy", "Overweight", "Hold", "Underweight", "Sell")

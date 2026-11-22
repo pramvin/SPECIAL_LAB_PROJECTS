@@ -118,7 +118,7 @@ def main() -> None:
             reasons.append(f"Trading {r['above_sma50']:.1%} above its 50-day average")
             if horizon != "1w":
                 reasons.append(f"Trading {r['above_sma200']:.1%} above its 200-day average")
-            reasons.append(f"Typical daily range (ATR) is {r['atr_pct']:.1f}% of price; stop {stop_k:g}x ATR, target {target_k:g}x ATR")
+            reasons.append(f"Typical daily range (ATR) is {r['atr_pct']:.1f}% of price")
             big_p = big.get(t) if horizon == "1w" else None
             out.append((t, r["name"], r["sector"], horizon, round(entry, 2), stop, target, int(round(r["score"])),
                         json.dumps(reasons), json.dumps([]), 0, now, as_of,

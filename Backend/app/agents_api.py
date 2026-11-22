@@ -79,6 +79,25 @@ def _evidence_ids(raw) -> list[str]:
     return [e for e in raw or [] if isinstance(e, str) and e]
 
 
+VERDICT_LIGHTS = ("green", "amber", "red")
+VERDICT_CHECKS = ("trend", "business", "news_market", "risk")
+
+
+def _verdict(raw) -> dict:
+    """The card's plain-language block, cleaned; {} when the review has none (older reviews)."""
+    if not isinstance(raw, dict):
+        return {}
+    text = lambda key: raw[key] if isinstance(raw.get(key), str) else ""  # noqa: E731
+    checks = {}
+    for key in VERDICT_CHECKS:
+        item = (raw.get("checks") or {}).get(key) if isinstance(raw.get("checks"), dict) else None
+        if isinstance(item, dict) and item.get("light") in VERDICT_LIGHTS and isinstance(item.get("line"), str):
+            checks[key] = {"light": item["light"], "line": item["line"]}
+    out = {"headline": text("headline"), "checks": checks, "how_to_act": text("how_to_act"),
+           "change_if": text("change_if")}
+    return out if (out["headline"] or checks or out["how_to_act"] or out["change_if"]) else {}
+
+
 def latest_ai(conn: sqlite3.Connection, tickers: list[str], horizon: str) -> dict:
     """Newest ok/partial review per ticker, in the shape the ideas list needs.
 
@@ -117,9 +136,10 @@ def latest_ai(conn: sqlite3.Connection, tickers: list[str], horizon: str) -> dic
             "created_at": row["started_at"],
             "model": row["model"],
         }
+        final = _json(row["final_json"], {})
+        final = final if isinstance(final, dict) else {}
+        item["verdict"] = _verdict(final.get("verdict"))
         if mode == "quick":
-            final = _json(row["final_json"], {})
-            final = final if isinstance(final, dict) else {}
             item["confidence"] = final.get("confidence") if final.get("confidence") in CONFIDENCES else "low"
             item["points"] = _points(final.get("points"))
         out[ticker] = item

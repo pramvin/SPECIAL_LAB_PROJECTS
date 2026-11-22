@@ -6,6 +6,8 @@ import { NoticeBanner } from "@/components/ui/NoticeBanner";
 import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
 import { AiRatingBadge } from "./AiRatingBadge";
 import { AgentPanel } from "./AgentPanel";
+import { TradeRow, WatchButton } from "./CardActions";
+import type { Portfolio } from "@/lib/wallet";
 import { NewsSentiment } from "./NewsSentiment";
 import { TopNews } from "./TopNews";
 import { DataStatus as DataStatusBar } from "./DataStatus";
@@ -67,21 +69,33 @@ function Level({
   label,
   value,
   tone,
+  hint,
+  note,
 }: {
   label: string;
   value: string;
   tone?: string;
+  hint?: string;
+  note?: string;
 }) {
   return (
     <div className="flex flex-col gap-1 rounded-[16px] bg-surface-container-low px-4 py-3">
-      <span className="font-body-sm text-body-sm text-on-surface-variant">
+      <span className="flex items-center gap-1 font-body-sm text-body-sm text-on-surface-variant">
         {label}
+        {hint && (
+          <span title={hint} aria-label={hint} className="inline-flex">
+            <Icon name="schedule" className="text-[14px]" />
+          </span>
+        )}
       </span>
       <span
         className={`font-metric-md text-metric-md tabular-nums ${tone ?? "text-on-surface"}`}
       >
         {value}
       </span>
+      {note && (
+        <span className="text-[12px] text-on-surface-variant">{note}</span>
+      )}
     </div>
   );
 }
@@ -94,63 +108,6 @@ const ACCENT: Record<string, string> = {
   review: "bg-surface-container-highest",
   none: "bg-surface-container-high",
 };
-
-/** Stop → target track with the entry (and latest price, if inside) marked. */
-function PriceRange({
-  stop,
-  entry,
-  target,
-  latest,
-}: {
-  stop: number;
-  entry: number;
-  target: number;
-  latest?: number | null;
-}) {
-  const span = target - stop;
-  if (!(span > 0)) return null;
-  const pct = (v: number) => Math.min(100, Math.max(0, ((v - stop) / span) * 100));
-  const entryAt = pct(entry);
-  const latestAt =
-    latest != null && latest >= stop && latest <= target ? pct(latest) : null;
-  return (
-    <div
-      className="flex flex-col gap-2"
-      role="img"
-      aria-label={`Stop ${usd(stop)}, entry ${usd(entry)}, target ${usd(target)}`}
-    >
-      <div className="relative h-2 rounded-full bg-surface-container-high">
-        <div
-          className="absolute inset-y-0 left-0 rounded-l-full bg-error/30"
-          style={{ width: `${entryAt}%` }}
-        />
-        <div
-          className="absolute inset-y-0 right-0 rounded-r-full bg-tertiary-accent/30"
-          style={{ width: `${100 - entryAt}%` }}
-        />
-        <span
-          className="absolute top-1/2 h-4 w-1 -translate-x-1/2 -translate-y-1/2 rounded-full bg-on-surface"
-          style={{ left: `${entryAt}%` }}
-          title={`Entry ${usd(entry)}`}
-        />
-        {latestAt !== null && (
-          <span
-            className="absolute top-1/2 h-3 w-3 -translate-x-1/2 -translate-y-1/2 rounded-full border-2 border-white bg-tertiary-accent"
-            style={{ left: `${latestAt}%` }}
-            title={`Latest ${usd(latest as number)}`}
-          />
-        )}
-      </div>
-      <div className="flex justify-between font-body-sm text-body-sm text-on-surface-variant">
-        <span>Stop</span>
-        <span>
-          {latestAt !== null ? "● latest · " : ""}| entry
-        </span>
-        <span>Target</span>
-      </div>
-    </div>
-  );
-}
 
 // The model sometimes writes "Headline [1091]" or "Headlines 12 and 15" in a reason; turn those ids into links.
 const ID_REF = /(\[\d+\]|\bHeadlines?\s+\d+(?:\s*(?:,|and)\s*\d+)*)/;
@@ -267,13 +224,18 @@ function IdeaCard({
   horizon,
   news,
   quote,
+  portfolio,
+  watching,
 }: {
   r: Recommendation;
   rank: number;
   horizon: Horizon;
   news?: TickerNewsSentiment | null;
   quote?: Quote | null;
+  portfolio: Portfolio | null;
+  watching: boolean;
 }) {
+  const trade = portfolio !== null && !r.is_example;
   const chartInterval = CHART_INTERVAL[horizon];
 
   return (
@@ -314,6 +276,8 @@ function IdeaCard({
           <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
             Score {r.score}
           </span>
+          <div className="flex flex-wrap items-center gap-2 md:justify-end">
+          {trade && <WatchButton ticker={r.ticker} watching={watching} />}
           {r.is_example ? (
             <ProvenanceBadge provenance="example" />
           ) : r.ai ? (
@@ -332,29 +296,23 @@ function IdeaCard({
               Rule-based · AI pending
             </span>
           )}
+          </div>
         </div>
       </div>
 
       <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
+          <Level
+            label="Current price"
+            value={quote ? usd(quote.price) : "—"}
+            hint="Nearly real-time: Yahoo Finance quote, can be a few minutes behind"
+            note={quote ? quoteTime(quote.quote_time) : "Unavailable"}
+          />
           <Level label="Entry" value={usd(r.entry)} />
-          <Level label="Stop" value={usd(r.stop)} tone="text-error" />
-          <Level label="Target" value={usd(r.target)} tone="text-tertiary-accent" />
-          <Level label="Position" value={`${r.position_pct}%`} />
         </div>
-        <PriceRange
-          stop={r.stop}
-          entry={r.entry}
-          target={r.target}
-          latest={quote?.price}
-        />
       </div>
 
       <div className="flex flex-col gap-2 font-body-sm text-body-sm text-on-surface-variant">
-        <p>
-          Upside {r.upside_pct}% · Stop {r.stop_distance_pct}% below entry · If
-          the stop is hit you lose about {r.loss_at_stop_pct}% of your capital.
-        </p>
         {r.bigmove_p !== null && (
           <p>
             <span className="font-medium text-on-surface">
@@ -367,21 +325,22 @@ function IdeaCard({
         {!r.is_example && (
           <p>
             Entry is the {r.as_of ?? "latest"} daily close (Yahoo Finance), not
-            a live price.{" "}
-            {quote ? (
-              <>
-                Latest price{" "}
-                <span className="font-medium text-on-surface">
-                  {usd(quote.price)}
-                </span>{" "}
-                · {quoteTime(quote.quote_time)} · delayed
-              </>
-            ) : (
-              "Latest price unavailable. Open the chart for current prices."
-            )}
+            a live price.
           </p>
         )}
       </div>
+
+      {trade && (
+        <TradeRow
+          ticker={r.ticker}
+          entry={r.entry}
+          balance={portfolio.balance}
+          position={
+            portfolio.positions.find((p) => p.ticker === r.ticker) ?? null
+          }
+          livePrice={quote?.price ?? null}
+        />
+      )}
 
       <details className="group border-t border-surface-container-high pt-5">
         <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-title-md text-title-md text-on-surface">
@@ -415,6 +374,8 @@ export function IdeasView({
   newsSentiment,
   quotes,
   dataStatus,
+  portfolio,
+  watchlist,
 }: {
   horizon: Horizon;
   items: Recommendation[] | null;
@@ -422,6 +383,8 @@ export function IdeasView({
   newsSentiment: Record<string, TickerNewsSentiment>;
   quotes: Record<string, Quote>;
   dataStatus: DataStatusData | null;
+  portfolio: Portfolio | null;
+  watchlist: Set<string>;
 }) {
   return (
     <div className="flex flex-col gap-8 lg:gap-10">
@@ -507,6 +470,8 @@ export function IdeasView({
                 horizon={horizon}
                 news={newsSentiment[r.ticker] ?? null}
                 quote={quotes[r.ticker] ?? null}
+                portfolio={portfolio}
+                watching={watchlist.has(r.ticker)}
               />
             ))}
           </div>

@@ -12,7 +12,7 @@ print("model:", s["model"], "| key set:", bool(s["api_key"]))
 for i in range(2):
     t = time.time()
     r = requests.post(s["base_url"] + "/chat/completions",
-                      json={"model": s["model"], "messages": [{"role": "user", "content": "สวัสดี"}]},
+                      json={"model": s["model"], "messages": [{"role": "user", "content": "Hello"}]},
                       headers={"Authorization": "Bearer " + s["api_key"]}, timeout=120)
     print(f"raw {i}: HTTP {r.status_code} in {time.time()-t:.1f}s")
 

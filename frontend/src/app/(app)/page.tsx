@@ -8,6 +8,8 @@ import {
   type Horizon,
 } from "@/lib/recommendations";
 import { getMe } from "@/lib/session";
+import { getWatchlist } from "@/lib/watchlist";
+import { getPortfolio } from "@/lib/wallet";
 
 const VALID: Horizon[] = ["1w", "1m", "3m"];
 
@@ -29,6 +31,7 @@ export default async function IdeasPage({
     (items ?? []).map((r) => r.ticker),
   );
   const quotes = await getQuotes((items ?? []).map((r) => r.ticker));
+  const [portfolio, watchlist] = await Promise.all([getPortfolio(), getWatchlist()]);
   return (
     <IdeasView
       horizon={horizon}
@@ -37,6 +40,8 @@ export default async function IdeasPage({
       topNews={topNews}
       newsSentiment={newsSentiment}
       dataStatus={dataStatus}
+      portfolio={portfolio}
+      watchlist={new Set((watchlist ?? []).map((w) => w.ticker))}
     />
   );
 }

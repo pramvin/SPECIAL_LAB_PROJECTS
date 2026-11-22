@@ -227,7 +227,8 @@ def _auto_output(role: str, user: str) -> dict:
                 "points": [_point(ids)], "data_gaps": []}
     if role in ("bull", "bear"):
         return {"points": [_point(ids, "The evidence can be read this way."),
-                           _point(ids[1:2] or ids, "A second point rests on the same context.")]}
+                           _point(ids[1:2] or ids, "A second point rests on the same context."),
+                           _point(ids[2:3] or ids, "A third point rests on the same context.")]}
     if role == "research_manager":
         return {"lean": "Hold", "rationale": "The evidence is mixed.", "evidence": ids[:1]}
     if role == "trader":

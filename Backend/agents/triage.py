@@ -21,15 +21,11 @@ def _skipped(*args, **kwargs) -> dict:
     return {"status": "skipped", "reason": "not used in the quick review", "items": []}
 
 
-# Fundamentals, filings, social posts and macro are left to the full review.
-SKIPPED_FETCHERS = {"fmp": _skipped, "sec": _skipped, "social": _skipped, "macro": _skipped}
+# SEC filings and social posts are left to the full review (fundamentals and macro are in the brief).
+SKIPPED_FETCHERS = {"sec": _skipped, "social": _skipped}
 
 ESCALATE_AGAINST = ("Underweight", "Sell")
 ESCALATE_FOR = ("Buy", "Overweight")
-
-
-def is_triage(prompt_version: str | None) -> bool:
-    return prompt_version == config.TRIAGE_PROMPT_VERSION
 
 
 def _now() -> str:
@@ -43,8 +39,11 @@ def brief_text(ctx: context.Context) -> str:
         intro,
         context.section("Rule-based idea (read-only; never change these numbers)",
                         context.rule_lines(ctx)),
-        context.section("Price metrics", context.metric_lines(ctx)
+        context.section("Price metrics and indicators", context.metric_lines(ctx)
                         + _extra_metric_lines(ctx)),
+        context.section("Company fundamentals (Yahoo Finance ratios, last four quarters, insider activity)",
+                        context.fund_lines(ctx), empty="(No fundamentals available.)"),
+        context.section("Macro", context.macro_lines(ctx), empty="(No macro data available.)"),
         context.section(f"Recent headlines (up to {config.TRIAGE_NEWS})", context.news_lines(ctx),
                         empty="(No recent headlines.)"),
     ])
@@ -112,6 +111,7 @@ def triage_ticker(conn, llm, ticker: str, horizon: str = "1w", fetchers: dict | 
         final = {
             "mode": "triage", "rating": rating, "confidence": confidence, "summary": summary,
             "agrees": config.agrees(rating), "points": points,
+            "verdict": output["verdict"] if output else {},
             "rules": {key: rules.get(key) or 0 for key in ("entry", "stop", "target", "score")},
             "evidence_index": {
                 key: {field: value[field] for field in

@@ -54,6 +54,18 @@ export type SourceStatus = {
   reason?: string;
 };
 
+export type Light = "green" | "amber" | "red";
+
+/** The plain-language block of the AI card; absent or empty on reviews stored before it existed. */
+export interface AiVerdictFields {
+  headline: string;
+  checks: Partial<
+    Record<"trend" | "business" | "news_market" | "risk", { light: Light; line: string }>
+  >;
+  how_to_act: string;
+  change_if: string;
+}
+
 /** One line of the AI opinion shown on the ideas list. */
 export interface AiSummary {
   run_id: number;
@@ -61,6 +73,7 @@ export interface AiSummary {
   mode: "full" | "quick";
   confidence?: "low" | "medium" | "high";
   points?: Point[];
+  verdict?: AiVerdictFields;
   rating: Rating;
   summary: string;
   agrees: Agrees;
