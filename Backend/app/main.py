@@ -515,7 +515,7 @@ def save_sentiment_response(
 
 # Max share of capital in one position, by risk level.
 POSITION_CAP_PCT = {"conservative": 10, "moderate": 20, "aggressive": 30}
-TOP_N_SERVED = 20  # ideas shown per horizon
+TOP_N_SERVED = 5  # ideas shown per horizon (user: a Top 5, not 20)
 
 
 def latest_llm(conn: sqlite3.Connection, tickers: list[str]) -> dict:
@@ -542,6 +542,26 @@ def latest_llm(conn: sqlite3.Connection, tickers: list[str]) -> dict:
     return out
 
 
+CARD_NEWS_N = 3  # headlines in the card's News column
+
+
+def latest_headlines(conn, tickers: list[str], n: int = CARD_NEWS_N) -> dict:
+    """Newest non-noise headlines per ticker from news_items, the same source the AI review and the
+    News mood box read. recommendations.news is written empty by rank.py, so the card used to say
+    "No recent headlines found" even when the AI cited headlines."""
+    if not tickers or "news_items" not in table_names(conn):
+        return {}
+    out: dict[str, list] = {}
+    for t in tickers:
+        rows = conn.execute(
+            "SELECT title, source, url, published_at FROM news_items "
+            "WHERE ticker = ? AND rule_noise = 0 ORDER BY published_at DESC LIMIT ?", (t, n)
+        ).fetchall()
+        out[t] = [{"title": r["title"], "source": r["source"], "url": r["url"],
+                   "published_at": r["published_at"]} for r in rows]
+    return out
+
+
 @app.get("/api/recommendations")
 def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Cookie(default=None)):
     with db() as conn:
@@ -561,6 +581,7 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
     with db() as conn:
         llm = latest_llm(conn, [c["ticker"] for c in ranked])
         ai = agents_api.latest_ai(conn, [c["ticker"] for c in ranked], horizon)
+        headlines = latest_headlines(conn, [c["ticker"] for c in ranked])
     out = []
     for r in ranked:  # each item is a recommendations row (dict) plus fit / match_reasons
         stop_pct = (r["entry"] - r["stop"]) / r["entry"] * 100
@@ -571,7 +592,7 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
         out.append({
             "ticker": r["ticker"], "name": r["name"], "sector": r["sector"], "horizon": r["horizon"],
             "action": r["action"], "entry": r["entry"], "stop": r["stop"], "target": r["target"],
-            "score": r["score"], "reasons": json.loads(r["reasons"]), "news": json.loads(r["news"]),
+            "score": r["score"], "reasons": json.loads(r["reasons"]), "news": headlines.get(r["ticker"]) or json.loads(r["news"]),
             "stop_distance_pct": round(stop_pct, 1),
             "upside_pct": round((r["target"] - r["entry"]) / r["entry"] * 100, 1),
             "position_pct": round(size, 1),

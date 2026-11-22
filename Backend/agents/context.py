@@ -58,7 +58,7 @@ def collect(conn, ticker: str, horizon: str, fetchers: dict | None = None) -> Co
 
     rules_result = _call(fetchers.get("rules") or sources.fetch_rules, conn, ticker, horizon)
     news_result = _call(fetchers.get("news") or sources.fetch_news, conn, ticker, as_of=as_of)
-    fmp_result = _call(fetchers.get("fmp") or sources.fetch_fmp, conn, ticker, as_of=as_of)
+    fmp_result = _call(fetchers.get("fmp") or sources.fetch_fundamentals, conn, ticker, as_of=as_of)
     sec_result = _call(fetchers.get("sec") or sources.fetch_sec, conn, ticker, as_of=as_of)
     social_result = _call(fetchers.get("social") or sources.fetch_social, conn, ticker, as_of=as_of)
     macro_result = _call(fetchers.get("macro") or sources.fetch_macro, conn, as_of=as_of)
@@ -129,7 +129,7 @@ def _index_evidence(ctx: Context) -> None:
         _add(ctx, f"metric:{name}", "metric", sources.METRIC_LABELS.get(name, name),
              sources.metric_display(name, value))
     if ctx.rules:
-        for key in ("entry", "stop", "target", "score"):
+        for key in ("entry", "score"):  # stop/target are unvalidated guesses: the AI never sees them
             value = ctx.rules.get(key)
             if value is not None:
                 _add(ctx, f"metric:{key}", "metric", f"Rule {key}", _fmt_number(value))
@@ -165,8 +165,6 @@ def rule_lines(ctx: Context) -> list[str]:
         return ["(No rule-based recommendation was available.)"]
     r = ctx.rules
     lines = [f"- Rule entry: {_fmt_number(r.get('entry'))} (metric:entry)",
-             f"- Rule stop: {_fmt_number(r.get('stop'))} (metric:stop)",
-             f"- Rule target: {_fmt_number(r.get('target'))} (metric:target)",
              f"- Rule score: {_fmt_number(r.get('score'))} (metric:score)"]
     for index, reason in enumerate(r.get("reasons") or []):
         lines.append(f"- Reason {index}: {reason} (rule:{index})")
@@ -225,7 +223,7 @@ def news_text(ctx: Context) -> str:
 
 
 def fundamentals_text(ctx: Context) -> str:
-    return "\n\n".join([section("FMP fundamentals", fund_lines(ctx)),
+    return "\n\n".join([section("Company fundamentals (Yahoo Finance ratios, last four quarters, insider activity)", fund_lines(ctx)),
                         section("SEC filings", sec_lines(ctx))])
 
 

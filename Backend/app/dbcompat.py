@@ -67,19 +67,41 @@ def _row_factory(cursor):
 class PgConnection:
     """The slice of the sqlite3.Connection API this project uses, on top of psycopg."""
 
-    def __init__(self, raw):
+    def __init__(self, raw, url: str | None = None):
         self._raw = raw
+        self._url = url
+
+    def _reconnect(self) -> None:
+        """Neon drops a connection that sat idle (a 20-minute AI review holds one open): open a new one."""
+        try:
+            self._raw.close()
+        except Exception:  # noqa: BLE001 - it is already dead
+            pass
+        self._raw = psycopg.connect(self._url, **_CONNECT_ARGS)
+
+    def _retry(self, fn):
+        try:
+            return fn()
+        except psycopg.OperationalError:
+            if not self._url:
+                raise
+            self._reconnect()
+            return fn()
 
     def execute(self, sql: str, params=None):
-        cur = self._raw.cursor()
         head = sql.lstrip()[:6].upper()
         if head in ("CREATE", "ALTER "):
             sql = to_pg_ddl(sql)
-        if params:
-            cur.execute(to_pg_sql(sql), params)
-        else:
-            cur.execute(sql)
-        return cur
+
+        def run():
+            cur = self._raw.cursor()
+            if params:
+                cur.execute(to_pg_sql(sql), params)
+            else:
+                cur.execute(sql)
+            return cur
+
+        return self._retry(run)
 
     def executemany(self, sql: str, seq):
         cur = self._raw.cursor()
@@ -96,7 +118,12 @@ class PgConnection:
         self._raw.commit()
 
     def rollback(self) -> None:
-        self._raw.rollback()
+        try:
+            self._raw.rollback()
+        except psycopg.OperationalError:
+            if not self._url:
+                raise
+            self._reconnect()  # the dead connection's open transaction is gone with it
 
     def close(self) -> None:
         self._raw.close()
@@ -109,7 +136,7 @@ class PgConnection:
         if exc_type is None:
             self._raw.commit()
         else:
-            self._raw.rollback()
+            self.rollback()
         return False
 
 
@@ -121,14 +148,18 @@ except ImportError:  # SQLite-only environments do not need psycopg
     psycopg = None
 
 
+# prepare_threshold=None: Neon's pooler may sit in front of Postgres, avoid server-side prepared statements.
+# TCP keepalives keep an idle connection from being cut during a long AI review.
+_CONNECT_ARGS = {"row_factory": _row_factory, "prepare_threshold": None, "keepalives": 1,
+                 "keepalives_idle": 30, "keepalives_interval": 10, "keepalives_count": 3}
+
+
 def connect(sqlite_path: str):
     url = database_url()
     if url:
         if psycopg is None:
             raise RuntimeError("DATABASE_URL is set but psycopg is not installed (pip install -r requirements.txt)")
-        # prepare_threshold=None: Neon's pooler may sit in front of Postgres, avoid server-side prepared statements.
-        raw = psycopg.connect(url, row_factory=_row_factory, prepare_threshold=None)
-        return PgConnection(raw)
+        return PgConnection(psycopg.connect(url, **_CONNECT_ARGS), url)
     conn = sqlite3.connect(sqlite_path)
     conn.row_factory = sqlite3.Row
     conn.execute("PRAGMA foreign_keys = ON")

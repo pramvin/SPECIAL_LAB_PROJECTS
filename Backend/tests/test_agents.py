@@ -25,7 +25,7 @@ EXPECTED_ROLES = (
     "research_manager", "trader", "aggressive", "conservative", "neutral",
     "portfolio_manager",
 )
-FINAL_KEYS = {"rating", "summary", "agrees", "key_risks", "analysts", "debate",
+FINAL_KEYS = {"rating", "summary", "agrees", "verdict", "key_risks", "analysts", "debate",
               "trader", "risk", "rules", "evidence_index"}
 
 MARKET_OK = {"signal": "neutral", "summary": "Momentum is steady.",
@@ -332,7 +332,8 @@ class AgentsTest(unittest.TestCase):
     # -- memory -------------------------------------------------------------
     # -- triage (quick review) ---------------------------------------------
     def triage_run(self, llm):
-        return triage.triage_ticker(self.conn, llm, TICKER, "1w")
+        fetchers = {key: value for key, value in self.fetchers().items() if key in ("fmp", "macro")}
+        return triage.triage_ticker(self.conn, llm, TICKER, "1w", fetchers=fetchers)
 
     def test_triage_is_one_call_and_stored_as_a_quick_run(self):
         llm = llm_client.FakeLLM(auto=True)
@@ -347,8 +348,10 @@ class AgentsTest(unittest.TestCase):
         self.assertEqual(final["agrees"], "caution")
         self.assertEqual(final["rules"]["entry"], self.entry)
         sources_json = json.loads(row["sources_json"])
-        for skipped in ("fmp", "sec", "social", "macro"):
+        for skipped in ("sec", "social"):  # fundamentals and macro are in the quick brief now
             self.assertEqual(sources_json[skipped]["status"], "skipped")
+        for used in ("fmp", "macro"):
+            self.assertEqual(sources_json[used]["status"], "ok")
         # Quick reviews never feed the track record or the memory.
         self.assertEqual(self.conn.execute("SELECT COUNT(*) FROM agent_decisions").fetchone()[0], 0)
 

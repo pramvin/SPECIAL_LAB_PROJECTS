@@ -1,6 +1,5 @@
 import type {
   Assumption,
-  ChatMessage,
   ModelInput,
   RationaleStep,
 } from "../types";
@@ -115,22 +114,3 @@ export const PORTFOLIO_IMPACT: { baseline: number[]; reallocated: number[] } = {
   baseline: [45000, 47000, 50000, 54000, 59000, 64000, 70000, 76000, 82000, 90000],
   reallocated: [45000, 48500, 52500, 57500, 63500, 70000, 77000, 84000, 90000, 96000],
 };
-
-/** Conversation history used to render the transcript. */
-export const MESSAGES: ChatMessage[] = [
-  {
-    id: "u1",
-    role: "user",
-    body: USER_QUESTION,
-    timestamp: "09:42 AM",
-  },
-  {
-    id: "a1",
-    role: "assistant",
-    headline: ANSWER.headline,
-    body: ANSWER.body,
-    verification: VERIFICATION_NOTE,
-    stats: ANSWER.stats,
-    timestamp: "09:42 AM",
-  },
-];

@@ -141,13 +141,13 @@ def review_ticker(conn, llm, ticker: str, horizon: str = "1w", fetchers: dict | 
 
         analyst_ids = {
             "market": _source_ids(ctx, "metric:") | _source_ids(ctx, "rule:") | _source_ids(ctx, "macro:"),
-            "news": _source_ids(ctx, "news:"),
+            "news": _source_ids(ctx, "news:") | _source_ids(ctx, "macro:"),
             "fundamentals": _source_ids(ctx, "fund:") | _source_ids(ctx, "sec:"),
             "social": _source_ids(ctx, "social:"),
         }
         sections = {
             "market": context.market_text(ctx),
-            "news": context.news_text(ctx),
+            "news": context.news_text(ctx) + "\n\n" + context.section("Macro", context.macro_lines(ctx)),
             "fundamentals": context.fundamentals_text(ctx),
             "social": context.social_text(ctx),
         }
@@ -198,23 +198,22 @@ def review_ticker(conn, llm, ticker: str, horizon: str = "1w", fetchers: dict | 
             if manager:
                 runner.register("research_manager", manager, "rationale")
 
-            trader_allowed = ({f"agent:research_manager"} & runner.agent_ids) | _source_ids(ctx, "metric:") | _source_ids(ctx, "rule:")
+            trader_allowed = (({f"agent:research_manager"} | analyst_agent_ids) & runner.agent_ids) | set(ctx.evidence)
             manager_text = (f"agent:research_manager — {manager['lean']}: {manager['rationale']}"
                             if manager else "(No research manager output in this run.)")
-            trader_user = (f"{intro}\n\nResearch manager plan: {manager_text}\n\n"
-                           f"{context.market_text(ctx)}")
+            trader_user = (f"{intro}\n\n{context.analysts_block(analyst_outputs)}\n\n"
+                           f"Research manager plan: {manager_text}\n\n{context.market_text(ctx)}")
             trader = runner.call("trader", trader_user, trader_allowed, deep=False)
             if trader:
                 runner.register("trader", trader, "rationale")
 
-            risk_base = (({f"agent:research_manager"} & runner.agent_ids)
-                         | ({f"agent:trader"} & runner.agent_ids)
-                         | _source_ids(ctx, "metric:") | _source_ids(ctx, "rule:"))
+            risk_base = ((({f"agent:research_manager", "agent:trader"} | analyst_agent_ids) & runner.agent_ids)
+                         | set(ctx.evidence))
             risk_turns = []
             for index, role in enumerate(("aggressive", "conservative", "neutral"), start=1):
                 allowed = risk_base | (runner.agent_ids & {"agent:aggressive", "agent:conservative",
                                                            "agent:neutral"})
-                user = (f"{intro}\n\nResearch manager: "
+                user = (f"{intro}\n\n{context.analysts_block(analyst_outputs)}\n\nResearch manager: "
                         f"{manager['lean'] + ': ' + manager['rationale'] if manager else '(none)'}\n\n"
                         f"Trader: {trader['stance'] + ': ' + trader['rationale'] if trader else '(none)'}\n\n"
                         f"{context.market_text(ctx)}\n\n"
@@ -262,6 +261,7 @@ def review_ticker(conn, llm, ticker: str, horizon: str = "1w", fetchers: dict | 
             "rating": rating,
             "summary": summary,
             "agrees": config.agrees(rating),
+            "verdict": (pm or {}).get("verdict") or {},
             "key_risks": key_risks,
             "analysts": {role: analyst_outputs.get(role) for role in ("market", "news", "fundamentals", "social")},
             "debate": {"bull": bull_points, "bear": bear_points, "manager": manager},

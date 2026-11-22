@@ -84,6 +84,39 @@ def check_numbers(text: str, allowed: set[float], where: str) -> None:
             raise ValidationError(f"{where} uses a number not in the context: {match}")
 
 
+_BARE = re.compile(r"\s*\(\s*[a-z][a-z0-9_]*(?:\s*,\s*[a-z][a-z0-9_]*)*\s*\)")
+
+
+def strip_internal(text: str) -> str:
+    """Remove bracketed internal metric names such as "(r60)" or "(ma200_gap, sma200)" from prose."""
+    def drop(match):
+        names = [t.strip() for t in match.group(0).strip(" ()").split(",")]
+        return "" if all(re.search(r"[\d_]", n) for n in names) else match.group(0)
+
+    text = re.sub(r"\s*\(\s*" + _ID_TOKEN.pattern + r"(?:\s*,\s*" + _ID_TOKEN.pattern + r")*\s*\)", "", text)
+    return _BARE.sub(drop, text)
+
+
+def clean_text(text: str, numbers: set[float], where: str) -> str:
+    """Drop only the sentences that use a number not in the context; fail only when nothing is left."""
+    kept = [s for s in re.split(r"(?<=[.!?])\s+", strip_internal(text).strip())
+            if not _unseen_number(s, numbers)]
+    if not kept:
+        raise ValidationError(f"{where} uses a number not in the context")
+    return " ".join(kept)
+
+
+def _unseen_number(text: str, allowed: set[float]) -> bool:
+    for match in _NUMBER.findall(_DATE.sub(" ", _ID_TOKEN.sub(" ", text))):
+        try:
+            value = float(match.replace(",", ""))
+        except ValueError:
+            continue
+        if not _number_allowed(value, allowed):
+            return True
+    return False
+
+
 def _string(data: dict, key: str, where: str, required: bool = True) -> str:
     value = data.get(key)
     if value is None and not required:
@@ -102,6 +135,10 @@ def _evidence_list(value, allowed: set[str], where: str, required: bool = True) 
     for item in value:
         if not isinstance(item, str):
             raise ValidationError(f"{where}.evidence items must be strings")
+        if item not in allowed and (" " in item or len(item) > 60):
+            # the model pasted a sentence into the list: keep only the allowed ids written inside it
+            ids.extend(i for i in dict.fromkeys(_ID_TOKEN.findall(item)) if i in allowed and i not in ids)
+            continue
         if item not in allowed:
             raise ValidationError(f"{where} cites an evidence id not in the context: {item}")
         ids.append(item)
@@ -121,7 +158,7 @@ def _points(data: dict, key: str, allowed: set[str], numbers: set[float],
     for index, point in enumerate(raw):
         if not isinstance(point, dict):
             raise ValidationError(f"{where}.{key}[{index}] must be an object")
-        text = _string(point, "text", f"{where}.{key}[{index}]")
+        text = strip_internal(_string(point, "text", f"{where}.{key}[{index}]"))
         try:
             check_numbers(text, numbers, f"{where}.{key}[{index}].text")
         except ValidationError:
@@ -140,14 +177,54 @@ def _analyst(data: dict, allowed: set[str], numbers: set[float], role: str) -> d
     signal = data.get("signal")
     if signal not in SIGNALS:
         raise ValidationError(f"{role}.signal must be one of {sorted(SIGNALS)}")
-    summary = _string(data, "summary", role)
-    check_numbers(summary, numbers, f"{role}.summary")
+    summary = clean_text(_string(data, "summary", role), numbers, f"{role}.summary")
     gaps = data.get("data_gaps") or []
     if not isinstance(gaps, list) or any(not isinstance(g, str) for g in gaps):
         raise ValidationError(f"{role}.data_gaps must be a list of strings")
     minimum = 0 if signal == "no_data" else 1
-    points = _points(data, "points", allowed, numbers, role, minimum=minimum, maximum=6)
+    points = _points(data, "points", allowed, numbers, role, minimum=minimum, maximum=10)
     return {"signal": signal, "summary": summary, "points": points, "data_gaps": [g.strip() for g in gaps if g.strip()]}
+
+
+LIGHTS = ("green", "amber", "red")
+CHECK_KEYS = ("trend", "business", "news_market", "risk")
+
+
+def _short(value, numbers: set[float], limit: int) -> str:
+    """A short plain-language line for the card; "" when missing or when every sentence has an unseen number."""
+    if not isinstance(value, str) or not value.strip():
+        return ""
+    try:
+        text = clean_text(_ID_TOKEN.sub(" ", value).strip(), numbers, "verdict")
+    except ValidationError:
+        return ""
+    text = re.sub(r"\s{2,}", " ", text).strip()
+    if len(text) <= limit:
+        return text
+    kept = ""
+    for sentence in re.split(r"(?<=[.!?])\s+", text):  # cut at a sentence end, not in the middle of one
+        if len(kept) + len(sentence) + 1 > limit:
+            break
+        kept = f"{kept} {sentence}".strip()
+    return kept or text[: limit - 1].rstrip() + "\u2026"
+
+
+def verdict_fields(data: dict, numbers: set[float]) -> dict:
+    """The card's headline, four traffic lights, how to act and change-if. All optional, never fatal."""
+    raw_checks = data.get("checks") if isinstance(data.get("checks"), dict) else {}
+    checks = {}
+    for key in CHECK_KEYS:
+        item = raw_checks.get(key)
+        if isinstance(item, dict) and item.get("light") in LIGHTS:
+            line = _short(item.get("line"), numbers, 70)
+            if line:
+                checks[key] = {"light": item["light"], "line": line}
+    return {
+        "headline": _short(data.get("headline"), numbers, 220),
+        "checks": checks,
+        "how_to_act": _short(data.get("how_to_act"), numbers, 260),
+        "change_if": _short(data.get("change_if"), numbers, 220),
+    }
 
 
 def _rating(data: dict, raw: str, role: str) -> str:
@@ -186,13 +263,12 @@ def validate(role: str, data: dict, raw: str, allowed: set[str], numbers: set[fl
         return _analyst(data, allowed, numbers, role)
 
     if role in ("bull", "bear"):
-        points = _points(data, "points", allowed, numbers, role, minimum=2, maximum=4)
+        points = _points(data, "points", allowed, numbers, role, minimum=3, maximum=7)
         return {"points": points}
 
     if role == "research_manager":
         lean = _rating(data, raw, role)
-        rationale = _string(data, "rationale", role)
-        check_numbers(rationale, numbers, f"{role}.rationale")
+        rationale = clean_text(_string(data, "rationale", role), numbers, f"{role}.rationale")
         evidence = _evidence_list(data.get("evidence"), allowed, role)
         return {"lean": lean, "rationale": rationale, "evidence": evidence}
 
@@ -200,8 +276,7 @@ def validate(role: str, data: dict, raw: str, allowed: set[str], numbers: set[fl
         stance = data.get("stance")
         if stance not in ("enter", "wait", "avoid"):
             raise ValidationError("trader.stance must be enter, wait or avoid")
-        rationale = _string(data, "rationale", role)
-        check_numbers(rationale, numbers, f"{role}.rationale")
+        rationale = clean_text(_string(data, "rationale", role), numbers, f"{role}.rationale")
         evidence = _evidence_list(data.get("evidence"), allowed, role)
         out = {"stance": stance, "rationale": rationale, "evidence": evidence,
                "suggested_stop": data.get("suggested_stop"),
@@ -209,8 +284,7 @@ def validate(role: str, data: dict, raw: str, allowed: set[str], numbers: set[fl
         return _sanity_trader(out, (rules or {}).get("entry"), atr)
 
     if role in ("aggressive", "conservative", "neutral"):
-        view = _string(data, "view", role)
-        check_numbers(view, numbers, f"{role}.view")
+        view = clean_text(_string(data, "view", role), numbers, f"{role}.view")
         evidence = _evidence_list(data.get("evidence"), allowed, role)
         pct = data.get("suggested_position_pct")
         if not isinstance(pct, (int, float)) or isinstance(pct, bool) or not 0 <= pct <= 30:
@@ -222,17 +296,17 @@ def validate(role: str, data: dict, raw: str, allowed: set[str], numbers: set[fl
         confidence = data.get("confidence")
         if confidence not in config.CONFIDENCES:
             raise ValidationError(f"triage.confidence must be one of {list(config.CONFIDENCES)}")
-        summary = _string(data, "summary", role)
-        check_numbers(summary, numbers, f"{role}.summary")
-        points = _points(data, "points", allowed, numbers, role, minimum=1, maximum=3)
-        return {"rating": rating, "confidence": confidence, "summary": summary, "points": points}
+        summary = clean_text(_string(data, "summary", role), numbers, f"{role}.summary")
+        points = _points(data, "points", allowed, numbers, role, minimum=1, maximum=5)
+        return {"rating": rating, "confidence": confidence, "summary": summary, "points": points,
+                "verdict": verdict_fields(data, numbers)}
 
     if role == "portfolio_manager":
         rating = _rating(data, raw, role)
-        summary = _string(data, "summary", role)
-        check_numbers(summary, numbers, f"{role}.summary")
-        risks = _points(data, "key_risks", allowed, numbers, role, minimum=0, maximum=6)
+        summary = clean_text(_string(data, "summary", role), numbers, f"{role}.summary")
+        risks = _points(data, "key_risks", allowed, numbers, role, minimum=0, maximum=8)
         evidence = _evidence_list(data.get("evidence"), allowed, role)
-        return {"rating": rating, "summary": summary, "key_risks": risks, "evidence": evidence}
+        return {"rating": rating, "summary": summary, "key_risks": risks, "evidence": evidence,
+                "verdict": verdict_fields(data, numbers)}
 
     raise ValidationError(f"unknown role {role}")

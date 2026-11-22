@@ -78,26 +78,20 @@ const QUICK = [10, 20, 50];
 export function TradeRow({
   ticker,
   entry,
-  stop,
-  target,
-  positionPct,
   balance,
   position,
   livePrice,
 }: {
   ticker: string;
   entry: number;
-  stop: number;
-  target: number;
-  positionPct: number;
   balance: number;
   position: Position | null;
   livePrice: number | null;
 }) {
   const { pending, refresh } = useRefresh();
-  const suggested = Math.max(1, Math.floor((balance * positionPct) / 100));
+  const initial = Math.max(1, Math.floor(balance * 0.1));
   const [open, setOpen] = useState(false);
-  const [amount, setAmount] = useState(String(suggested));
+  const [amount, setAmount] = useState(String(initial));
   const [leverage, setLeverage] = useState(1);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -155,8 +149,6 @@ export function TradeRow({
   const value = Number(amount);
   const valid = Number.isFinite(value) && value > 0 && value <= balance;
   const notional = valid ? value * leverage : 0;
-  const lossAtStop = (notional * (stop - entry)) / entry;
-  const gainAtTarget = (notional * (target - entry)) / entry;
 
   if (!open) {
     return (
@@ -169,10 +161,6 @@ export function TradeRow({
         >
           Open position
         </button>
-        <span className="font-body-sm text-body-sm text-on-surface-variant">
-          Suggested: <b className="text-on-surface">{usd(suggested)}</b> ({positionPct}%
-          of balance)
-        </span>
         <span className="flex-1" />
         <span className="font-body-sm text-body-sm text-on-surface-variant">
           Available <b className="text-on-surface">{usd(balance)}</b>
@@ -239,23 +227,10 @@ export function TradeRow({
           <Row label="Notional" value={usd(notional)} />
           <Row label="Quantity" value={`${(notional / entry).toFixed(3)} shares`} />
           <Row label="Balance after" value={usd(balance - (valid ? value : 0))} />
-          <Row
-            label={`If stop hit (${usd(stop)})`}
-            value={signed(lossAtStop)}
-            tone="text-error"
-            strong
-          />
-          <Row
-            label={`If target hit (${usd(target)})`}
-            value={signed(gainAtTarget)}
-            tone="text-green-700"
-            strong
-          />
         </dl>
         <p className="rounded-xl bg-amber-50 px-3 py-2 text-[12.5px] text-amber-800">
           Paper money. The fill uses the latest daily close in our data, so it can
-          differ from the card price. Stop and target are guides only: positions do
-          not close by themselves.
+          differ from the card price. Positions do not close by themselves.
           {leverage > 1 && " With leverage you can lose more than the margin."}
         </p>
         <div className="flex gap-3">
