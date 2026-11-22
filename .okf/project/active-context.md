@@ -22,7 +22,7 @@ No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/not
 - Current branch: `fais-agent-review`, pushed, **PR #13** open against `main` (agent review + the Yahoo news commit `130aeba` + `.github/workflows/refresh-news.yml`; mergeable) · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
 - Ask before committing or pushing (rule in `AGENTS.md`)
 
-# Wallet and trading database (Vincent, due Friday)
+# Paper trading
 
 `Backend/app/wallet.py` and `Backend/app/trading.py` follow the watchlist pattern: own `SCHEMA`, own `APIRouter`, included from `main.py` so tables are created at startup. Wallet starts at $1,000; deposits/withdrawals and balance snapshots are logged. Positions support long and short, leverage 1–10, latest `prices` close for entry/exit, and closed trades store P/L and P/L%. See [Wallet](/architecture/wallet.md) and [Simulated trading](/architecture/trading.md). Tests: `python -m unittest tests.test_wallet tests.test_trading`. Idea cards now have ★ Watch, Open/Close position (long only, 1–10x, fills at the latest daily close in the DB, not the live quote) and a header balance pill (P/L on total equity), all in `CardActions.tsx` / `BalancePill.tsx`; tried on a scratch DB only. The `/wallet` page now shows the balance, deposit/withdraw forms, history chart, open positions, closed trades, and transaction log.
 

@@ -1,10 +1,14 @@
 """Simulated wallet: balance, deposit/withdraw log, and balance history."""
+import math
 import sqlite3
 import time
-from typing import Callable
+from typing import Callable, Literal
 
-from fastapi import APIRouter, Cookie, HTTPException, Query
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Cookie, Header, HTTPException, Query
+from pydantic import BaseModel, Field, field_validator
+
+from .dbcompat import begin_financial_write, is_pg, lock_wallet
+from . import idempotency
 
 STARTING_BALANCE = 1000.0
 DEFAULT_TRANSACTION_LIMIT = 50
@@ -44,10 +48,69 @@ CREATE INDEX IF NOT EXISTS idx_balance_history_user_time
 
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(SCHEMA)
+    if not is_pg(conn):
+        # Initialization owns its transaction; existing rows deliberately stay NULL.
+        with conn:
+            begin_financial_write(conn)
+            columns = {row[1] for row in conn.execute("PRAGMA table_info(balance_history)").fetchall()}
+            for name, column_type in (
+                ("operation_type", "TEXT"), ("delta", "REAL"),
+                ("wallet_transaction_id", "INTEGER"), ("position_id", "INTEGER"), ("trade_id", "INTEGER"),
+            ):
+                if name not in columns:
+                    conn.execute(f"ALTER TABLE balance_history ADD COLUMN {name} {column_type}").close()
+
+
+def record_balance_history(
+    conn, user_id, balance, created_at, operation_type, delta,
+    wallet_transaction_id=None, position_id=None, trade_id=None,
+) -> None:
+    if is_pg(conn):
+        conn.execute("INSERT INTO balance_history (user_id, balance, created_at) VALUES (?, ?, ?)",
+                     (user_id, balance, created_at)).close()
+    else:
+        conn.execute(
+            "INSERT INTO balance_history "
+            "(user_id, balance, created_at, operation_type, delta, wallet_transaction_id, position_id, trade_id) "
+            "VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+            (user_id, balance, created_at, operation_type, delta,
+             wallet_transaction_id, position_id, trade_id),
+        ).close()
 
 
 def money(value: float) -> float:
     return round(float(value), 2)
+
+
+def finite_number(value: float) -> float:
+    """Validate trusted-helper inputs as well as uncoerced HTTP numbers."""
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise ValueError("Amount must be a finite number")
+    try:
+        number = float(value)
+    except (OverflowError, ValueError):
+        raise ValueError("Amount must be a finite number") from None
+    if not math.isfinite(number):
+        raise ValueError("Amount must be a finite number")
+    return number
+
+
+def validate_amount(value: float) -> float:
+    number = finite_number(value)
+    if not 0 < number <= MAX_AMOUNT:
+        raise ValueError(f"Amount must be positive and at most {MAX_AMOUNT:g}")
+    rounded = money(number)
+    if rounded <= 0:
+        raise ValueError("Amount must round to at least 0.01")
+    return rounded
+
+
+def request_number(value: float) -> float:
+    # JSON's nonstandard NaN/Infinity tokens can reach Python's decoder. A
+    # Pydantic error retaining that input cannot itself be serialized as JSON.
+    if isinstance(value, float) and not math.isfinite(value):
+        raise HTTPException(422, "Amount must be a finite number")
+    return finite_number(value)
 
 
 def ensure_wallet(conn: sqlite3.Connection, user_id: int) -> sqlite3.Row:
@@ -59,16 +122,19 @@ def ensure_wallet(conn: sqlite3.Connection, user_id: int) -> sqlite3.Row:
     if row is not None:
         return row
 
+    begin_financial_write(conn)
     now = int(time.time())
-    conn.execute(
+    cur = conn.execute(
         "INSERT INTO wallets (user_id, balance, starting_balance, created_at, updated_at) "
-        "VALUES (?, ?, ?, ?, ?)",
+        "VALUES (?, ?, ?, ?, ?) ON CONFLICT (user_id) DO NOTHING RETURNING user_id",
         (user_id, STARTING_BALANCE, STARTING_BALANCE, now, now),
     )
-    conn.execute(
-        "INSERT INTO balance_history (user_id, balance, created_at) VALUES (?, ?, ?)",
-        (user_id, STARTING_BALANCE, now),
-    )
+    try:
+        created = cur.fetchone() is not None
+    finally:
+        cur.close()
+    if created:
+        record_balance_history(conn, user_id, STARTING_BALANCE, now, "initialization", STARTING_BALANCE)
     return conn.execute(
         "SELECT user_id, balance, starting_balance, created_at, updated_at "
         "FROM wallets WHERE user_id = ?",
@@ -82,63 +148,81 @@ def change_balance(
     delta: float,
     kind: str | None = None,
     note: str = "",
+    *,
+    require_funds: bool = False,
+    operation_type: str | None = None,
+    position_id: int | None = None,
+    trade_id: int | None = None,
 ) -> tuple[sqlite3.Row, sqlite3.Row | None]:
-    """Apply a balance delta, write history, and optionally log the transaction."""
-    wallet = ensure_wallet(conn, user_id)
-    balance_after = money(wallet["balance"] + delta)
+    """Mutate under a DB lock; the outer caller must roll back on any error."""
+    delta = finite_number(delta)  # Internal settlements have no external amount cap.
+    if kind is not None:
+        if kind not in ("deposit", "withdraw") or (kind == "deposit") != (delta > 0):
+            raise ValueError("Invalid wallet transaction kind or delta")
+        amount = validate_amount(abs(delta))
+        delta = amount if kind == "deposit" else -amount
+    begin_financial_write(conn)
+    ensure_wallet(conn, user_id)
+    wallet = lock_wallet(conn, user_id)
+    balance_before = finite_number(wallet["balance"])
+    balance_after = money(balance_before + delta)
+    finite_number(balance_after)
     now = int(time.time())
-    conn.execute(
-        "UPDATE wallets SET balance = ?, updated_at = ? WHERE user_id = ?",
-        (balance_after, now, user_id),
+    guarded = require_funds and delta < 0
+    cur = conn.execute(
+        "UPDATE wallets SET balance = ?, updated_at = ? WHERE user_id = ?"
+        + (" AND balance >= ?" if guarded else "")
+        + " RETURNING user_id, balance, starting_balance, created_at, updated_at",
+        (balance_after, now, user_id, -delta) if guarded else (balance_after, now, user_id),
     )
-    conn.execute(
-        "INSERT INTO balance_history (user_id, balance, created_at) VALUES (?, ?, ?)",
-        (user_id, balance_after, now),
-    )
-
+    try:
+        wallet = cur.fetchone()
+    finally:
+        cur.close()
+    if wallet is None:
+        raise InsufficientFunds("Insufficient wallet balance")
     transaction = None
     if kind is not None:
-        cur = conn.execute(
+        new_id = conn.execute(
             "INSERT INTO wallet_transactions "
             "(user_id, kind, amount, balance_after, note, created_at) "
-            "VALUES (?, ?, ?, ?, ?, ?)",
+            "VALUES (?, ?, ?, ?, ?, ?) RETURNING id",
             (user_id, kind, money(abs(delta)), balance_after, note, now),
-        )
+        ).fetchone()[0]
         transaction = conn.execute(
             "SELECT id, kind, amount, balance_after, note, created_at "
             "FROM wallet_transactions WHERE id = ?",
-            (cur.lastrowid,),
+            (new_id,),
         ).fetchone()
 
-    wallet = conn.execute(
-        "SELECT user_id, balance, starting_balance, created_at, updated_at "
-        "FROM wallets WHERE user_id = ?",
-        (user_id,),
-    ).fetchone()
+    event_type = ("withdrawal" if kind == "withdraw" else kind) or operation_type or "adjustment"
+    record_balance_history(
+        conn, user_id, balance_after, now, event_type, money(balance_after - balance_before),
+        None if transaction is None else transaction["id"], position_id, trade_id,
+    )
+
     return wallet, transaction
 
 
 class InsufficientFunds(Exception):
-    pass
+    financial_status = 409
+    financial_reason = None
 
 
 def deposit(
     conn: sqlite3.Connection, user_id: int, amount: float, note: str = ""
 ) -> tuple[sqlite3.Row, sqlite3.Row | None]:
-    if amount <= 0:
-        raise ValueError("Amount must be positive")
+    amount = validate_amount(amount)
     return change_balance(conn, user_id, amount, kind="deposit", note=note)
 
 
 def withdraw(
     conn: sqlite3.Connection, user_id: int, amount: float, note: str = ""
 ) -> tuple[sqlite3.Row, sqlite3.Row | None]:
-    if amount <= 0:
-        raise ValueError("Amount must be positive")
-    wallet = ensure_wallet(conn, user_id)
-    if amount > wallet["balance"] + 1e-9:
-        raise InsufficientFunds("Insufficient wallet balance")
-    return change_balance(conn, user_id, -amount, kind="withdraw", note=note)
+    amount = validate_amount(amount)
+    return change_balance(
+        conn, user_id, -amount, kind="withdraw", note=note, require_funds=True
+    )
 
 
 def wallet_payload(row: sqlite3.Row) -> dict:
@@ -164,6 +248,43 @@ def transaction_payload(row: sqlite3.Row) -> dict:
         "balance_after": money(row["balance_after"]),
         "note": row["note"],
         "created_at": row["created_at"],
+    }
+
+
+def transaction_history(
+    conn: sqlite3.Connection,
+    user_id: int,
+    limit: int,
+    offset: int = 0,
+    search: str = "",
+    kind: Literal["deposit", "withdraw"] | None = None,
+) -> dict:
+    clauses = ["user_id = ?"]
+    params: list[object] = [user_id]
+    search = search.strip()
+    if search:
+        clauses.append("(instr(lower(note), lower(?)) > 0 OR instr(kind, lower(?)) > 0)")
+        params.extend((search, search))
+    if kind is not None:
+        clauses.append("kind = ?")
+        params.append(kind)
+    where = " AND ".join(clauses)
+
+    total = conn.execute(
+        f"SELECT COUNT(*) FROM wallet_transactions WHERE {where}", params
+    ).fetchone()[0]
+    rows = conn.execute(
+        "SELECT id, kind, amount, balance_after, note, created_at "
+        f"FROM wallet_transactions WHERE {where} "
+        "ORDER BY created_at DESC, id DESC LIMIT ? OFFSET ?",
+        [*params, limit, offset],
+    ).fetchall()
+    return {
+        "items": [transaction_payload(row) for row in rows],
+        "total": total,
+        "offset": offset,
+        "limit": limit,
+        "has_more": offset + len(rows) < total,
     }
 
 
@@ -193,10 +314,16 @@ class AmountBody(BaseModel):
     amount: float = Field(gt=0, le=MAX_AMOUNT)
     note: str = Field(default="", max_length=200)
 
+    @field_validator("amount", mode="before")
+    @classmethod
+    def valid_amount(cls, value):
+        return validate_amount(request_number(value))
+
 
 def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -> APIRouter:
     with db() as conn:
         init_schema(conn)
+        idempotency.init_schema(conn)
 
     router = APIRouter(prefix="/api")
 
@@ -207,47 +334,47 @@ def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -
             return wallet_payload(ensure_wallet(conn, user["id"]))
 
     @router.post("/wallet/deposit")
-    def deposit_funds(body: AmountBody, session: str | None = Cookie(default=None)):
-        with db() as conn:
-            user = current_user(conn, session)
+    def deposit_funds(
+        body: AmountBody, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ):
+        def execute(conn, user_id, _prepared):
             wallet, transaction = deposit(
-                conn, user["id"], body.amount, note=body.note.strip()
+                conn, user_id, body.amount, note=body.note.strip()
             )
-        return {
-            "wallet": wallet_payload(wallet),
-            "transaction": transaction_payload(transaction),
-        }
+            return {"wallet": wallet_payload(wallet), "transaction": transaction_payload(transaction)}
+        return idempotency.run(db, current_user, session, idempotency_key, "wallet.deposit",
+                               {"amount": body.amount, "note": body.note.strip()}, execute)
 
     @router.post("/wallet/withdraw")
-    def withdraw_funds(body: AmountBody, session: str | None = Cookie(default=None)):
-        with db() as conn:
-            user = current_user(conn, session)
-            try:
-                wallet, transaction = withdraw(
-                    conn, user["id"], body.amount, note=body.note.strip()
-                )
-            except InsufficientFunds as exc:
-                raise HTTPException(409, str(exc))
-        return {
-            "wallet": wallet_payload(wallet),
-            "transaction": transaction_payload(transaction),
-        }
+    def withdraw_funds(
+        body: AmountBody, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
+    ):
+        def execute(conn, user_id, _prepared):
+            wallet, transaction = withdraw(conn, user_id, body.amount, note=body.note.strip())
+            return {"wallet": wallet_payload(wallet), "transaction": transaction_payload(transaction)}
+        try:
+            return idempotency.run(db, current_user, session, idempotency_key, "wallet.withdraw",
+                                   {"amount": body.amount, "note": body.note.strip()}, execute)
+        except InsufficientFunds as exc:
+            raise HTTPException(409, str(exc))
 
     @router.get("/wallet/transactions")
     def get_transactions(
         limit: int = Query(DEFAULT_TRANSACTION_LIMIT, ge=1, le=MAX_TRANSACTION_LIMIT),
+        offset: int = Query(0, ge=0, le=1_000_000),
+        search: str = Query("", max_length=80),
+        kind: Literal["deposit", "withdraw"] | None = None,
         session: str | None = Cookie(default=None),
     ):
         with db() as conn:
             user = current_user(conn, session)
             ensure_wallet(conn, user["id"])
-            rows = conn.execute(
-                "SELECT id, kind, amount, balance_after, note, created_at "
-                "FROM wallet_transactions WHERE user_id = ? "
-                "ORDER BY created_at DESC, id DESC LIMIT ?",
-                (user["id"], limit),
-            ).fetchall()
-        return {"items": [transaction_payload(r) for r in rows]}
+            result = transaction_history(
+                conn, user["id"], limit, offset, search, kind
+            )
+        return result
 
     @router.get("/wallet/history")
     def get_history(

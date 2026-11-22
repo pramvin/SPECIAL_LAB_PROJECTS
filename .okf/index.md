@@ -23,6 +23,8 @@ okf_version: "0.2"
 * [News sentiment](/architecture/news-sentiment.md) - Local ML label for headlines (replaces Laya), training data, limits
 * [Wallet](/architecture/wallet.md) - Simulated $1,000 wallet, deposits, withdrawals, balance history
 * [Simulated trading](/architecture/trading.md) - Long/short positions, leverage, P/L, closed trades
+* [Financial idempotency](/architecture/idempotency.md) - SQLite request keys, atomic response storage, retries, and conflicts
+* [Financial audit](/architecture/financial-audit.md) - Linked balance history, legacy migration, and safe failure diagnostics
 * [Auth and security](/architecture/auth-security.md) - Login, hashing, rate limit, known limits
 * [Data sources](/architecture/data-sources.md) - Prices, news, and sources not used
 

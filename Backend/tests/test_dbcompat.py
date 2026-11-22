@@ -3,12 +3,23 @@
 Covers the SQLite -> Postgres translation as pure string functions (no Postgres server needed)
 and the engine switch rules. The live Postgres path needs a real DATABASE_URL to verify.
 """
+import ast
 import os
+from pathlib import Path
+import sqlite3
+import tempfile
 import unittest
 from unittest import mock
 
 from app import dbcompat
-from app.main import SCHEMA as MAIN_SCHEMA
+
+# Read the constant without importing main: import initializes/seeds a database.
+_main_tree = ast.parse((Path(__file__).parents[1] / "app" / "main.py").read_text(encoding="utf-8"))
+MAIN_SCHEMA = next(
+    ast.literal_eval(node.value) for node in _main_tree.body
+    if isinstance(node, ast.Assign)
+    and any(isinstance(target, ast.Name) and target.id == "SCHEMA" for target in node.targets)
+)
 
 
 class Translate(unittest.TestCase):
@@ -55,11 +66,84 @@ class Engine(unittest.TestCase):
     def test_sqlite_helpers(self):
         with mock.patch.dict(os.environ, {"PLANWISE_DB": ":memory:"}):
             conn = dbcompat.connect(":memory:")
+        self.addCleanup(conn.close)
         conn.executescript("CREATE TABLE t (a INTEGER PRIMARY KEY, b TEXT);")
         self.assertEqual(dbcompat.table_names(conn), {"t"})
         self.assertEqual(dbcompat.column_names(conn, "t"), {"a", "b"})
         conn.execute("INSERT INTO t (b) VALUES (?)", ("x",))
         self.assertEqual(dbcompat.read_df(conn, "SELECT a, b FROM t").to_dict("records"), [{"a": 1, "b": "x"}])
+
+
+class FinancialProtection(unittest.TestCase):
+    def test_existing_deferred_read_acquires_writer_before_wallet_read(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = str(Path(directory) / "locking.db")
+            with sqlite3.connect(path) as setup:
+                setup.execute("CREATE TABLE wallets (balance REAL)")
+            setup.close()
+            first = sqlite3.connect(path)
+            second = sqlite3.connect(path, timeout=0.01)
+            try:
+                first.execute("BEGIN")
+                first.execute("SELECT * FROM wallets").fetchall()
+                dbcompat.begin_financial_write(first)
+                with self.assertRaises(sqlite3.OperationalError) as error:
+                    second.execute("BEGIN IMMEDIATE")
+                self.assertEqual(error.exception.sqlite_errorcode, sqlite3.SQLITE_BUSY)
+                first.rollback()
+                second.execute("BEGIN IMMEDIATE")
+                second.rollback()
+            finally:
+                first.close()
+                second.close()
+
+    def test_sqlite_fresh_and_existing_transactions_do_not_commit(self):
+        conn = sqlite3.connect(":memory:")
+        self.addCleanup(conn.close)
+        conn.row_factory = sqlite3.Row
+        conn.execute("CREATE TABLE wallets (user_id INTEGER PRIMARY KEY, balance REAL, "
+                     "starting_balance REAL, created_at INTEGER, updated_at INTEGER)")
+        statements = []
+        conn.set_trace_callback(statements.append)
+        dbcompat.begin_financial_write(conn)
+        conn.execute("INSERT INTO wallets VALUES (1, 1000, 1000, 0, 0)")
+        self.assertEqual(dbcompat.lock_wallet(conn, 1)["balance"], 1000)
+        self.assertEqual(sum(s == "BEGIN IMMEDIATE" for s in statements), 1)
+        self.assertNotIn("COMMIT", statements)
+        conn.rollback()
+        self.assertEqual(conn.execute("SELECT COUNT(*) FROM wallets").fetchone()[0], 0)
+
+    def test_pg_locks_row_and_preserves_caller_ownership(self):
+        raw = mock.Mock(autocommit=False)
+        conn = dbcompat.PgConnection(raw)
+        raw.cursor.return_value.fetchone.return_value = (1, 1000)
+        self.assertEqual(dbcompat.lock_wallet(conn, 1), (1, 1000))
+        sql, params = raw.cursor.return_value.execute.call_args.args
+        self.assertTrue(sql.endswith("FOR UPDATE"))
+        self.assertIn("user_id = %s", sql)
+        self.assertEqual(params, (1,))
+        raw.commit.assert_not_called()
+        raw.rollback.assert_not_called()
+        raw.close.assert_not_called()
+        raw.cursor.return_value.close.assert_called_once()
+
+    def test_pg_autocommit_is_rejected(self):
+        raw = mock.Mock(autocommit=True)
+        with self.assertRaises(ValueError):
+            dbcompat.begin_financial_write(dbcompat.PgConnection(raw))
+        raw.cursor.assert_not_called()
+
+    def test_pg_context_contract_is_unchanged(self):
+        raw = mock.Mock()
+        conn = dbcompat.PgConnection(raw)
+        with conn:
+            pass
+        raw.commit.assert_called_once()
+        with self.assertRaises(RuntimeError):
+            with conn:
+                raise RuntimeError("failure")
+        raw.rollback.assert_called_once()
+        raw.close.assert_not_called()
 
 
 if __name__ == "__main__":

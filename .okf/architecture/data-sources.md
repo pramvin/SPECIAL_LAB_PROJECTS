@@ -8,7 +8,7 @@ generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-18T05:00:00Z }
 
 | Source | Status | Notes |
 |---|---|---|
-| yfinance prices | in use (decided 2026-11-01: free, no paid feed) | daily closes only, **not real-time and not a 15-min feed** · UI says so · 2 years · the S&P 500 list comes from Wikipedia (no API key) and is stored in the DB |
+| yfinance prices | in use (decided 2026-11-01: free, no paid feed) | daily closes only, **not real-time and not a 15-min feed** · UI says so · 2 years · the S&P 500 list comes from Wikipedia (no API key) and is stored in the DB · simulated position entry/close fetches the latest daily bar on demand |
 | Yahoo quotes (`/api/quotes`) | in use, unofficial | latest 1-min bar via yfinance, cached 60 s · UI labels it "delayed, usually about 15 minutes" and shows the real quote time · the 15-min figure is Yahoo's usual delay, **not verified by us** |
 | TradingView | link only | the ticker opens tradingview.com (their own live data) · see [TradingView chart link](/decisions/tradingview-chart-link.md) |
 | Yahoo Finance news (`yf.Search`, replaced Google News RSS 2026-11-17) | in use | unofficial, no key · recent headlines only (we keep the last 7 days) · tagged with `relatedTickers` · an `&` in the query returns nothing, so it is stripped · `Ticker.get_news()` raised "Yahoo is down" in a test while `Search` worked · run `pipeline.news` manually |
@@ -16,6 +16,8 @@ generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-18T05:00:00Z }
 | StockTwits | used by the agent review's social analyst | returned 403 on 2026-11-17 but worked on 2026-11-18 (posts cited as `social:stocktwits:<id>`) → intermittent, shown as unavailable when blocked |
 | X/influencer | not used | |
 | Reddit (social sentiment) | planned for the agent review (live display only) · anonymous RSS returned 403 on 2026-11-17, so it needs OAuth app keys `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET` | the user made a Reddit "script" app (2026-11-02; keys only in the user's hands, never in the repo) · the API lists only ~1,000 recent items per query and the Pushshift archive is restricted to moderators, so it gives **no 2011–2020 history to train on** (community sources, not checked against Reddit's docs) · possible only for live display, or via an archive dump such as a Kaggle r/wallstreetbets dataset (unverified: date range, ticker tagging not included) |
+
+- SQLite daily cache observations are ordered by local receipt time for both trading and ingest; an older same-ticker/date observation cannot replace a newer one. This does not certify provider freshness. See [Simulated trading](/architecture/trading.md).
 
 - Paid/realtime feeds (Finnhub, Polygon, exchanges) and OpenStock (AGPL) were considered and not adopted
 - FMP: removed 2026-11-22 (its free key returned HTTP 402); the agent review reads fundamentals, quarterly statements and insider activity from Yahoo Finance instead

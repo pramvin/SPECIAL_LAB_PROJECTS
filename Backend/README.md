@@ -12,8 +12,9 @@ The frontend proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8000`)
 
 ## Wallet and simulated trading
 
-Each user starts with a simulated **$1,000** wallet. Tables are created at
-startup by `app/wallet.py` and `app/trading.py`; both follow the same
+Each user receives a simulated **$1,000** wallet on registration (and existing
+accounts get one on first wallet access). Tables are created at startup by
+`app/wallet.py` and `app/trading.py`; both follow the same
 `SCHEMA` + `APIRouter` pattern as `app/watchlist.py`.
 
 Wallet:
@@ -23,7 +24,7 @@ Wallet:
 | GET | `/api/wallet` | balance + change from $1,000 |
 | POST | `/api/wallet/deposit` | `{ "amount": 100, "note": "optional" }` |
 | POST | `/api/wallet/withdraw` | fails with 409 if balance is insufficient |
-| GET | `/api/wallet/transactions` | deposit/withdraw log |
+| GET | `/api/wallet/transactions` | paginated log; optional `search` (note/type) and `kind` filters |
 | GET | `/api/wallet/history` | balance snapshots for the chart |
 
 Trading:
@@ -31,9 +32,18 @@ Trading:
 | Method | Path | Notes |
 |---|---|---|
 | GET | `/api/positions` | open positions + unrealized P/L |
-| POST | `/api/positions` | `{ "ticker": "AAPL", "side": "long", "amount": 500, "leverage": 2 }` |
-| POST | `/api/positions/{id}/close` | close at the latest `prices` close |
-| GET | `/api/trades` | closed-trade history |
+| POST | `/api/positions` | `{ "ticker": "AAPL", "side": "long", "amount": 500, "leverage": 2 }`; fetches and saves the latest Yahoo Finance daily bar |
+| POST | `/api/positions/{id}/close` | refreshes the daily bar from Yahoo Finance, then closes the position |
+| GET | `/api/trades` | paginated history; optional ticker `search`, `side`, and `outcome` filters |
+| GET | `/api/trading/summary` | all-time P/L, win/loss/breakeven counts, win rate, and open-position totals |
+
+History endpoints accept `limit` and `offset` and return `items`, `total`,
+`offset`, `limit`, and `has_more`. Trade history defaults to 100 rows per page;
+wallet transactions default to 50. `win_rate_pct` is winning closed trades
+divided by all closed trades, including break-even trades in the denominator.
+The win rate and per-trade averages/extremes are `null` until a trade exists.
+Unrealized P/L uses saved daily prices and is `null` when any open position
+lacks a saved daily price.
 
 Rules:
 
@@ -43,6 +53,8 @@ Rules:
 - Long P/L = `(exit − entry) × quantity`; short P/L = `(entry − exit) × quantity`.
 - `pnl_pct = pnl ÷ amount_deducted × 100`.
 - A leveraged loss may make the wallet balance negative.
+- Position entry and close prices use Yahoo Finance daily data (not real-time); fetched bars are saved in `prices`.
+- If Yahoo Finance is unavailable, the position is not opened or closed and the API returns an error.
 
 Tests (no real DB touched):
 
