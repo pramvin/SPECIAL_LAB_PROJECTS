@@ -18,7 +18,7 @@ from fastapi import Request
 from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from . import agents_api, matching
+from . import agents_api, idempotency, matching
 from .dbcompat import IntegrityError, column_names, connect, table_names
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
