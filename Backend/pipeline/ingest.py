@@ -14,6 +14,7 @@ import requests
 import yfinance as yf
 
 from app.dbcompat import connect
+from app.price_cache import init_price_observations, price_upsert_sql, price_values
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 WIKI_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
@@ -73,12 +74,14 @@ def fetch_prices(tickers: list[str], period: str) -> dict[str, pd.DataFrame]:
         chunk = tickers[i : i + BATCH]
         raw = yf.download(chunk, period=period, interval="1d", auto_adjust=True,
                           group_by="ticker", threads=True, progress=False)
+        observed_at_ns = time.time_ns()
         for t in chunk:
             try:
                 df = raw[t] if len(chunk) > 1 else raw
             except KeyError:
                 continue
             out[t] = df.dropna(how="all")
+            out[t].attrs["observed_at_ns"] = observed_at_ns
     return out
 
 
@@ -127,6 +130,7 @@ def main() -> None:
     now = int(time.time())
     conn = connect(DB_PATH)
     conn.executescript(SCHEMA)
+    init_price_observations(conn)
 
     uni = fetch_universe()
     if args.limit:
@@ -143,7 +147,9 @@ def main() -> None:
     frames = fetch_prices(list(uni["ticker"]), args.period)
     ok = rejected = rows = n_issues = 0
     for ticker in uni["ticker"]:
-        clean, issues = validate(ticker, frames.get(ticker))
+        frame = frames.get(ticker)
+        observed_at_ns = None if frame is None else frame.attrs["observed_at_ns"]
+        clean, issues = validate(ticker, frame)
         with conn:
             conn.executemany(
                 "INSERT INTO data_issues (run_at, ticker, date, kind, detail) VALUES (?,?,?,?,?)",
@@ -151,11 +157,10 @@ def main() -> None:
             )
             if not clean.empty:
                 conn.executemany(
-                    "INSERT INTO prices (ticker, date, open, high, low, close, volume) VALUES (?,?,?,?,?,?,?) "
-                    "ON CONFLICT(ticker, date) DO UPDATE SET open=excluded.open, high=excluded.high, "
-                    "low=excluded.low, close=excluded.close, volume=excluded.volume",
-                    [(ticker, d.strftime("%Y-%m-%d"), float(r.Open), float(r.High), float(r.Low),
-                      float(r.Close), int(r.Volume)) for d, r in clean.iterrows()],
+                    price_upsert_sql(conn),
+                    [price_values(conn, (ticker, d.strftime("%Y-%m-%d"), float(r.Open),
+                                        float(r.High), float(r.Low), float(r.Close), int(r.Volume)),
+                                  observed_at_ns) for d, r in clean.iterrows()],
                 )
         n_issues += len(issues)
         if clean.empty:

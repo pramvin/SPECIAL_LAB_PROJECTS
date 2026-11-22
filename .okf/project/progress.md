@@ -3,7 +3,7 @@ type: Progress
 title: Stage and task status
 description: Status of the 8 pipeline stages and the tasks still open
 tags: [status]
-generated: { by: copilot-sdk/ai-assistant, at: 2026-11-17T00:49:47+08:00 }
+generated: { by: codex/gpt-6, at: 2026-11-20T18:15:11Z }
 ---
 
 Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user brings it back) · ❌ Dropped
@@ -42,5 +42,9 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 | T15 | Direction (up/down) prediction from news, chart, RSI/MACD, ML | ❌ dropped 2026-11-06 · [Direction prediction](/experiments/direction-prediction.md) |
 | T16 | News sentiment: Laya removed, local ML model trained on Kaggle (2026-11-06), `pipeline.sentiment` run on 530 headlines, card UI shows labels + News mood bar ✅ · headlines exist for only 12 tickers, so run `pipeline.news` for the current ideas ⬜ · labels unvalidated vs humans ⬜ | 🟡 |
 | T17 | Wallet + simulated trading: $1,000 wallet, all-time performance summary, searchable/filterable paginated histories, sortable positions, close confirmation, endpoints, tests, and docs | ✅ |
+| T18 | Han transaction security Stage 1: committed; SQLite wallet/opening protection and rollback verified. Live PostgreSQL remains unverified | ✅ |
+| T19 | Han Security Stage 2: SQLite close-once claim and non-reused future IDs while trade history is retained; quote fetching precedes writer protection. 101 SQLite-focused tests pass, including deposits during paused close quotes and out-of-order quotes in default/WAL modes. Trading/ingest cache updates compare observation timestamps atomically; legacy SQLite prices upgrade at startup. Legacy ID ambiguity remains unaudited | committed and reviewed |
+| T20 | Security Stage 3: optional SQLite financial idempotency, atomic stored responses, key conflicts, short read/quote preparation, retryable lock errors; 143 relevant tests pass in default/WAL coverage. Frontend adoption remains future work | committed, reviewed, and pushed |
+| T21 | Security Stage 4: linked SQLite history metadata, nullable legacy upgrade, safe diagnostics after transaction cleanup; 165 relevant tests pass, including default/WAL audit, reconciliation, rollback, migration, and logging failures | implemented, review pending |
 
 Experiment results: [Results](/experiments/results.md)

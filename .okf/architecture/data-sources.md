@@ -3,7 +3,7 @@ type: Data Sources
 title: Data sources
 description: Prices and news currently in use, plus sources that are deferred or not used
 tags: [architecture, data]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-17T12:00:00Z }
+generated: { by: codex/gpt-6, at: 2026-11-20T17:41:55Z }
 ---
 
 | Source | Status | Notes |
@@ -15,6 +15,8 @@ generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-17T12:00:00Z }
 | SEC EDGAR | deferred | the user brings it back — **do not start on your own** |
 | X/influencer | not used | locked · [Project brief](/project/brief.md) |
 | Reddit (social sentiment) | idea, not used yet | the user made a Reddit "script" app (2026-11-02; keys only in the user's hands, never in the repo) · the API lists only ~1,000 recent items per query and the Pushshift archive is restricted to moderators, so it gives **no 2011–2020 history to train on** (community sources, not checked against Reddit's docs) · possible only for live display, or via an archive dump such as a Kaggle r/wallstreetbets dataset (unverified: date range, ticker tagging not included) |
+
+- SQLite daily cache observations are ordered by local receipt time for both trading and ingest; an older same-ticker/date observation cannot replace a newer one. This does not certify provider freshness. See [Simulated trading](/architecture/trading.md).
 
 - Paid/realtime feeds (Finnhub, Polygon, exchanges) and OpenStock (AGPL) were considered and not adopted
 - FMP was removed (2026-11-17): the universe comes only from Wikipedia · news history from FMP was never available on the free plan

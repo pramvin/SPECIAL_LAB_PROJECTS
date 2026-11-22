@@ -5,10 +5,16 @@ import time
 from typing import Callable, Literal, TypedDict
 
 import yfinance as yf
-from fastapi import APIRouter, Cookie, HTTPException, Query
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, Cookie, Header, HTTPException, Query
+from pydantic import BaseModel, Field, field_validator
 
-from .wallet import change_balance, ensure_wallet, money, wallet_payload
+from .dbcompat import begin_financial_write
+from . import idempotency
+from .price_cache import init_price_observations, price_upsert_sql, price_values
+from .wallet import (
+    InsufficientFunds as WalletInsufficientFunds,
+    change_balance, ensure_wallet, finite_number, money, request_number, validate_amount, wallet_payload,
+)
 from .watchlist import TICKER_RE, normalize_ticker
 
 MIN_LEVERAGE = 1.0
@@ -63,23 +69,26 @@ CREATE INDEX IF NOT EXISTS idx_trades_user_time
 
 
 class TradingError(Exception):
-    pass
+    financial_status = 422
+    financial_reason = None
 
 
 class UnknownTicker(TradingError):
-    pass
+    financial_status = 404
 
 
 class InsufficientFunds(TradingError):
-    pass
+    financial_status = 409
 
 
 class PositionNotFound(TradingError):
-    pass
+    financial_status = 404
+    financial_reason = "position_unavailable"
 
 
 class MarketDataUnavailable(TradingError):
-    pass
+    financial_status = 502
+    financial_reason = "market_data_unavailable"
 
 
 class PriceBar(TypedDict):
@@ -93,6 +102,7 @@ class PriceBar(TypedDict):
 
 def init_schema(conn: sqlite3.Connection) -> None:
     conn.executescript(PRICES_SCHEMA)
+    init_price_observations(conn)
     conn.executescript(SCHEMA)
 
 
@@ -138,13 +148,16 @@ def fetch_latest_bar(ticker: str) -> PriceBar:
 
 def refresh_latest_close(conn: sqlite3.Connection, ticker: str) -> float:
     bar = fetch_latest_bar(ticker)
+    observed_at_ns = time.time_ns()
+    return save_price_bar(conn, ticker, bar, observed_at_ns)
+
+
+def save_price_bar(
+    conn: sqlite3.Connection, ticker: str, bar: PriceBar, observed_at_ns: int
+) -> float:
     conn.execute(
-        "INSERT INTO prices (ticker, date, open, high, low, close, volume) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?) "
-        "ON CONFLICT(ticker, date) DO UPDATE SET "
-        "open=excluded.open, high=excluded.high, low=excluded.low, "
-        "close=excluded.close, volume=excluded.volume",
-        (
+        price_upsert_sql(conn),
+        price_values(conn, (
             ticker,
             bar["date"],
             bar["open"],
@@ -152,7 +165,7 @@ def refresh_latest_close(conn: sqlite3.Connection, ticker: str) -> float:
             bar["low"],
             bar["close"],
             bar["volume"],
-        ),
+        ), observed_at_ns),
     )
     return float(bar["close"])
 
@@ -215,6 +228,22 @@ def trade_payload(row: sqlite3.Row) -> dict:
     }
 
 
+def _next_position_id(conn: sqlite3.Connection) -> int:
+    """Allocate under the caller's writer lock; closed trade IDs must be retained."""
+    begin_financial_write(conn)
+    cur = conn.execute(
+        "SELECT COALESCE(MAX(position_id), 0) FROM ("
+        "SELECT id AS position_id FROM positions UNION ALL SELECT position_id FROM trades)"
+    )
+    try:
+        highest = cur.fetchone()[0]
+    finally:
+        cur.close()
+    if highest >= 9_223_372_036_854_775_807:
+        raise TradingError("Position ID space exhausted")
+    return highest + 1
+
+
 def open_position(
     conn: sqlite3.Connection,
     user_id: int,
@@ -222,16 +251,19 @@ def open_position(
     side: Literal["long", "short"],
     amount: float,
     leverage: float,
+    *,
+    quote: tuple[PriceBar, int] | None = None,
 ) -> tuple[sqlite3.Row, sqlite3.Row]:
     ticker = normalize_ticker(ticker)
     if not TICKER_RE.fullmatch(ticker):
         raise UnknownTicker("Invalid ticker")
     if side not in ("long", "short"):
         raise TradingError("Side must be long or short")
-    amount = money(amount)
-    leverage = float(leverage)
-    if amount <= 0:
-        raise TradingError("Amount must be positive")
+    try:
+        amount = validate_amount(amount)
+        leverage = finite_number(leverage)
+    except ValueError as exc:
+        raise TradingError(str(exc)) from exc
     if not MIN_LEVERAGE <= leverage <= MAX_LEVERAGE:
         raise TradingError(f"Leverage must be between {MIN_LEVERAGE:g} and {MAX_LEVERAGE:g}")
 
@@ -239,17 +271,27 @@ def open_position(
     if amount > wallet["balance"] + 1e-9:
         raise InsufficientFunds("Insufficient wallet balance")
 
-    entry = refresh_latest_close(conn, ticker)
+    entry = (refresh_latest_close(conn, ticker) if quote is None
+             else save_price_bar(conn, ticker, *quote))
     notional = money(amount * leverage)
     quantity = round(notional / entry, 8)
     now = int(time.time())
-    new_id = conn.execute(
+    new_id = _next_position_id(conn)
+    cur = conn.execute(
         "INSERT INTO positions "
-        "(user_id, ticker, side, entry_price, quantity, leverage, amount_deducted, notional, opened_at) "
-        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
-        (user_id, ticker, side, entry, quantity, leverage, amount, notional, now),
-    ).fetchone()[0]
-    wallet, _ = change_balance(conn, user_id, -amount)
+        "(id, user_id, ticker, side, entry_price, quantity, leverage, amount_deducted, notional, opened_at) "
+        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?) RETURNING id",
+        (new_id, user_id, ticker, side, entry, quantity, leverage, amount, notional, now),
+    )
+    try:
+        new_id = cur.fetchone()[0]
+    finally:
+        cur.close()
+    try:
+        wallet, _ = change_balance(conn, user_id, -amount, require_funds=True,
+                                   operation_type="trade_open", position_id=new_id)
+    except WalletInsufficientFunds as exc:
+        raise InsufficientFunds(str(exc)) from exc
     position = conn.execute(
         "SELECT id, user_id, ticker, side, entry_price, quantity, leverage, "
         "amount_deducted, notional, opened_at FROM positions WHERE id = ?",
@@ -258,19 +300,51 @@ def open_position(
     return position, wallet
 
 
-def close_position(
-    conn: sqlite3.Connection, user_id: int, position_id: int
-) -> tuple[sqlite3.Row, sqlite3.Row]:
-    position = conn.execute(
-        "SELECT id, user_id, ticker, side, entry_price, quantity, leverage, "
-        "amount_deducted, notional, opened_at "
-        "FROM positions WHERE id = ? AND user_id = ?",
+def owned_position_ticker(conn: sqlite3.Connection, user_id: int, position_id: int) -> str:
+    cur = conn.execute(
+        "SELECT ticker FROM positions WHERE id = ? AND user_id = ?",
         (position_id, user_id),
-    ).fetchone()
+    )
+    try:
+        candidate = cur.fetchone()
+    finally:
+        cur.close()
+    if candidate is None:
+        raise PositionNotFound("Open position not found")
+    return candidate["ticker"]
+
+
+def prepare_quote(ticker: str) -> tuple[PriceBar, int]:
+    ticker = normalize_ticker(ticker)
+    if not TICKER_RE.fullmatch(ticker):
+        raise UnknownTicker("Invalid ticker")
+    bar = fetch_latest_bar(ticker)
+    return bar, time.time_ns()
+
+
+def close_position(
+    conn: sqlite3.Connection, user_id: int, position_id: int,
+    *, quote: tuple[PriceBar, int] | None = None,
+) -> tuple[sqlite3.Row, sqlite3.Row]:
+    if quote is None:
+        quote = prepare_quote(owned_position_ticker(conn, user_id, position_id))
+    bar, observed_at_ns = quote
+
+    begin_financial_write(conn)
+    cur = conn.execute(
+        "DELETE FROM positions WHERE id = ? AND user_id = ? "
+        "RETURNING id, user_id, ticker, side, entry_price, quantity, leverage, "
+        "amount_deducted, notional, opened_at",
+        (position_id, user_id),
+    )
+    try:
+        position = cur.fetchone()
+    finally:
+        cur.close()
     if position is None:
         raise PositionNotFound("Open position not found")
 
-    exit_price = refresh_latest_close(conn, position["ticker"])
+    exit_price = save_price_bar(conn, position["ticker"], bar, observed_at_ns)
 
     entry = float(position["entry_price"])
     quantity = float(position["quantity"])
@@ -301,8 +375,8 @@ def close_position(
             now,
         ),
     ).fetchone()[0]
-    conn.execute("DELETE FROM positions WHERE id = ? AND user_id = ?", (position_id, user_id))
-    wallet, _ = change_balance(conn, user_id, amount + pnl)
+    wallet, _ = change_balance(conn, user_id, amount + pnl, operation_type="trade_close",
+                               position_id=position["id"], trade_id=new_id)
     trade = conn.execute(
         "SELECT id, position_id, user_id, ticker, side, entry_price, exit_price, quantity, "
         "leverage, amount_deducted, pnl, pnl_pct, opened_at, closed_at "
@@ -421,10 +495,21 @@ class OpenPositionBody(BaseModel):
     amount: float = Field(gt=0, le=MAX_AMOUNT)
     leverage: float = Field(default=1, ge=MIN_LEVERAGE, le=MAX_LEVERAGE)
 
+    @field_validator("amount", mode="before")
+    @classmethod
+    def valid_amount(cls, value):
+        return validate_amount(request_number(value))
+
+    @field_validator("leverage", mode="before")
+    @classmethod
+    def valid_leverage(cls, value):
+        return request_number(value)
+
 
 def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -> APIRouter:
     with db() as conn:
         init_schema(conn)
+        idempotency.init_schema(conn)
 
     router = APIRouter(prefix="/api")
 
@@ -437,51 +522,49 @@ def build_router(db: Callable[[], sqlite3.Connection], current_user: Callable) -
 
     @router.post("/positions")
     def post_position(
-        body: OpenPositionBody, session: str | None = Cookie(default=None)
+        body: OpenPositionBody, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ):
-        with db() as conn:
-            user = current_user(conn, session)
-            try:
-                position, wallet = open_position(
-                    conn,
-                    user["id"],
-                    body.ticker,
-                    body.side,
-                    body.amount,
-                    body.leverage,
-                )
-            except UnknownTicker as exc:
-                raise HTTPException(404, str(exc))
-            except MarketDataUnavailable:
-                raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
-            except InsufficientFunds as exc:
-                raise HTTPException(409, str(exc))
-            except TradingError as exc:
-                raise HTTPException(422, str(exc))
+        def execute(conn, user_id, quote):
+            position, wallet = open_position(
+                conn, user_id, body.ticker, body.side, body.amount, body.leverage, quote=quote)
             current = latest_close(conn, position["ticker"])
-        return {
-            "position": position_payload(position, current),
-            "wallet": wallet_payload(wallet),
-        }
+            return {"position": position_payload(position, current), "wallet": wallet_payload(wallet)}
+        try:
+            return idempotency.run(
+                db, current_user, session, idempotency_key, "positions.open",
+                {"ticker": normalize_ticker(body.ticker), "side": body.side,
+                 "amount": body.amount, "leverage": float(body.leverage)},
+                execute, prepare=lambda _user_id: prepare_quote(body.ticker))
+        except UnknownTicker as exc:
+            raise HTTPException(404, str(exc))
+        except MarketDataUnavailable:
+            raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
+        except InsufficientFunds as exc:
+            raise HTTPException(409, str(exc))
+        except TradingError as exc:
+            raise HTTPException(422, str(exc))
 
     @router.post("/positions/{position_id}/close")
     def post_close(
-        position_id: int, session: str | None = Cookie(default=None)
+        position_id: int, session: str | None = Cookie(default=None),
+        idempotency_key: str | None = Header(default=None, alias="Idempotency-Key"),
     ):
-        with db() as conn:
-            user = current_user(conn, session)
-            try:
-                trade, wallet = close_position(conn, user["id"], position_id)
-            except PositionNotFound as exc:
-                raise HTTPException(404, str(exc))
-            except UnknownTicker as exc:
-                raise HTTPException(404, str(exc))
-            except MarketDataUnavailable:
-                raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
-        return {
-            "trade": trade_payload(trade),
-            "wallet": wallet_payload(wallet),
-        }
+        def prepare(user_id):
+            with idempotency.connection(db) as conn:
+                ticker = owned_position_ticker(conn, user_id, position_id)
+            return prepare_quote(ticker)
+
+        def execute(conn, user_id, quote):
+            trade, wallet = close_position(conn, user_id, position_id, quote=quote)
+            return {"trade": trade_payload(trade), "wallet": wallet_payload(wallet)}
+        try:
+            return idempotency.run(db, current_user, session, idempotency_key, "positions.close",
+                                   {"position_id": position_id}, execute, prepare)
+        except (PositionNotFound, UnknownTicker) as exc:
+            raise HTTPException(404, str(exc))
+        except MarketDataUnavailable:
+            raise HTTPException(502, "Yahoo Finance market data is unavailable. Try again.")
 
     @router.get("/trades")
     def get_trades(

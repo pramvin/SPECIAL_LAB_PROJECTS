@@ -139,6 +139,40 @@ def is_pg(conn) -> bool:
     return isinstance(conn, PgConnection)
 
 
+def begin_financial_write(conn) -> None:
+    """Acquire write protection without owning the caller's transaction.
+
+    A SQLite transaction may already contain registration/trading writes, or
+    may only contain reads. A no-row UPDATE upgrades the latter before any
+    protected balance read (a stale snapshot raises BUSY rather than spending).
+    Neither path commits, rolls back, or issues a nested BEGIN.
+    """
+    if is_pg(conn):
+        if conn._raw.autocommit:
+            raise ValueError("Financial writes require a non-autocommit connection")
+        return  # psycopg starts/joins its transaction on the next statement.
+    if not conn.in_transaction:
+        conn.execute("BEGIN IMMEDIATE").close()
+    else:
+        conn.execute("UPDATE wallets SET balance = balance WHERE 0").close()
+
+
+def lock_wallet(conn, user_id: int):
+    """Return the current wallet under protection held until outer completion."""
+    begin_financial_write(conn)
+    sql = (
+        "SELECT user_id, balance, starting_balance, created_at, updated_at "
+        "FROM wallets WHERE user_id = ?"
+    )
+    if is_pg(conn):
+        sql += " FOR UPDATE"
+    cur = conn.execute(sql, (user_id,))
+    try:
+        return cur.fetchone()
+    finally:
+        cur.close()
+
+
 def table_names(conn) -> set[str]:
     if is_pg(conn):
         sql = "SELECT table_name FROM information_schema.tables WHERE table_schema = current_schema()"
