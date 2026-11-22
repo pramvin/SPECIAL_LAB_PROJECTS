@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>TradingAgents: how the pipeline works</title>
+<style>
+  :root {
+    --bg: #0e1320; --card: #161d2f; --line: #26304a; --text: #e8ecf6; --mute: #93a0bd;
+    --analyst: #2bb8a6; --research: #e0a73a; --trader: #5b9cf5; --risk: #a78bfa; --boss: #f0c75e;
+    --memory: #f08a9b; --ok: #5fd08a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text);
+    font: 15px/1.55 -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 28px 20px 60px; }
+  h1 { font-size: 28px; margin: 0 0 6px; }
+  h2 { font-size: 20px; margin: 44px 0 14px; }
+  p { margin: 0 0 10px; }
+  .sub { color: var(--mute); max-width: 760px; }
+  .note { background: #1b2238; border: 1px solid var(--line); border-radius: 10px; padding: 10px 14px;
+    color: var(--mute); font-size: 13px; margin-top: 14px; }
+  code { background: #0b1019; border: 1px solid var(--line); border-radius: 5px; padding: 1px 6px; font-size: 12.5px; }
+
+  /* controls */
+  .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 22px 0 12px; }
+  button { background: var(--card); color: var(--text); border: 1px solid var(--line); border-radius: 8px;
+    padding: 7px 14px; font-size: 14px; cursor: pointer; }
+  button:hover { border-color: #3b4a73; }
+  button.primary { background: #2b5bd7; border-color: #2b5bd7; }
+  .bar { flex: 1; min-width: 160px; height: 6px; background: var(--line); border-radius: 4px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--ok); transition: width .4s; }
+  .count { color: var(--mute); font-size: 13px; min-width: 70px; text-align: right; }
+
+  .layout { display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; align-items: start; }
+  @media (max-width: 860px) { .layout { grid-template-columns: 1fr; } }
+
+  /* pipeline diagram */
+  .flow { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .row { margin: 0; }
+  .label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--mute); margin: 0 0 6px; }
+  .group { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .arrow { text-align: center; color: var(--mute); line-height: 1; margin: 6px 0; font-size: 16px; }
+  .node { border: 1.5px solid var(--line); border-radius: 10px; padding: 7px 11px; font-size: 13px; background: #101627;
+    color: var(--mute); cursor: pointer; transition: all .3s; text-align: center; }
+  .node small { display: block; font-size: 10.5px; opacity: .8; }
+  .node[data-team=analyst] { --c: var(--analyst); } .node[data-team=research] { --c: var(--research); }
+  .node[data-team=trader] { --c: var(--trader); } .node[data-team=risk] { --c: var(--risk); }
+  .node[data-team=boss] { --c: var(--boss); } .node[data-team=memory] { --c: var(--memory); }
+  .node[data-team=io] { --c: var(--ok); }
+  .node.done { border-color: color-mix(in srgb, var(--c) 45%, var(--line)); color: var(--text); }
+  .node.on { border-color: var(--c); color: #fff; background: color-mix(in srgb, var(--c) 22%, #101627);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--c) 28%, transparent); animation: pulse 1.4s infinite; }
+  @keyframes pulse { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--c) 8%, transparent); } }
+  .loop { text-align: center; color: var(--memory); font-size: 12px; margin-top: 10px; border-top: 1px dashed var(--line); padding-top: 8px; }
+  .loop.on { color: #fff; }
+
+  /* right panel */
+  .panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  .panel h3 { margin: 0 0 4px; font-size: 18px; }
+  .tag { display: inline-block; font-size: 11px; border-radius: 20px; padding: 1px 9px; border: 1px solid var(--line); color: var(--mute); margin-right: 5px; }
+  .kv { font-size: 13.5px; margin: 8px 0 0; }
+  .kv b { color: var(--mute); font-weight: 600; display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+  .file { font-size: 12px; color: var(--mute); margin-top: 10px; }
+  #body { min-height: 96px; }
+  .turns { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+  .turn { font-size: 12px; border: 1px solid var(--line); border-radius: 14px; padding: 2px 10px; opacity: .25; transition: opacity .4s; }
+  .turn.show { opacity: 1; border-color: var(--research); }
+
+  .state { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--line); }
+  .state .label { margin-bottom: 8px; }
+  .keys { display: flex; flex-wrap: wrap; gap: 6px; }
+  .key { font: 12px ui-monospace, Menlo, monospace; border: 1px dashed var(--line); border-radius: 6px; padding: 2px 8px; color: #5d6a88; transition: all .4s; }
+  .key.full { border-style: solid; border-color: var(--ok); color: var(--ok); background: #12251d; }
+  .key.fresh { color: #fff; background: #1c4a33; }
+
+  /* below the animation */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 12px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; }
+  .card h4 { margin: 0 0 6px; font-size: 15px; }
+  .card p { color: var(--mute); font-size: 14px; margin: 0; }
+  .scale { display: flex; flex-wrap: wrap; gap: 8px; margin: 8px 0; }
+  .scale span { border-radius: 8px; padding: 4px 12px; font-size: 13px; background: #101627; border: 1px solid var(--line); }
+  .scale .review { border-style: dashed; color: var(--mute); }
+  table { border-collapse: collapse; width: 100%; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { color: var(--mute); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; }
+  ul.files { color: var(--mute); font-size: 14px; padding-left: 18px; }
+  ul.files li { margin: 3px 0; }
+  @media (prefers-reduced-motion: reduce) { .node.on { animation: none; } * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <h1>TradingAgents: how the pipeline works</h1>
+  <p class="sub">A multi-agent framework where one run = <b>one ticker + one date</b> → <b>one rating</b>
+    (Buy / Overweight / Hold / Underweight / Sell). Every step is an LLM "agent" reading text written by the step before it.</p>
+  <div class="note">Report written by reading the source code in <code>~/Downloads/TradingAgents-main</code> (v0.7.1).
+    I did <b>not</b> run it and did <b>not</b> check any of its performance claims. The debate lines shown below are not from a real run: only the structure comes from the code.</div>
+
+  <div class="controls">
+    <button id="prev">◀ Back</button>
+    <button id="play" class="primary">▶ Play</button>
+    <button id="next">Next ▶</button>
+    <button id="reset">↺ Restart</button>
+    <div class="bar"><i id="bar"></i></div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div class="layout">
+    <div class="flow" id="flow">
+      <div class="row">
+        <p class="label">1 · Input</p>
+        <div class="group"><div class="node" data-team="io" data-id="start">Ticker + date<small>propagate()</small></div></div>
+      </div>
+      <div class="arrow">▼ all start at the same time</div>
+      <div class="row">
+        <p class="label">2 · Analysts (parallel) + memory</p>
+        <div class="group">
+          <div class="node" data-team="analyst" data-id="market">Market<small>chart + indicators</small></div>
+          <div class="node" data-team="analyst" data-id="social">Sentiment<small>news + StockTwits + Reddit</small></div>
+          <div class="node" data-team="analyst" data-id="news">News<small>company + macro</small></div>
+          <div class="node" data-team="analyst" data-id="fund">Fundamentals<small>financials + insiders</small></div>
+          <div class="node" data-team="memory" data-id="memory">Memory Log<small>past lessons</small></div>
+        </div>
+      </div>
+      <div class="arrow">▼ wait until every report is filed</div>
+      <div class="row">
+        <p class="label">3 · Research debate</p>
+        <div class="group">
+          <div class="node" data-team="research" data-id="bull">Bull</div>
+          <div class="node" data-team="research" data-id="bear">Bear</div>
+          <div class="node" data-team="research" data-id="rm">Research Manager<small>deep model</small></div>
+        </div>
+      </div>
+      <div class="arrow">▼</div>
+      <div class="row">
+        <p class="label">4 · Trade proposal</p>
+        <div class="group"><div class="node" data-team="trader" data-id="trader">Trader<small>entry · stop · size</small></div></div>
+      </div>
+      <div class="arrow">▼</div>
+      <div class="row">
+        <p class="label">5 · Risk debate</p>
+        <div class="group">
+          <div class="node" data-team="risk" data-id="agg">Aggressive</div>
+          <div class="node" data-team="risk" data-id="con">Conservative</div>
+          <div class="node" data-team="risk" data-id="neu">Neutral</div>
+          <div class="node" data-team="boss" data-id="pm">Portfolio Manager<small>deep model</small></div>
+        </div>
+      </div>
+      <div class="arrow">▼</div>
+      <div class="row">
+        <p class="label">6 · Output</p>
+        <div class="group">
+          <div class="node" data-team="io" data-id="out">Final rating<small>saved as "pending"</small></div>
+          <div class="node" data-team="memory" data-id="settle">Settle later<small>score + reflect</small></div>
+        </div>
+      </div>
+      <div class="loop" id="loop">↺ the lesson from step 6 is read by the Portfolio Manager in a later run</div>
+    </div>
+
+    <div class="panel">
+      <span class="tag" id="phase"></span><span class="tag" id="model"></span>
+      <h3 id="title"></h3>
+      <div id="body"></div>
+      <div class="turns" id="turns"></div>
+      <div class="kv"><b>Reads</b><span id="reads"></span></div>
+      <div class="kv"><b>Writes</b><span id="writes"></span></div>
+      <div class="file" id="file"></div>
+      <div class="state">
+        <p class="label">Shared state (fills up as the run goes)</p>
+        <div class="keys" id="keys"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>The five-point scale</h2>
+  <p class="sub">Research Manager and Portfolio Manager both use the same five ratings. The Trader uses only Buy / Hold / Sell
+    (Overweight counts as Buy, Underweight as Sell).</p>
+  <div class="scale"><span>Buy</span><span>Overweight</span><span>Hold</span><span>Underweight</span><span>Sell</span>
+    <span class="review">REVIEW = no readable rating</span></div>
+  <p class="sub">If the final text has no readable rating, the code returns <code>REVIEW</code>, not Hold. A decision nobody can read is not recorded as a "Hold" call.</p>
+
+  <h2>Design ideas worth noticing</h2>
+  <div class="cards">
+    <div class="card"><h4>Text in, text out</h4><p>Agents do not share numbers. Each one gets earlier reports pasted into its prompt and writes more text. The only typed (structured) outputs are the three manager-level steps: Research Manager, Trader, Portfolio Manager, plus the Sentiment report.</p></div>
+    <div class="card"><h4>Two model tiers</h4><p>"Quick" model for analysts, debaters and the Trader. "Deep" model only for the Research Manager and Portfolio Manager, the two steps that decide.</p></div>
+    <div class="card"><h4>Debates have a fixed length</h4><p>Defaults: 1 round. Bull and Bear speak 2 turns in total. The three risk analysts speak 3 turns in total. Then a manager decides. No open-ended arguing.</p></div>
+    <div class="card"><h4>Tool-loop guard</h4><p>Each analyst may call tools up to 20 rounds, then is told to write its report. A model that keeps calling tools cannot run the graph forever.</p></div>
+    <div class="card"><h4>Price grounding</h4><p>The Market Analyst must call a "verified snapshot" tool and treat it as the source of truth for exact prices. The Trader also receives the market report so entry and stop are real price levels, not percentages.</p></div>
+    <div class="card"><h4>Memory with a point-in-time rule</h4><p>Past decisions are scored after a holding window, turned into a 2-4 sentence lesson, and reused. For back-tests, only lessons whose outcome was already known by that date are shown.</p></div>
+  </div>
+
+  <h2>Where the data comes from (default config)</h2>
+  <table>
+    <tr><th>Need</th><th>Default source</th><th>Notes from the code</th></tr>
+    <tr><td>Prices, indicators</td><td>Yahoo Finance (yfinance)</td><td>Alpha Vantage is an option</td></tr>
+    <tr><td>Fundamentals</td><td>SEC EDGAR, then yfinance</td><td>Statements served as filed</td></tr>
+    <tr><td>Company news</td><td>Yahoo Finance</td><td>Up to 20 articles per ticker</td></tr>
+    <tr><td>Macro news / indicators</td><td>Yahoo search queries, FRED</td><td>FRED needs an API key</td></tr>
+    <tr><td>Prediction markets</td><td>Polymarket</td><td>No key needed</td></tr>
+    <tr><td>Social sentiment</td><td>StockTwits, Reddit</td><td>Feeds show recent posts only, so a historical run's sentiment is <b>not</b> point-in-time (the code says so itself)</td></tr>
+  </table>
+
+  <h2>How it differs from PlanWise AI (my reading)</h2>
+  <div class="cards">
+    <div class="card"><h4>Who makes the numbers</h4><p>TradingAgents: an LLM at every step, including the final rating. PlanWise: ranking and the big-move model are code and a trained model; the LLM only reads headlines and writes reasons.</p></div>
+    <div class="card"><h4>Scope</h4><p>TradingAgents analyses one ticker per run, with many tool calls. PlanWise ranks about 879 stocks per day, which would be too slow and costly to do this way.</p></div>
+    <div class="card"><h4>Idea we could borrow</h4><p>The memory loop: score each past recommendation after N days and feed a short lesson back. It is also an honest way to measure the app. This is only an idea, not a plan.</p></div>
+  </div>
+
+  <h2>Where to read the code</h2>
+  <ul class="files">
+    <li><code>tradingagents/graph/setup.py</code>: the whole graph (who runs after whom)</li>
+    <li><code>tradingagents/graph/conditional_logic.py</code>: when a debate stops</li>
+    <li><code>tradingagents/agents/</code>: one file per agent (<code>analysts/</code>, <code>researchers/</code>, <code>managers/</code>, <code>trader/</code>, <code>risk_mgmt/</code>)</li>
+    <li><code>tradingagents/agents/schemas.py</code>, <code>rating.py</code>: typed outputs and the five-point scale</li>
+    <li><code>tradingagents/memory/</code>: decision log, settlement, reflection</li>
+    <li><code>tradingagents/backtest.py</code>: runs a grid of tickers × dates to judge decision quality (not a portfolio simulator)</li>
+  </ul>
+</div>
+
+<script>
+const KEYS = ["market_report","sentiment_report","news_report","fundamentals_report","past_context",
+  "investment_debate_state","investment_plan","trader_investment_plan","risk_debate_state",
+  "final_trade_decision","final_rating"];
+
+const STEPS = [
+  { nodes:["start"], phase:"Input", model:"no LLM", title:"Start a run",
+    body:"You give a ticker and a date. The code checks the date (a future date is rejected), looks up the company's identity once so every agent uses the same name, and builds an empty shared state: four empty reports and two debate counters set to 0.",
+    reads:"ticker, date", writes:"empty state", keys:[], file:"graph/trading_graph.py · graph/propagation.py" },
+
+  { nodes:["market","social","news","fund"], phase:"Analysts", model:"quick model", title:"Four analysts work at the same time",
+    body:"Each analyst is its own small graph with its own message history, and returns only its report. <b>Market</b>: pulls price data, then picks up to 8 indicators (RSI, MACD, Bollinger, ATR…). <b>Sentiment</b>: fetches headlines, StockTwits and Reddit first, then writes a band, a score and a confidence. <b>News</b>: company news, world news, FRED macro data, Polymarket odds. <b>Fundamentals</b>: financial statements and insider transactions.",
+    reads:"ticker, date, data tools", writes:"4 reports", keys:["market_report","sentiment_report","news_report","fundamentals_report"], file:"agents/analysts/*.py · graph/analyst_execution.py" },
+
+  { nodes:["memory"], phase:"Memory", model:"quick model", title:"Memory Log runs beside the analysts",
+    body:"It settles past decisions that are now old enough to score (fetch prices, compute the result, write a lesson), then loads recent lessons: up to 5 for the same ticker and 3 from other tickers. Only the Portfolio Manager reads them. If this step fails, the run goes on and the report says so.",
+    reads:"memory log file", writes:"past_context", keys:["past_context"], file:"graph/trading_graph.py (_memory_step) · memory/log.py" },
+
+  { nodes:["bull","bear"], phase:"Research debate", model:"quick model", title:"Bull and Bear argue",
+    body:"Both read all four reports and the debate so far. Bull argues to invest, Bear argues against, and each answers the other's last point. With the default of 1 round, they speak twice in total (count reaches 2), then the Research Manager steps in.",
+    reads:"4 reports, debate history", writes:"debate history", keys:["investment_debate_state"], file:"agents/researchers/*.py · graph/conditional_logic.py",
+    turns:["Bull: opening case","Bear: reply","→ Research Manager"] },
+
+  { nodes:["rm"], phase:"Research debate", model:"deep model", title:"Research Manager picks a side",
+    body:"It reads only the debate history, not the raw reports. It must output one rating (Buy…Sell), a rationale, and strategic actions. The prompt says conflict alone is not a reason to Hold: commit to the stronger case, sized by how decisively it wins.",
+    reads:"debate history", writes:"investment plan (typed)", keys:["investment_plan"], file:"agents/managers/research_manager.py" },
+
+  { nodes:["trader"], phase:"Trade proposal", model:"quick model", title:"Trader turns the plan into a trade",
+    body:"Reads the research plan plus the technical market report, so the levels use real price structure. Outputs Buy / Hold / Sell, an entry price and stop-loss as absolute prices (never a percentage), and a position size. Entry and stop are optional: it may leave them empty if it cannot state a number.",
+    reads:"investment plan, market report, portfolio", writes:"trader proposal (typed)", keys:["trader_investment_plan"], file:"agents/trader/trader.py" },
+
+  { nodes:["agg","con","neu"], phase:"Risk debate", model:"quick model", title:"Three risk views argue about the trade",
+    body:"Aggressive pushes for upside, Conservative protects against loss, Neutral balances both. They speak in turn and answer each other, each reading the trader's plan, all four reports and the debate so far. Default: 3 turns in total, then the Portfolio Manager.",
+    reads:"trader plan, 4 reports, debate history", writes:"risk history", keys:["risk_debate_state"], file:"agents/risk_mgmt/*.py · graph/conditional_logic.py",
+    turns:["Aggressive","Conservative","Neutral","→ Portfolio Manager"] },
+
+  { nodes:["pm"], phase:"Decision", model:"deep model", title:"Portfolio Manager makes the final call",
+    body:"Reads the research plan, the trader's proposal, the whole risk debate and the past lessons. Outputs a typed decision: rating, executive summary, investment thesis, and optionally a price target and time horizon. The rating comes from the typed field, not from searching the text.",
+    reads:"research plan, trader plan, risk debate, lessons", writes:"final decision + rating", keys:["final_trade_decision","final_rating"], file:"agents/managers/portfolio_manager.py · agents/rating.py" },
+
+  { nodes:["out"], phase:"Output", model:"no LLM", title:"Save the decision as pending",
+    body:"The run saves its reports (one HTML page) and appends the decision to a markdown memory log with a tag like <code>[date | TICKER | Rating | pending]</code>. Only one entry per ticker and date is allowed, so a re-run cannot count the same decision twice.",
+    reads:"final decision", writes:"report files, memory log", keys:[], file:"graph/trading_graph.py (record_decision) · memory/log.py" },
+
+  { nodes:["settle","memory"], phase:"Later", model:"quick model", title:"After 5 trading days: score it and learn",
+    body:"Once the holding window (default 5 trading days) has traded, the code computes the raw return and the alpha against a benchmark (SPY for US stocks). The model then writes 2-4 sentences: what the alpha says about the call, which part of the thesis it supports, and one lesson. That text is stored and shown to future runs on the same ticker.",
+    reads:"pending entries, prices", writes:"outcome + reflection", keys:[], file:"memory/settlement.py · memory/reflection.py", loop:true }
+];
+
+const $ = id => document.getElementById(id);
+const nodes = [...document.querySelectorAll(".node")];
+let cur = 0, timer = null, turnTimer = null;
+
+$("keys").innerHTML = KEYS.map(k => `<span class="key" data-k="${k}">${k}</span>`).join("");
+
+function render() {
+  const s = STEPS[cur];
+  $("phase").textContent = s.phase; $("model").textContent = s.model;
+  $("title").textContent = s.title; $("body").innerHTML = s.body;
+  $("reads").textContent = s.reads; $("writes").textContent = s.writes;
+  $("file").textContent = "Code: tradingagents/" + s.file;
+  $("count").textContent = `Step ${cur + 1} / ${STEPS.length}`;
+  $("bar").style.width = ((cur + 1) / STEPS.length * 100) + "%";
+  $("loop").classList.toggle("on", !!s.loop);
+
+  const doneNodes = new Set(STEPS.slice(0, cur).flatMap(x => x.nodes));
+  nodes.forEach(n => {
+    const id = n.dataset.id;
+    n.classList.toggle("on", s.nodes.includes(id));
+    n.classList.toggle("done", !s.nodes.includes(id) && doneNodes.has(id));
+  });
+
+  const filled = new Set(STEPS.slice(0, cur + 1).flatMap(x => x.keys));
+  document.querySelectorAll(".key").forEach(k => {
+    k.classList.toggle("full", filled.has(k.dataset.k));
+    k.classList.toggle("fresh", s.keys.includes(k.dataset.k));
+  });
+
+  clearInterval(turnTimer);
+  const t = $("turns"); t.innerHTML = "";
+  if (s.turns) {
+    t.innerHTML = s.turns.map(x => `<span class="turn">${x}</span>`).join("");
+    const chips = [...t.children]; let i = 0;
+    turnTimer = setInterval(() => { if (i < chips.length) chips[i++].classList.add("show"); else clearInterval(turnTimer); }, 650);
+  }
+}
+
+function go(i) { cur = Math.max(0, Math.min(STEPS.length - 1, i)); render(); }
+function stop() { clearInterval(timer); timer = null; $("play").textContent = "▶ Play"; }
+function play() {
+  if (cur >= STEPS.length - 1) go(0);
+  $("play").textContent = "❚❚ Pause";
+  timer = setInterval(() => { if (cur >= STEPS.length - 1) stop(); else go(cur + 1); }, 4500);
+}
+
+$("play").onclick = () => timer ? stop() : play();
+$("next").onclick = () => { stop(); go(cur + 1); };
+$("prev").onclick = () => { stop(); go(cur - 1); };
+$("reset").onclick = () => { stop(); go(0); };
+nodes.forEach(n => n.onclick = () => {
+  const i = STEPS.findIndex(s => s.nodes.includes(n.dataset.id));
+  if (i >= 0) { stop(); go(i); }
+});
+document.addEventListener("keydown", e => {
+  if (e.key === "ArrowRight") { stop(); go(cur + 1); }
+  if (e.key === "ArrowLeft") { stop(); go(cur - 1); }
+});
+render();
+</script>
+</body>
+</html>

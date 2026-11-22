@@ -1,4 +1,4 @@
-import type { Goal, Milestone } from "../types";
+import type { Goal } from "../types";
 
 /**
  * Goals mock data — synthetic example data only (OVERVIEW.md §7).
@@ -78,12 +78,6 @@ export const DRAFT_GOAL = {
     "Incomplete goals do not participate in active net-worth forecasting or " +
     "automated ledger transfers.",
 };
-
-export const MILESTONES: Milestone[] = [
-  { period: "Q4 2024", amount: 21200, growthPct: 8.4 },
-  { period: "Q2 2025", amount: 33400, growthPct: 14.1 },
-  { period: "Q4 2026", amount: 63000, growthPct: 28.0 },
-];
 
 export const ADVISORY_GUIDELINE = {
   title: "Advisory Guideline",

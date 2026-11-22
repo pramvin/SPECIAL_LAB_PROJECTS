@@ -53,7 +53,7 @@ python3 -m venv .venv
 The frontend proxies `/api/*` to `BACKEND_URL` (default `http://127.0.0.1:8000`).
 The demo account is created on first start.
 
-To fetch the real Google News headlines used by the “News sentiment” panel:
+To fetch the real Yahoo Finance headlines used by the “News sentiment” panel:
 
 ```bash
 cd Backend

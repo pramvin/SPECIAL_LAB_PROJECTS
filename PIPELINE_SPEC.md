@@ -188,7 +188,7 @@ Python venv: `Backend/.venv` (Python 3.14). Installed: fastapi, uvicorn, yfinanc
 Things in the UI to know about:
 
 - **`SentimentBadge` shows "AI · Bullish/Bearish/Neutral" from Laya.** Under the new design, direction is the LLM's job, so this chip comes from the wrong stage. Treat it as a temporary baseline and replace it (task T6).
-- **`SocialSentiment.tsx` is a pure mockup** (Thai text, three example scenarios, accounts named `*_example`, a "ตัวอย่าง" badge). It does not change any real score. X data was dropped by the user, so decide: keep it as a labeled design mock or remove it.
+- **`SocialSentiment.tsx` is a pure mockup** (Thai text, three example scenarios, accounts named `*_example`, a Thai "example" badge). It does not change any real score. X data was dropped by the user, so decide: keep it as a labeled design mock or remove it.
 - **LLM block** (`LlmBlock` in `IdeasView.tsx`) is live; see section 0 for its known bug.
 - **`SocialSentiment` now carries a SAMPLE watermark** and its "Total score" does not match the real card score. With X dropped there is no source for it; removing it is still the cleaner option.
 - `components/dashboard/DashboardView.tsx` and its mock data are unused now. Safe to delete.

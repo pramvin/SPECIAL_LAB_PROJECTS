@@ -19,17 +19,6 @@ export interface Profile {
   incompleteReviewCount: number;
 }
 
-export interface Metric {
-  id: string;
-  label: string;
-  value: string;
-  unit?: string;
-  delta?: string;
-  deltaTone?: "positive" | "negative" | "neutral";
-  caption?: string;
-  provenance: Provenance;
-}
-
 export interface Goal {
   id: string;
   title: string;
@@ -43,12 +32,6 @@ export interface Goal {
   accent: "primary" | "secondary";
   provenance: Provenance;
   meta: { label: string; value: string }[];
-}
-
-export interface Milestone {
-  period: string;
-  amount: number;
-  growthPct: number;
 }
 
 export interface ModelInput {
@@ -69,13 +52,3 @@ export interface RationaleStep {
   body: string;
 }
 
-export interface ChatMessage {
-  id: string;
-  role: "user" | "assistant";
-  body?: string;
-  headline?: string;
-  verification?: string;
-  stats?: { label: string; value: string; unit?: string }[];
-  steps?: RationaleStep[];
-  timestamp: string;
-}

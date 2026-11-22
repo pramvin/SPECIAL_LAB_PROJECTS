@@ -33,6 +33,152 @@ export interface Recommendation {
   /** Chance of a top-20% 5-day move (0..1); null when no model or horizon is not 1w. */
   bigmove_p: number | null;
   llm: LlmAnalysis | null;
+  /** Newest AI review for this ticker + horizon; null when none has run yet. */
+  ai: AiSummary | null;
+}
+
+export type Rating =
+  | "Buy"
+  | "Overweight"
+  | "Hold"
+  | "Underweight"
+  | "Sell"
+  | "REVIEW";
+
+export type Signal = "bullish" | "neutral" | "bearish" | "no_data";
+
+export type Agrees = "agree" | "caution" | "disagree" | "review";
+
+export type SourceStatus = {
+  status: "ok" | "unavailable" | "skipped";
+  reason?: string;
+};
+
+export type Light = "green" | "amber" | "red";
+
+/** The plain-language block of the AI card; absent or empty on reviews stored before it existed. */
+export interface AiVerdictFields {
+  headline: string;
+  checks: Partial<
+    Record<"trend" | "business" | "news_market" | "risk", { light: Light; line: string }>
+  >;
+  how_to_act: string;
+  change_if: string;
+}
+
+/** One line of the AI opinion shown on the ideas list. */
+export interface AiSummary {
+  run_id: number;
+  /** "full" = the 12-agent review; "quick" = one-call triage (has confidence + points). */
+  mode: "full" | "quick";
+  confidence?: "low" | "medium" | "high";
+  points?: Point[];
+  verdict?: AiVerdictFields;
+  rating: Rating;
+  summary: string;
+  agrees: Agrees;
+  as_of: string;
+  created_at: string;
+  model: string;
+}
+
+export interface Point {
+  text: string;
+  evidence: string[];
+}
+
+export type EvidenceKind =
+  | "news"
+  | "metric"
+  | "fund"
+  | "sec"
+  | "social"
+  | "macro"
+  | "rule"
+  | "agent"
+  | "memory";
+
+export interface Evidence {
+  id: string;
+  kind: EvidenceKind;
+  label: string;
+  value?: string;
+  url?: string;
+  published_at?: string;
+  sentiment?: string | null;
+}
+
+export interface AnalystReview {
+  signal: Signal;
+  summary: string;
+  points: Point[];
+  data_gaps: string[];
+}
+
+export interface ManagerView {
+  lean: Rating;
+  rationale: string;
+  evidence: string[];
+}
+
+export interface TraderPlan {
+  stance: "enter" | "wait" | "avoid";
+  rationale: string;
+  evidence: string[];
+  suggested_stop: number | null;
+  suggested_target: number | null;
+}
+
+export interface RiskView {
+  view: string;
+  suggested_position_pct: number | null;
+  evidence: string[];
+}
+
+export interface TrackRecordEntry {
+  as_of: string;
+  rating: Rating;
+  return_pct: number | null;
+  benchmark_return_pct: number | null;
+  alpha_pct: number | null;
+  reflection: string | null;
+}
+
+/** Full AI review from `GET /api/agents/{ticker}`. */
+export interface AgentReview {
+  run_id: number;
+  ticker: string;
+  horizon: Horizon;
+  as_of: string;
+  model: string;
+  deep_model: string;
+  prompt_version: string;
+  created_at: string;
+  status: "ok" | "partial";
+  sources: Record<
+    "prices" | "news" | "fmp" | "sec" | "social" | "macro",
+    SourceStatus
+  >;
+  review: {
+    rating: Rating;
+    summary: string;
+    agrees: Agrees;
+    key_risks: Point[];
+    analysts: Record<
+      "market" | "news" | "fundamentals" | "social",
+      AnalystReview | null
+    >;
+    debate: {
+      bull: Point[];
+      bear: Point[];
+      manager: ManagerView | null;
+    };
+    trader: TraderPlan | null;
+    risk: Record<"aggressive" | "conservative" | "neutral", RiskView | null>;
+    rules: { entry: number; stop: number; target: number; score: number };
+  };
+  evidence: Evidence[];
+  track_record: TrackRecordEntry[];
 }
 
 export interface LlmAnalysis {
@@ -134,7 +280,7 @@ export interface TickerNewsSentiment {
 }
 
 /**
- * Real Google News headlines per ticker (from the backend pipeline), plus
+ * Real Yahoo Finance headlines per ticker (from the backend pipeline), plus
  * sentiment when the scoring model has been run. No synthetic fallback.
  */
 export async function getNewsSentiment(

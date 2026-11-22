@@ -10,7 +10,7 @@ with a transparent scoring rule, and uses two AI models to read the news and exp
 
 - S&P 500 only, **long only**, holding periods `1w`, `1m`, `3m`
 - AI models do **not** run on your computer: they run on **Kaggle** and are reached through a Cloudflare tunnel
-- No X/Twitter or influencer data. News comes from Google News RSS
+- No X/Twitter or influencer data. News comes from Yahoo Finance (yfinance)
 - The AI only **explains**. It never changes the score, entry, stop or target
 - Web UI is in English
 
@@ -18,7 +18,7 @@ with a transparent scoring rule, and uses two AI models to read the news and exp
 
 ```
 S&P 500 list + prices (yfinance)  ->  rank (score, entry, stop, target)  -> recommendations
-Google News RSS                   ->  news_items
+Yahoo Finance news                 ->  news_items
 news_items  -> Laya (Kaggle)      ->  news_scores   (good/bad/neutral, event vs filler)
 news_items  -> qwen3:8b (Kaggle)  ->  llm_analysis  (up/down/unclear, reasons, cited headlines)
 FastAPI  <-  SQLite (planwise.db)  ->  Next.js idea cards
@@ -28,7 +28,7 @@ FastAPI  <-  SQLite (planwise.db)  ->  Next.js idea cards
 |---|---|---|
 | Prices | `python -m pipeline.ingest` | S&P 500 universe and daily prices, validated rows only |
 | Rank | `python -m pipeline.rank` | Scores stocks, sets ATR stop and target. **Replaces all recommendations** |
-| News | `python -m pipeline.news` | Google News headlines (about 7 days kept, so run regularly) |
+| News | `python -m pipeline.news` | Yahoo Finance headlines (only recent ones kept, so run regularly) |
 | Laya | `python -m pipeline.analyze` | Tags each headline: sentiment and event vs filler |
 | LLM | `python -m pipeline.llm` | Per stock: direction, confidence, reasons, cited headlines |
 
@@ -88,7 +88,7 @@ Run from `Backend/`, in this order:
 ```
 
 Always run `news`, `analyze` and `llm` **after** `rank`, because `rank` rebuilds the recommendations.
-Google News keeps only about 7 days, so the news archive only grows if `news` is run regularly.
+Yahoo Finance only returns recent headlines, so the news archive only grows if `news` is run regularly.
 
 ## Use Kaggle for the AI models
 
