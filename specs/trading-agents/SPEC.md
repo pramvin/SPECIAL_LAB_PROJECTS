@@ -1,6 +1,6 @@
 # AI trading-agent review — shared spec
 
-Status: approved by the user 2026-11-17. Two coding agents build it in parallel:
+Status: approved by the user 2026-11-17. Updated 2026-11-22: detailed TradingAgents prompts, Yahoo Finance data, the plain-language `verdict` and the new card layout (the two briefs below are the original build history). Two coding agents built it in parallel:
 
 | Agent | Brief | Owns (only edit these) |
 |---|---|---|
@@ -33,7 +33,7 @@ About 13 LLM calls per stock (+1 per settled past decision, + retries).
 
 ## Hard rules (from the project brief — break none)
 
-1. **The AI never changes** `entry`, `stop`, `target`, `score`, `position_pct` in `recommendations`. Trader/risk numbers are stored and shown separately as "AI suggestion".
+1. **The AI never changes** `entry`, `stop`, `target`, `score`, `position_pct` in `recommendations`. The card no longer shows stop, target or position at all (user decision 2026-11-21, the multipliers are unvalidated guesses), and since 2026-11-22 the AI is not given the rule's stop and target either. The trader's and risk analysts' suggested numbers are stored but not displayed.
 2. **No invented data.** Every claim cites evidence ids that exist in the context the agent was given (validated in code). A source that fails is `unavailable` and shown as "no data" — never filled in by the model.
 3. Rating is the AI's opinion, labelled "AI opinion · not backtested · not investment advice".
 4. No secrets in the frontend, logs, DB, or error messages. Only read keys from env.
@@ -48,7 +48,7 @@ About 13 LLM calls per stock (+1 per settled past decision, + retries).
 | `AGENT_LLM_API_KEY` | yes | user puts it in; never print it |
 | `AGENT_LLM_MODEL` | yes | `qwen3.8-27b-fp8` (quick roles) |
 | `AGENT_LLM_DEEP_MODEL` | no | defaults to `AGENT_LLM_MODEL` (research manager, portfolio manager) |
-| `FMP_API_KEY` | no | already set; free plan = 250 requests/day → cache per day |
+| (none) | | Fundamentals, quarterly statements, insider activity and the macro lines come from Yahoo Finance and need no key; the FMP source was removed on 2026-11-22 (its free key returned HTTP 402) |
 | `SEC_EDGAR_USER_AGENT` | no | `"PlanWise <email>"`; if unset, SEC is `skipped` (do not send a fake contact) |
 | `REDDIT_CLIENT_ID` / `REDDIT_CLIENT_SECRET` | no | Reddit OAuth (app-only). Anonymous Reddit RSS and StockTwits returned **403** from this machine on 2026-11-17 |
 | `FRED_API_KEY` | no | macro; skipped if unset |
@@ -168,6 +168,8 @@ interface AgentReview {
 }
 ```
 
+Since 2026-11-22 each quick review and each full review also carries a plain-language `verdict` (`headline`, `checks.{trend,business,news_market,risk}` as `{light: green|amber|red, line}`, `how_to_act`, `change_if`), served on the `ai` object of `/api/recommendations`; it is optional and empty on older reviews.
+
 A full example is in [example_review.json](example_review.json) (fake values, `"_example": true`).
 
 ## Done = the user can test
@@ -176,4 +178,4 @@ A full example is in [example_review.json](example_review.json) (fake values, `"
 2. `cd Backend && .venv/bin/python -m agents.run --tickers TYL --horizon 1w` prints each role, the rating, tokens, and writes one `agent_runs` row.
 3. `.venv/bin/python -m agents.run --horizon 1w --top 20` reviews the 20 curated 1w ideas.
 4. `cd frontend && npm run build && npm run lint && npx tsc --noEmit` pass.
-5. Home page: badge shows `AI · Buy` (etc.); expanding a card shows the verdict box and 6 tabs; a card without a run shows "Rule-based" and "AI review pending".
+5. Home page: the badge shows the rating; expanding a card shows the verdict block (one sentence, four traffic lights, how to act, change-if) and a collapsed **More info** area with the analysts, debate, risk views, sources and track record; a card without a run shows "Rule-based" and "AI review pending".

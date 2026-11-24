@@ -3,7 +3,7 @@ type: Progress
 title: Stage and task status
 description: Status of the 8 pipeline stages and the tasks still open
 tags: [status]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-22T09:00:00Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-24T03:00:00Z }
 ---
 
 Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user brings it back) · ❌ Dropped
@@ -37,7 +37,7 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 | T8 | Backtest, event study, latency (state survivorship bias) · the S&P 500 join/leave log exists but only 40% of stocks removed since 2016 still have Yahoo prices (T19) | ⬜ |
 | T11 | Numeric confirmation layer | ⬜ waiting on user approval · [Verification layer](/project/verification-layer.md) |
 | T12 | Per-stock sentiment questionnaire | 🟡 backend ready, no UI |
-| T14 | AI agent review: engine + API + UI built (PR #13) · prompts rewritten from TradingAgents with Yahoo fundamentals, indicators, macro (2026-11-22; full review about 150-220k tokens and 15-25 min per stock, quick about 7.5k) · card redesigned: one-sentence verdict, four lights, how to act, change-if, details under More info · the 5 curated 1w stocks and the 15 cards of one Healthcare profile were rerun on Neon; other profiles' quick reviews (about 37 pairs) still have the old short text · AI ratings are unvalidated · next: user tests, merge | 🟡 · [AI agent review](/architecture/agent-review.md) |
+| T14 | AI agent review: engine + API + UI built and merged (PR #13, #17) · prompts rewritten from TradingAgents with Yahoo fundamentals, indicators, macro (2026-11-22; full review about 150-220k tokens and 15-25 min per stock, quick about 7.5k) · card redesigned: one-sentence verdict, four lights, how to act, change-if, details under More info · the 5 curated 1w stocks and the 15 cards of one Healthcare profile were rerun on Neon; other profiles' quick reviews (about 37 pairs) still have the old short text · AI ratings are unvalidated · next: user tests, merge | 🟡 · [AI agent review](/architecture/agent-review.md) |
 | T13 | Personalized matching (branch `fais-questionire`): step 1 store all filtered stocks + `atr_pct` ✅ · step 2 matcher `app/matching.py` + `tests/test_matching.py` ✅ · step 3 API `/api/recommendations` ranks all stocks per user + UI shows match reasons ✅ · onboarding now 11 GICS sectors ✅ · real data needs `ingest` + `rank` ⬜ | 🟡 |
 | T14 | Big-move badge (chart-only model, 1w): train on Kaggle ✅ · serve in `rank.py` + API + UI badge ✅ · needs real `ingest` + `rank` to show numbers ⬜ | 🟡 |
 | T15 | Direction (up/down) prediction from news, chart, RSI/MACD, ML | ❌ dropped 2026-11-06 · [Direction prediction](/experiments/direction-prediction.md) |
