@@ -3,10 +3,10 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, and next steps (the most frequently updated file)
 tags: [active]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-22T09:00:00Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-24T03:00:00Z }
 ---
 
-**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". Next: build the **AI agent review** (user, 2026-11-17): a TradingAgents-style team of LLM agents reviews each home-page idea; built by two OpenCode agents, live-tested on Grok 4.3 and, since 2026-11-21, on the `gateway.9arm.co` model chosen by the user, and committed in PR #13 (91 backend tests pass, tsc clean); on 2026-11-19 a cheap one-call **quick review** (triage, then funnel to the full 12-agent review) was added so many more stocks can get an AI opinion · see [AI agent review](/architecture/agent-review.md). Also pending: the 2-hour news refresh on GitHub (see Waiting on the user).
+**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". The **AI agent review** (user, 2026-11-17) is built and merged (PR #13, #17): a TradingAgents-style team of LLM agents reviews each idea, plus a cheap one-call quick review; the card shows a short verdict with the details under More info · open: the ratings are not validated · see [AI agent review](/architecture/agent-review.md). Also pending: the 2-hour news refresh on GitHub (see Waiting on the user).
 
 **Hourly news routine** (2026-11-21, user): a macOS LaunchAgent runs `pipeline.collect_hourly` every hour against Neon (headlines, local sentiment, price reaction after each headline, earnings calendar, intraday volume of the curated stocks, AI filter that sends flagged stocks to a quick review) · not committed or pushed (user said no) · runs only while the Mac is awake · see [Hourly news routine](/architecture/news-routine.md).
 
@@ -18,8 +18,8 @@ No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/not
 
 # Git status
 
-- `main` = `e645e50` · PR #1–#7 merged, including the frontend redesign and local ML news sentiment · see [Team](/project/team.md)
-- Current branch: `fais-agent-review`, pushed, **PR #13** open against `main` (agent review + the Yahoo news commit `130aeba` + `.github/workflows/refresh-news.yml`; mergeable) · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
+- `main` = `e35838a` · merged: PR #1–#7, #13 (agent review), #15 (financial audit and idempotency), #17 (Top 5, detailed AI reviews, verdict card) and #18 · see [Team](/project/team.md)
+- Render deploys `main` automatically. The first deploy after merging #13 and #15 failed (2026-11-22): the merge dropped `idempotency` from the imports in `app/main.py`, so the app crashed at startup with a `NameError`; #18 fixed it and the live service was not checked (the Render dashboard needs the user's login) · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
 - Ask before committing or pushing (rule in `AGENTS.md`)
 
 # Paper trading
@@ -59,7 +59,7 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 # Waiting on the user
 
 1. Approve source tiers + corroboration rule (Proposal)
-2. Review and merge PR #13 to `main`, add the repo secret `DATABASE_URL` (Neon), then run the workflow once by hand (Actions → Run workflow) · it runs `pipeline.news` + `pipeline.sentiment` every 2 hours (cron, may lag 5–15 min, never run on GitHub yet) · prices are not refreshed by it (`pipeline.ingest` last ran for 2026-11-02) · also add `DATABASE_URL` on Render and reset the exposed Neon password
+2. PR #13 is merged; add the repo secret `DATABASE_URL` (Neon), then run the workflow once by hand (Actions → Run workflow) · it runs `pipeline.news` + `pipeline.sentiment` every 2 hours (cron, may lag 5–15 min, never run on GitHub yet) · prices are not refreshed by it (`pipeline.ingest` last ran for 2026-11-02) · also add `DATABASE_URL` on Render and reset the exposed Neon password
 3. Want the per-stock questionnaire back in the UI? (the UI was removed)
 4. For the agent review, `Backend/.env` uses the `gateway.9arm.co` key (`AGENT_LLM_*`, qwen3.8-27b-fp8; the xAI lines are commented out); decide whether to run `--mode funnel` on the top 100 (about 100 quick calls plus up to 15 full reviews, ~16 min each on this gateway, uses credits); still optional: `SEC_EDGAR_USER_AGENT` (contact email, adds SEC filing facts; fundamentals already come from Yahoo), `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`, `FRED_API_KEY` · refresh with `pipeline.ingest` + `pipeline.rank` + `pipeline.news` before real runs · real runs without `PLANWISE_DB` write to Neon and show on the live site (confirm first)
 5. Numeric confirmation layer: [Verification layer](/project/verification-layer.md)
