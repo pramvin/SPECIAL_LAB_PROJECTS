@@ -2,8 +2,7 @@
 
 Order: collect headlines -> score new ones with the local model -> record price reactions ->
 refresh the earnings calendar -> take an intraday volume snapshot of the curated stocks ->
-log and score the shadow Top 5 portfolios (`pipeline.shadow`) -> quick AI review of every idea the web
-serves (`pipeline.review_served`, at most 12 pairs per run) -> filter which stocks deserve an AI review and run it (`pipeline.news_trigger`).
+log and score the shadow Top 5 portfolios (`pipeline.shadow`).
 A failing step is printed and the next one still runs, because for example a Yahoo news outage
 must not stop the reaction slots from filling. Exit code is 1 if any step failed.
 
@@ -15,8 +14,7 @@ Scope of the news step (`--scope`):
 Settings come from Backend/.env (DATABASE_URL = Neon). Set PLANWISE_DB to a SQLite file to test
 without touching Neon. Only one run at a time: a run that finds another one still going exits at once.
 
-Run from Backend/:  .venv/bin/python -m pipeline.collect_hourly [--scope auto] [--no-ai]
-The AI step spends LLM credits (provider in AGENT_LLM_*), capped at MAX_PAIRS stocks per run.
+Run from Backend/:  .venv/bin/python -m pipeline.collect_hourly [--scope auto]
 """
 import argparse
 import fcntl
@@ -32,9 +30,9 @@ from agents import config
 LOCK = os.path.join(tempfile.gettempdir(), "planwise_collect.lock")
 
 
-def steps(scope: str, ai: bool) -> list[tuple[str, list[str]]]:
+def steps(scope: str) -> list[tuple[str, list[str]]]:
     all_ = scope == "all"
-    out = [
+    return [
         ("news", ["-m", "pipeline.news"] + (["--all"] if all_ else [])),
         ("sentiment", ["-m", "pipeline.sentiment"] + (["--all"] if all_ else [])),
         ("reaction", ["-m", "pipeline.reaction"]),
@@ -42,10 +40,6 @@ def steps(scope: str, ai: bool) -> list[tuple[str, list[str]]]:
         ("intraday", ["-m", "pipeline.intraday"]),  # writes only while the US market is open
         ("shadow", ["-m", "pipeline.shadow"]),  # logs Top 5 picks once per ranking date, scores matured ones
     ]
-    if ai:
-        out.append(("review-served", ["-m", "pipeline.review_served"]))  # quick review of what the web serves
-        out.append(("ai-filter", ["-m", "pipeline.news_trigger"]))
-    return out
 
 
 def resolve_scope(scope: str, now: datetime) -> str:
@@ -57,7 +51,6 @@ def resolve_scope(scope: str, now: datetime) -> str:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--scope", choices=["ideas", "all", "auto"], default="auto")
-    ap.add_argument("--no-ai", action="store_true", help="skip the AI filter step (no LLM credits used)")
     args = ap.parse_args()
 
     config.load_env()  # DATABASE_URL etc.; PLANWISE_DB (if set) still wins
@@ -71,10 +64,10 @@ def main() -> int:
     scope = resolve_scope(args.scope, datetime.now(timezone.utc))
     target = "SQLite " + os.environ["PLANWISE_DB"] if os.environ.get("PLANWISE_DB") else (
         "Postgres (DATABASE_URL)" if os.environ.get("DATABASE_URL") else "local SQLite")
-    print(f"collect: scope={scope}, ai={'off' if args.no_ai else 'on'}, database={target}", flush=True)
+    print(f"collect: scope={scope}, database={target}", flush=True)
 
     failed = []
-    for name, cmd in steps(scope, not args.no_ai):
+    for name, cmd in steps(scope):
         t0 = time.time()
         print(f"== {name} ==", flush=True)
         code = subprocess.run([sys.executable, *cmd]).returncode
