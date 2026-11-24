@@ -15,7 +15,6 @@ export interface NewsHeadline {
   title: string;
   source: string;
   url?: string;
-  published?: string;
   published_at?: string;
   sentiment?: Sentiment | null;
 }
@@ -25,22 +24,11 @@ export interface Recommendation {
   name: string;
   sector: string;
   horizon: Horizon;
-  action: "BUY";
   entry: number;
-  stop: number;
-  target: number;
   score: number;
-  reasons: string[];
   /** The 3 newest headlines for this ticker, already sentiment-labeled. */
   news: NewsHeadline[];
-  stop_distance_pct: number;
-  upside_pct: number;
-  position_pct: number;
-  loss_at_stop_pct: number;
   matches_interest: boolean;
-  /** Cosine fit to the user's answers (0..1); null when no profile is saved yet. */
-  fit: number | null;
-  match_reasons: string[];
   is_example: boolean;
   as_of: string | null;
   /** Chance of a top-20% 5-day move (0..1); null when no model or horizon is not 1w. */
