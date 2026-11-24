@@ -5,6 +5,7 @@ import os
 import re
 import secrets
 import sqlite3
+import threading
 import time
 import json
 import smtplib
@@ -18,7 +19,7 @@ from fastapi import Request
 from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from . import agents_api, idempotency, matching
+from . import idempotency, matching
 from .dbcompat import IntegrityError, column_names, connect, table_names
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
@@ -547,20 +548,55 @@ def latest_llm(conn: sqlite3.Connection, tickers: list[str]) -> dict:
 CARD_NEWS_N = 3  # headlines in the card's News column
 
 
+SENTIMENT_WORDS = {"bullish": "positive", "neutral": "neutral", "bearish": "negative"}
+
+
+def latest_sentiments(conn, ids: list[int]) -> dict[int, str]:
+    """Latest label per headline id as positive|neutral|negative, from one query.
+
+    `news_scores` holds one row per model and uses the model's own words (bullish/bearish).
+    """
+    if not ids or "news_scores" not in table_names(conn):
+        return {}
+    marks = ",".join("?" * len(ids))
+    rows = conn.execute(
+        f"SELECT news_id, sentiment FROM news_scores WHERE news_id IN ({marks}) ORDER BY scored_at", ids
+    ).fetchall()
+    return {r["news_id"]: SENTIMENT_WORDS[r["sentiment"]] for r in rows if r["sentiment"] in SENTIMENT_WORDS}
+
+
 def latest_headlines(conn, tickers: list[str], n: int = CARD_NEWS_N) -> dict:
     """Newest non-noise headlines per ticker from news_items, the same source the AI review and the
     News mood box read. recommendations.news is written empty by rank.py, so the card used to say
-    "No recent headlines found" even when the AI cited headlines."""
+    "No recent headlines found" even when the AI cited headlines. Sentiment is display-only."""
     if not tickers or "news_items" not in table_names(conn):
         return {}
     out: dict[str, list] = {}
+    ids: list[int] = []
     for t in tickers:
         rows = conn.execute(
-            "SELECT title, source, url, published_at FROM news_items "
+            "SELECT id, title, source, url, published_at FROM news_items "
             "WHERE ticker = ? AND rule_noise = 0 ORDER BY published_at DESC LIMIT ?", (t, n)
         ).fetchall()
-        out[t] = [{"title": r["title"], "source": r["source"], "url": r["url"],
-                   "published_at": r["published_at"]} for r in rows]
+        head = []
+        for r in rows:
+            ids.append(r["id"])
+            head.append({"id": r["id"], "title": r["title"], "source": r["source"], "url": r["url"],
+                         "published_at": r["published_at"]})
+        out[t] = head
+    labels = latest_sentiments(conn, ids)
+    for head in out.values():
+        for item in head:
+            item["sentiment"] = labels.get(item.pop("id"))
+    return out
+
+
+def card_news(raw: str) -> list[dict]:
+    """The headlines stored on the card (used when `news_items` has none), with the contract's sentiment words."""
+    out = []
+    for n in json.loads(raw):
+        label = SENTIMENT_WORDS.get(n.get("sentiment"))
+        out.append({**{k: v for k, v in n.items() if k != "sentiment_conf"}, "sentiment": label})
     return out
 
 
@@ -582,7 +618,6 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
         ranked = [{**c, "fit": None, "match_reasons": []} for c in cands if c["in_top"]][:TOP_N_SERVED]
     with db() as conn:
         llm = latest_llm(conn, [c["ticker"] for c in ranked])
-        ai = agents_api.latest_ai(conn, [c["ticker"] for c in ranked], horizon)
         headlines = latest_headlines(conn, [c["ticker"] for c in ranked])
     out = []
     for r in ranked:  # each item is a recommendations row (dict) plus fit / match_reasons
@@ -594,7 +629,7 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
         out.append({
             "ticker": r["ticker"], "name": r["name"], "sector": r["sector"], "horizon": r["horizon"],
             "action": r["action"], "entry": r["entry"], "stop": r["stop"], "target": r["target"],
-            "score": r["score"], "reasons": json.loads(r["reasons"]), "news": headlines.get(r["ticker"]) or json.loads(r["news"]),
+            "score": r["score"], "reasons": json.loads(r["reasons"]), "news": headlines.get(r["ticker"]) or card_news(r["news"]),
             "stop_distance_pct": round(stop_pct, 1),
             "upside_pct": round((r["target"] - r["entry"]) / r["entry"] * 100, 1),
             "position_pct": round(size, 1),
@@ -606,7 +641,6 @@ def recommendations(horizon: Literal["1w", "1m", "3m"], session: str | None = Co
             "bigmove_p": (round(float(r["bigmove_p"]), 4)
                           if horizon == "1w" and r["bigmove_p"] is not None else None),
             "llm": llm.get(r["ticker"]),
-            "ai": ai.get(r["ticker"]),
         })
     return {"horizon": horizon, "items": out}
 
@@ -656,39 +690,135 @@ def quotes(tickers: str, session: str | None = Cookie(default=None)):
     return result
 
 
-@app.get("/api/top-news")
-def top_news(limit: int = 5, session: str | None = Cookie(default=None)):
-    """Newest headline per recommended stock, with the stock's last close and 1-day change."""
+LATEST_NEWS_N = 10
+NEWS_REFRESH_S = 300  # background Yahoo refresh at most every 5 minutes
+_last_news_refresh: float | None = None
+_news_refresh_lock = threading.Lock()
+
+
+def served_stocks(conn) -> list[tuple[str, str]]:
+    """(ticker, name) of the stocks the app serves on the home page (curated 1-week Top 5)."""
+    rows = conn.execute(
+        "SELECT ticker, MIN(name) AS name FROM recommendations "
+        "WHERE in_top = 1 AND horizon = '1w' GROUP BY ticker ORDER BY ticker"
+    ).fetchall()
+    return [(r["ticker"], r["name"]) for r in rows]
+
+
+def price_change(conn, ticker: str) -> tuple[float | None, float | None, float | None, str | None]:
+    """Last close, change and % change vs the previous close, and the close's date."""
+    if "prices" not in table_names(conn):
+        return None, None, None, None
+    bars = conn.execute(
+        "SELECT date, close FROM prices WHERE ticker = ? ORDER BY date DESC LIMIT 2", (ticker,)
+    ).fetchall()
+    if not bars:
+        return None, None, None, None
+    price = round(float(bars[0]["close"]), 2)
+    date = bars[0]["date"]
+    if len(bars) < 2 or not bars[1]["close"]:
+        return price, None, None, date
+    prev = float(bars[1]["close"])
+    change = price - prev
+    return price, round(change, 2), round(change / prev * 100, 2), date
+
+
+def _maybe_refresh_news(tickers: list[str]) -> None:
+    """Start a daemon refresh of the served tickers when the last one is older than 5 minutes."""
+    global _last_news_refresh
+    if not tickers:
+        return
+    with _news_refresh_lock:
+        if _last_news_refresh is not None and time.time() - _last_news_refresh < NEWS_REFRESH_S:
+            return
+        _last_news_refresh = time.time()  # set before starting, so parallel requests do not double-fetch
+    threading.Thread(target=_refresh_news_worker, args=(tickers,), daemon=True).start()
+
+
+def _refresh_news_worker(tickers: list[str]) -> None:
+    try:
+        from pipeline import news_live
+        conn = db()
+        try:
+            news_live.refresh_many(conn, tickers)
+        finally:
+            conn.close()
+    except Exception:  # a failed refresh must never break the request that started it
+        pass
+
+
+@app.get("/api/latest-news")
+def latest_news(limit: int = LATEST_NEWS_N, session: str | None = Cookie(default=None)):
+    """Newest non-noise headlines of the served stocks, with the stock's last close and 1-day change.
+
+    Opening this endpoint starts a background Yahoo refresh (never blocks the response).
+    """
+    limit = max(1, min(limit, 50))
+    now = datetime.now(timezone.utc).isoformat()
     with db() as conn:
         current_user(conn, session)
-        rows = conn.execute("SELECT ticker, MIN(name) AS name, MIN(news) AS news FROM recommendations GROUP BY ticker").fetchall()
-        items = []
-        for r in rows:
-            news = [n for n in json.loads(r["news"]) if n.get("published_at")]
-            if not news:
-                continue
-            n = max(news, key=lambda x: x["published_at"])
-            bars = conn.execute(
-                "SELECT date, close FROM prices WHERE ticker = ? ORDER BY date DESC LIMIT 2", (r["ticker"],)
+        stocks = served_stocks(conn)
+        tickers = [t for t, _ in stocks]
+        _maybe_refresh_news(tickers)
+        if not stocks or "news_items" not in table_names(conn):
+            return {"items": [], "refreshed_at": now}
+        names = dict(stocks)
+        marks = ",".join("?" * len(tickers))
+        rows = conn.execute(
+            f"SELECT id, ticker, title, source, url, published_at FROM news_items "
+            f"WHERE ticker IN ({marks}) AND rule_noise = 0 ORDER BY published_at DESC LIMIT 500", tickers
+        ).fetchall()
+        labels = latest_sentiments(conn, [r["id"] for r in rows])
+        prices = {t: price_change(conn, t) for t in tickers}
+    items, seen_urls = [], set()
+    for r in rows:  # already newest first
+        if r["url"] in seen_urls:
+            continue
+        seen_urls.add(r["url"])
+        price, change, pct, price_date = prices[r["ticker"]]
+        items.append({
+            "ticker": r["ticker"], "name": names.get(r["ticker"]), "title": r["title"],
+            "source": r["source"], "url": r["url"], "published_at": r["published_at"],
+            "sentiment": labels.get(r["id"]), "price": price, "change": change,
+            "change_pct": pct, "price_date": price_date,
+        })
+        if len(items) == limit:
+            break
+    return {"items": items, "refreshed_at": now}
+
+
+@app.get("/api/prices/{ticker}")
+def ticker_prices(ticker: str, days: int = 60, session: str | None = Cookie(default=None)):
+    """Daily closes for one stock (oldest first), plus the last close and its 1-day change."""
+    t = ticker.strip().upper()
+    if not re.fullmatch(r"[A-Z][A-Z.\-]{0,9}", t):
+        raise HTTPException(404, "unknown ticker")
+    days = max(5, min(days, 250))
+    with db() as conn:
+        current_user(conn, session)
+        name = None
+        if "recommendations" in table_names(conn):
+            row = conn.execute("SELECT name FROM recommendations WHERE ticker = ? LIMIT 1", (t,)).fetchone()
+            name = row["name"] if row else None
+        if name is None and "universe" in table_names(conn):
+            row = conn.execute("SELECT name FROM universe WHERE ticker = ? LIMIT 1", (t,)).fetchone()
+            name = row["name"] if row else None
+        if name is None:
+            raise HTTPException(404, "unknown ticker")
+        bars = []
+        if "prices" in table_names(conn):
+            rows = conn.execute(
+                "SELECT date, close, volume FROM prices WHERE ticker = ? ORDER BY date DESC LIMIT ?", (t, days)
             ).fetchall()
-            price = change = pct = price_date = None
-            if len(bars) == 2:
-                price, price_date = bars[0]["close"], bars[0]["date"]
-                change = price - bars[1]["close"]
-                pct = change / bars[1]["close"] * 100
-            items.append({
-                "ticker": r["ticker"], "name": r["name"], "title": n["title"], "source": n["source"],
-                "url": n.get("url"), "published_at": n["published_at"], "sentiment": n.get("sentiment"),
-                "price": price and round(price, 2), "change": change and round(change, 2),
-                "change_pct": pct and round(pct, 2), "price_date": price_date,
-            })
-    items.sort(key=lambda x: x["published_at"], reverse=True)
-    return {"items": items[: max(1, min(limit, 20))]}
+            bars = [{"date": r["date"], "close": round(float(r["close"]), 2), "volume": int(r["volume"] or 0)}
+                    for r in reversed(rows)]
+        price, change, pct, _ = price_change(conn, t)
+    return {"ticker": t, "name": name, "bars": bars, "price": price, "change": change, "change_pct": pct}
+
 
 app.include_router(build_watchlist_router(db, current_user))
 app.include_router(build_wallet_router(db, current_user))
 app.include_router(build_trading_router(db, current_user))
-app.include_router(agents_api.router)
 
 @app.get("/api/news-sentiment")
 def news_sentiment(tickers: str, limit: int = 3):
