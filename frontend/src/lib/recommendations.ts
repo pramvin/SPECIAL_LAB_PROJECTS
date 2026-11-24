@@ -79,9 +79,9 @@ export interface Prices {
   name: string;
   /** Oldest first. */
   bars: PriceBar[];
-  price: number;
-  change: number;
-  change_pct: number;
+  price: number | null;
+  change: number | null;
+  change_pct: number | null;
 }
 
 const BACKEND_URL = process.env.BACKEND_URL ?? "http://127.0.0.1:8000";

@@ -5,6 +5,8 @@ import type { Horizon } from "@/lib/recommendations";
 const usd = (n: number) =>
   n.toLocaleString("en-US", { style: "currency", currency: "USD" });
 
+/** The backend sends null when a stock has no stored price bars yet. */
+
 const TABS: { value: Horizon; label: string }[] = [
   { value: "1w", label: "1 week" },
   { value: "1m", label: "1 month" },
@@ -22,13 +24,13 @@ export function StockHeader({
 }: {
   ticker: string;
   name: string;
-  price: number;
-  change: number;
-  changePct: number;
+  price: number | null;
+  change: number | null;
+  changePct: number | null;
   asOf: string | null;
   horizon: Horizon;
 }) {
-  const up = changePct >= 0;
+  const up = (changePct ?? 0) >= 0;
   return (
     <header className="flex flex-col gap-5">
       <Link
@@ -50,17 +52,19 @@ export function StockHeader({
         </div>
         <div className="flex flex-col md:items-end">
           <span className="font-metric-xl text-metric-xl tabular-nums text-on-surface">
-            {usd(price)}
+            {price === null ? "No price yet" : usd(price)}
           </span>
-          <span
-            className={`font-body-md text-body-md font-semibold tabular-nums ${
-              up ? "text-green-700" : "text-error"
-            }`}
-          >
-            {up ? "+" : "−"}
-            {usd(Math.abs(change))} ({up ? "+" : "−"}
-            {Math.abs(changePct).toFixed(2)}%)
-          </span>
+          {change !== null && changePct !== null && (
+            <span
+              className={`font-body-md text-body-md font-semibold tabular-nums ${
+                up ? "text-green-700" : "text-error"
+              }`}
+            >
+              {up ? "+" : "−"}
+              {usd(Math.abs(change))} ({up ? "+" : "−"}
+              {Math.abs(changePct).toFixed(2)}%)
+            </span>
+          )}
           {asOf && (
             <span className="text-[12.5px] text-on-surface-variant">
               Last close {asOf} · not a live price
