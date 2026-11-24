@@ -1,55 +1,32 @@
-"""Agent tables (SPEC DDL). Portable SQLite/Postgres through `app.dbcompat`."""
+"""Stock analysis tables. Portable SQLite/Postgres through `app.dbcompat`."""
 from __future__ import annotations
 
+from app.dbcompat import table_names
+
 DDL = """
-CREATE TABLE IF NOT EXISTS agent_runs (
+CREATE TABLE IF NOT EXISTS stock_analysis (
   id INTEGER PRIMARY KEY,
   ticker TEXT NOT NULL,
   horizon TEXT NOT NULL,
-  as_of TEXT NOT NULL,
-  model TEXT NOT NULL,
-  deep_model TEXT NOT NULL,
-  prompt_version TEXT NOT NULL,
   status TEXT NOT NULL,
-  rating TEXT,
-  summary TEXT,
-  final_json TEXT,
-  sources_json TEXT NOT NULL,
-  tokens_in INTEGER NOT NULL DEFAULT 0,
-  tokens_out INTEGER NOT NULL DEFAULT 0,
+  result_json TEXT,
   error TEXT,
+  model TEXT,
+  tokens INTEGER,
   started_at TEXT NOT NULL,
   finished_at TEXT
 );
-CREATE INDEX IF NOT EXISTS idx_agent_runs_ticker ON agent_runs (ticker, horizon, id);
-CREATE TABLE IF NOT EXISTS agent_messages (
+CREATE INDEX IF NOT EXISTS idx_stock_analysis_t ON stock_analysis (ticker, horizon, started_at);
+CREATE TABLE IF NOT EXISTS stock_analysis_messages (
   id INTEGER PRIMARY KEY,
-  run_id INTEGER NOT NULL REFERENCES agent_runs(id),
+  analysis_id INTEGER NOT NULL REFERENCES stock_analysis(id),
   role TEXT NOT NULL,
-  turn INTEGER NOT NULL DEFAULT 0,
-  model TEXT NOT NULL,
-  input_ids TEXT NOT NULL,
   output_json TEXT,
   error TEXT,
   tokens_in INTEGER NOT NULL DEFAULT 0,
   tokens_out INTEGER NOT NULL DEFAULT 0,
   latency_ms INTEGER NOT NULL DEFAULT 0,
   created_at TEXT NOT NULL
-);
-CREATE TABLE IF NOT EXISTS agent_decisions (
-  id INTEGER PRIMARY KEY,
-  run_id INTEGER NOT NULL REFERENCES agent_runs(id),
-  ticker TEXT NOT NULL,
-  rating TEXT NOT NULL,
-  as_of TEXT NOT NULL,
-  entry_close REAL,
-  settle_after_days INTEGER NOT NULL DEFAULT 5,
-  settled_on TEXT,
-  return_pct REAL,
-  benchmark_return_pct REAL,
-  alpha_pct REAL,
-  reflection TEXT,
-  settled_at TEXT
 );
 CREATE TABLE IF NOT EXISTS source_cache (
   source TEXT NOT NULL,
@@ -62,4 +39,8 @@ CREATE TABLE IF NOT EXISTS source_cache (
 
 
 def ensure(conn) -> None:
+    """Create the tables once per database (a cheap table lookup when they already exist)."""
+    if {"stock_analysis", "stock_analysis_messages", "source_cache"} <= table_names(conn):
+        return
     conn.executescript(DDL)
+    conn.commit()

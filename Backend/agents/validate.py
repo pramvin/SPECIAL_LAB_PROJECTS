@@ -1,39 +1,22 @@
-"""Parse and validate each role's JSON output.
-
-Adapted from TauricResearch/TradingAgents (Apache-2.0), agents/rating.py
-(`extract_rating` fallback) and agents/structured.py (retry shape).
-"""
+"""Parse and validate each click-analysis role's JSON output."""
 from __future__ import annotations
 
 import re
-import unicodedata
-
-from . import config
 
 
 class ValidationError(ValueError):
     pass
 
 
-RATINGS = set(config.RATINGS)
-SIGNALS = set(config.SIGNALS)
+NEWS_DIRECTIONS = ("positive", "neutral", "negative", "mixed")
+SOCIAL_DIRECTIONS = NEWS_DIRECTIONS + ("no_data",)
+MOMENTUM = ("improving", "flat", "weakening")
+VOLUME = ("above_average", "normal", "below_average")
+SENTIMENTS = ("positive", "neutral", "negative")
 
-_ID_TOKEN = re.compile(r"\b(?:news|metric|fund|sec|social|macro|rule|agent|memory):[A-Za-z0-9_.:\-]+")
+_ID_TOKEN = re.compile(r"\b(?:news|metric|social):[A-Za-z0-9_.:\-]+")
 _DATE = re.compile(r"\b\d{4}-\d{2}-\d{2}\b")
 _NUMBER = re.compile(r"\d[\d,]*(?:\.\d+)?")  # unsigned: "418-430" is a range, not 418 and -430
-_RATING_LABEL = re.compile(
-    r"(?<![a-z])rating\b[^:\-\u2010-\u2015]*[:\-\u2010-\u2015][\s*]*(\w+)", re.IGNORECASE)
-
-
-def extract_rating(text: str) -> str | None:
-    """The first labelled 5-tier rating in free text, or None."""
-    if not text:
-        return None
-    norm = unicodedata.normalize("NFKC", text)
-    for value in _RATING_LABEL.findall(norm):
-        if value.lower() in {r.lower() for r in config.RATINGS}:
-            return value.capitalize()
-    return None
 
 
 def numbers_in(text: str) -> set[float]:
@@ -72,18 +55,6 @@ def _number_allowed(value: float, allowed: set[float]) -> bool:
     return False
 
 
-def check_numbers(text: str, allowed: set[float], where: str) -> None:
-    if not text:
-        return
-    for match in _NUMBER.findall(_DATE.sub(" ", _ID_TOKEN.sub(" ", text))):
-        try:
-            value = float(match.replace(",", ""))
-        except ValueError:
-            continue
-        if not _number_allowed(value, allowed):
-            raise ValidationError(f"{where} uses a number not in the context: {match}")
-
-
 _BARE = re.compile(r"\s*\(\s*[a-z][a-z0-9_]*(?:\s*,\s*[a-z][a-z0-9_]*)*\s*\)")
 
 
@@ -97,15 +68,6 @@ def strip_internal(text: str) -> str:
     return _BARE.sub(drop, text)
 
 
-def clean_text(text: str, numbers: set[float], where: str) -> str:
-    """Drop only the sentences that use a number not in the context; fail only when nothing is left."""
-    kept = [s for s in re.split(r"(?<=[.!?])\s+", strip_internal(text).strip())
-            if not _unseen_number(s, numbers)]
-    if not kept:
-        raise ValidationError(f"{where} uses a number not in the context")
-    return " ".join(kept)
-
-
 def _unseen_number(text: str, allowed: set[float]) -> bool:
     for match in _NUMBER.findall(_DATE.sub(" ", _ID_TOKEN.sub(" ", text))):
         try:
@@ -117,18 +79,33 @@ def _unseen_number(text: str, allowed: set[float]) -> bool:
     return False
 
 
-def _string(data: dict, key: str, where: str, required: bool = True) -> str:
-    value = data.get(key)
-    if value is None and not required:
+def clean_text(text: str, numbers: set[float], where: str) -> str:
+    """Drop only the sentences that use a number not in the context; fail only when nothing is left."""
+    kept = [s for s in re.split(r"(?<=[.!?])\s+", strip_internal(text).strip())
+            if not _unseen_number(s, numbers)]
+    if not kept:
+        raise ValidationError(f"{where} uses a number not in the context")
+    return " ".join(kept)
+
+
+def _safe_text(value, numbers: set[float]) -> str:
+    """A short optional line; "" when missing or when every sentence has an unseen number."""
+    if not isinstance(value, str) or not value.strip():
         return ""
+    try:
+        return clean_text(value, numbers, "text")
+    except ValidationError:
+        return ""
+
+
+def _string(data: dict, key: str, where: str) -> str:
+    value = data.get(key)
     if not isinstance(value, str) or not value.strip():
         raise ValidationError(f"{where}.{key} must be a non-empty string")
     return value.strip()
 
 
-def _evidence_list(value, allowed: set[str], where: str, required: bool = True) -> list[str]:
-    if value is None and not required:
-        return []
+def _evidence_list(value, allowed: set[str], where: str) -> list[str]:
     if not isinstance(value, list):
         raise ValidationError(f"{where}.evidence must be a list")
     ids = []
@@ -142,171 +119,82 @@ def _evidence_list(value, allowed: set[str], where: str, required: bool = True) 
         if item not in allowed:
             raise ValidationError(f"{where} cites an evidence id not in the context: {item}")
         ids.append(item)
-    if required and not ids:
+    if not ids:
         raise ValidationError(f"{where} needs at least one evidence id")
     return ids
 
 
-def _points(data: dict, key: str, allowed: set[str], numbers: set[float],
-            where: str, minimum: int = 0, maximum: int | None = None) -> list[dict]:
-    raw = data.get(key)
-    if raw is None:
-        raw = []
-    if not isinstance(raw, list):
-        raise ValidationError(f"{where}.{key} must be a list")
-    points = []
-    for index, point in enumerate(raw):
-        if not isinstance(point, dict):
-            raise ValidationError(f"{where}.{key}[{index}] must be an object")
-        text = strip_internal(_string(point, "text", f"{where}.{key}[{index}]"))
-        try:
-            check_numbers(text, numbers, f"{where}.{key}[{index}].text")
-        except ValidationError:
-            continue  # a point with an invented number is dropped, never shown; the rest stay
-        evidence = _evidence_list(point.get("evidence"), allowed, f"{where}.{key}[{index}]")
-        if evidence:
-            points.append({"text": text, "evidence": evidence})
-    if len(points) < minimum:
-        raise ValidationError(f"{where}.{key} needs at least {minimum} points with evidence")
-    if maximum is not None:
-        points = points[:maximum]
-    return points
+def _direction(data: dict, role: str, allowed: tuple[str, ...]) -> str:
+    direction = data.get("direction")
+    if direction not in allowed:
+        raise ValidationError(f"{role}.direction must be one of {list(allowed)}")
+    return direction
 
 
-def _analyst(data: dict, allowed: set[str], numbers: set[float], role: str) -> dict:
-    signal = data.get("signal")
-    if signal not in SIGNALS:
-        raise ValidationError(f"{role}.signal must be one of {sorted(SIGNALS)}")
-    summary = clean_text(_string(data, "summary", role), numbers, f"{role}.summary")
-    gaps = data.get("data_gaps") or []
-    if not isinstance(gaps, list) or any(not isinstance(g, str) for g in gaps):
-        raise ValidationError(f"{role}.data_gaps must be a list of strings")
-    minimum = 0 if signal == "no_data" else 1
-    points = _points(data, "points", allowed, numbers, role, minimum=minimum, maximum=10)
-    return {"signal": signal, "summary": summary, "points": points, "data_gaps": [g.strip() for g in gaps if g.strip()]}
+def _market(data: dict, allowed: set[str], numbers: set[float], levels: dict | None) -> dict:
+    summary = clean_text(_string(data, "summary", "market"), numbers, "market.summary")
+    evidence = _evidence_list(data.get("evidence"), allowed, "market")
+    levels = levels or {"support": [], "resistance": []}
 
+    def picks(key: str) -> list[dict]:
+        wanted = {round(float(item["price"]), 2) for item in levels.get(key) or []}
+        out = []
+        for item in data.get(key) or []:
+            if not isinstance(item, dict):
+                continue
+            try:
+                price = round(float(item.get("price")), 2)
+            except (TypeError, ValueError):
+                continue
+            if price not in wanted:
+                continue  # the model may only choose a level the code computed
+            out.append({"price": price, "why": _safe_text(item.get("why"), numbers)})
+        return out[:3]
 
-LIGHTS = ("green", "amber", "red")
-CHECK_KEYS = ("trend", "business", "news_market", "risk")
+    def label(key: str, values: tuple[str, ...], fallback: str) -> dict:
+        raw = data.get(key) if isinstance(data.get(key), dict) else {}
+        label = raw.get("label") if raw.get("label") in values else fallback
+        return {"label": label, "why": _safe_text(raw.get("why"), numbers)}
 
-
-def _short(value, numbers: set[float], limit: int) -> str:
-    """A short plain-language line for the card; "" when missing or when every sentence has an unseen number."""
-    if not isinstance(value, str) or not value.strip():
-        return ""
-    try:
-        text = clean_text(_ID_TOKEN.sub(" ", value).strip(), numbers, "verdict")
-    except ValidationError:
-        return ""
-    text = re.sub(r"\s{2,}", " ", text).strip()
-    if len(text) <= limit:
-        return text
-    kept = ""
-    for sentence in re.split(r"(?<=[.!?])\s+", text):  # cut at a sentence end, not in the middle of one
-        if len(kept) + len(sentence) + 1 > limit:
-            break
-        kept = f"{kept} {sentence}".strip()
-    return kept or text[: limit - 1].rstrip() + "\u2026"
-
-
-def verdict_fields(data: dict, numbers: set[float]) -> dict:
-    """The card's headline, four traffic lights, how to act and change-if. All optional, never fatal."""
-    raw_checks = data.get("checks") if isinstance(data.get("checks"), dict) else {}
-    checks = {}
-    for key in CHECK_KEYS:
-        item = raw_checks.get(key)
-        if isinstance(item, dict) and item.get("light") in LIGHTS:
-            line = _short(item.get("line"), numbers, 70)
-            if line:
-                checks[key] = {"light": item["light"], "line": line}
     return {
-        "headline": _short(data.get("headline"), numbers, 220),
-        "checks": checks,
-        "how_to_act": _short(data.get("how_to_act"), numbers, 260),
-        "change_if": _short(data.get("change_if"), numbers, 220),
+        "summary": summary,
+        "evidence": evidence,
+        "support": picks("support"),
+        "resistance": picks("resistance"),
+        "momentum": label("momentum", MOMENTUM, "flat"),
+        "volume": label("volume", VOLUME, "normal"),
     }
 
 
-def _rating(data: dict, raw: str, role: str) -> str:
-    rating = data.get("rating", data.get("lean"))
-    if rating in RATINGS:
-        return rating
-    fallback = extract_rating(raw)
-    if fallback:
-        return fallback
-    raise ValidationError(f"{role} has no valid rating")
+def _news(data: dict, allowed: set[str], numbers: set[float]) -> dict:
+    direction = _direction(data, "news", NEWS_DIRECTIONS)
+    summary = clean_text(_string(data, "summary", "news"), numbers, "news.summary")
+    return {"direction": direction, "summary": summary,
+            "evidence": _evidence_list(data.get("evidence"), allowed, "news")}
 
 
-def _sanity_trader(output: dict, entry, atr) -> dict:
-    stop, target = output.get("suggested_stop"), output.get("suggested_target")
-    stop = float(stop) if isinstance(stop, (int, float)) and not isinstance(stop, bool) else None
-    target = float(target) if isinstance(target, (int, float)) and not isinstance(target, bool) else None
-    if entry is None:
-        output["suggested_stop"] = output["suggested_target"] = None
-        return output
-    entry = float(entry)
-    limit = 4 * float(atr) if atr else None
-    if (stop is None or not stop < entry or (limit is not None and abs(entry - stop) > limit)):
-        stop = None
-    if (target is None or not target > entry or (limit is not None and abs(target - entry) > limit)):
-        target = None
-    output["suggested_stop"], output["suggested_target"] = stop, target
-    return output
+def _social(data: dict, allowed: set[str], numbers: set[float]) -> dict:
+    direction = _direction(data, "social", SOCIAL_DIRECTIONS)
+    summary = clean_text(_string(data, "summary", "social"), numbers, "social.summary")
+    items = []
+    for item in data.get("items") or []:
+        if not isinstance(item, dict):
+            continue
+        item_id, sentiment = item.get("id"), item.get("sentiment")
+        if item_id in allowed and sentiment in SENTIMENTS:
+            items.append({"id": item_id, "sentiment": sentiment})
+    return {"direction": direction, "summary": summary,
+            "evidence": _evidence_list(data.get("evidence"), allowed, "social"), "items": items}
 
 
 def validate(role: str, data: dict, raw: str, allowed: set[str], numbers: set[float],
-             rules: dict | None = None, atr: float | None = None) -> dict:
+             levels: dict | None = None) -> dict:
     if not isinstance(data, dict) or not data:
         raise ValidationError(f"{role} did not return a JSON object")
-
-    if role in ("market", "news", "fundamentals", "social"):
-        return _analyst(data, allowed, numbers, role)
-
-    if role in ("bull", "bear"):
-        points = _points(data, "points", allowed, numbers, role, minimum=3, maximum=7)
-        return {"points": points}
-
-    if role == "research_manager":
-        lean = _rating(data, raw, role)
-        rationale = clean_text(_string(data, "rationale", role), numbers, f"{role}.rationale")
-        evidence = _evidence_list(data.get("evidence"), allowed, role)
-        return {"lean": lean, "rationale": rationale, "evidence": evidence}
-
-    if role == "trader":
-        stance = data.get("stance")
-        if stance not in ("enter", "wait", "avoid"):
-            raise ValidationError("trader.stance must be enter, wait or avoid")
-        rationale = clean_text(_string(data, "rationale", role), numbers, f"{role}.rationale")
-        evidence = _evidence_list(data.get("evidence"), allowed, role)
-        out = {"stance": stance, "rationale": rationale, "evidence": evidence,
-               "suggested_stop": data.get("suggested_stop"),
-               "suggested_target": data.get("suggested_target")}
-        return _sanity_trader(out, (rules or {}).get("entry"), atr)
-
-    if role in ("aggressive", "conservative", "neutral"):
-        view = clean_text(_string(data, "view", role), numbers, f"{role}.view")
-        evidence = _evidence_list(data.get("evidence"), allowed, role)
-        pct = data.get("suggested_position_pct")
-        if not isinstance(pct, (int, float)) or isinstance(pct, bool) or not 0 <= pct <= 30:
-            pct = None
-        return {"view": view, "suggested_position_pct": pct, "evidence": evidence}
-
-    if role == "triage":
-        rating = _rating(data, raw, role)
-        confidence = data.get("confidence")
-        if confidence not in config.CONFIDENCES:
-            raise ValidationError(f"triage.confidence must be one of {list(config.CONFIDENCES)}")
-        summary = clean_text(_string(data, "summary", role), numbers, f"{role}.summary")
-        points = _points(data, "points", allowed, numbers, role, minimum=1, maximum=5)
-        return {"rating": rating, "confidence": confidence, "summary": summary, "points": points,
-                "verdict": verdict_fields(data, numbers)}
-
-    if role == "portfolio_manager":
-        rating = _rating(data, raw, role)
-        summary = clean_text(_string(data, "summary", role), numbers, f"{role}.summary")
-        risks = _points(data, "key_risks", allowed, numbers, role, minimum=0, maximum=8)
-        evidence = _evidence_list(data.get("evidence"), allowed, role)
-        return {"rating": rating, "summary": summary, "key_risks": risks, "evidence": evidence,
-                "verdict": verdict_fields(data, numbers)}
-
+    if role == "market":
+        return _market(data, allowed, numbers, levels)
+    if role == "news":
+        return _news(data, allowed, numbers)
+    if role == "social":
+        return _social(data, allowed, numbers)
     raise ValidationError(f"unknown role {role}")
