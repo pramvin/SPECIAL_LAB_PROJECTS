@@ -4,21 +4,17 @@ import { Card } from "@/components/ui/Card";
 import { Icon } from "@/components/ui/Icon";
 import { NoticeBanner } from "@/components/ui/NoticeBanner";
 import { ProvenanceBadge } from "@/components/ui/ProvenanceBadge";
-import { AiRatingBadge } from "./AiRatingBadge";
-import { AgentPanel } from "./AgentPanel";
 import { TradeRow, WatchButton } from "./CardActions";
-import type { Portfolio } from "@/lib/wallet";
-import { NewsSentiment } from "./NewsSentiment";
-import { TopNews } from "./TopNews";
+import { LatestNews } from "./LatestNews";
+import { SentimentBadge } from "./SentimentBadge";
 import { DataStatus as DataStatusBar } from "./DataStatus";
+import type { Portfolio } from "@/lib/wallet";
 import {
   HORIZONS,
-  type TopNewsItem,
   type Horizon,
-  type LlmAnalysis,
+  type LatestNews as LatestNewsData,
   type Quote,
   type Recommendation,
-  type TickerNewsSentiment,
   type DataStatus as DataStatusData,
 } from "@/lib/recommendations";
 
@@ -39,12 +35,6 @@ const SECTOR_LABEL: Record<string, string> = {
   utilities: "Utilities",
 };
 
-const CHART_INTERVAL: Record<Horizon, { value: string; label: string }> = {
-  "1w": { value: "240", label: "4-hour" },
-  "1m": { value: "1D", label: "daily" },
-  "3m": { value: "1D", label: "daily" },
-};
-
 function quoteTime(iso: string) {
   return (
     new Date(iso).toLocaleString("en-US", {
@@ -57,24 +47,14 @@ function quoteTime(iso: string) {
   );
 }
 
-function tradingViewChartUrl(ticker: string, horizon: Horizon) {
-  const params = new URLSearchParams({
-    symbol: ticker,
-    interval: CHART_INTERVAL[horizon].value,
-  });
-  return `https://www.tradingview.com/chart/?${params.toString()}`;
-}
-
 function Level({
   label,
   value,
-  tone,
   hint,
   note,
 }: {
   label: string;
   value: string;
-  tone?: string;
   hint?: string;
   note?: string;
 }) {
@@ -88,9 +68,7 @@ function Level({
           </span>
         )}
       </span>
-      <span
-        className={`font-metric-md text-metric-md tabular-nums ${tone ?? "text-on-surface"}`}
-      >
+      <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
         {value}
       </span>
       {note && (
@@ -100,129 +78,10 @@ function Level({
   );
 }
 
-/** Top stripe colour: how the AI review sits against the rule-based idea. */
-const ACCENT: Record<string, string> = {
-  agree: "bg-provenance-input-text",
-  caution: "bg-amber-500",
-  disagree: "bg-error",
-  review: "bg-surface-container-highest",
-  none: "bg-surface-container-high",
-};
-
-// The model sometimes writes "Headline [1091]" or "Headlines 12 and 15" in a reason; turn those ids into links.
-const ID_REF = /(\[\d+\]|\bHeadlines?\s+\d+(?:\s*(?:,|and)\s*\d+)*)/;
-
-function ReasonText({
-  text,
-  cited,
-}: {
-  text: string;
-  cited: LlmAnalysis["cited"];
-}) {
-  const byId = new Map(
-    cited.map((c, i) => [String(c.id), { cited: c, n: i + 1 }]),
-  );
-  const chip = (
-    c: LlmAnalysis["cited"][number],
-    n: number,
-    key: string,
-    className = "",
-  ) =>
-    c.url ? (
-      <a
-        key={key}
-        href={c.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        title={c.title}
-        className={`text-tertiary-accent hover:underline ${className}`}
-      >
-        [{n}]
-      </a>
-    ) : (
-      <span key={key} title={c.title} className={`text-on-surface-variant ${className}`}>
-        [{n}]
-      </span>
-    );
-
-  return (
-    <>
-      {text.split(ID_REF).map((part, i) => {
-        if (i % 2 === 0) return part;
-        if (part.startsWith("[")) {
-          const known = [...new Set(part.match(/\d+/g) ?? [])]
-            .map((id) => byId.get(id))
-            .filter(
-              (x): x is { cited: LlmAnalysis["cited"][number]; n: number } =>
-                x !== undefined,
-            );
-          if (known.length === 0) return null;
-          return (
-            <span key={i}>
-              {known.map(({ cited: c, n }, k) =>
-                chip(c, n, c.id.toString(), k > 0 ? "ml-1" : ""),
-              )}
-            </span>
-          );
-        }
-        return (
-          <span key={i}>
-            {part.split(/(\d+)/).map((piece, k) => {
-              if (k % 2 === 0) return piece;
-              const hit = byId.get(piece);
-              return hit ? chip(hit.cited, hit.n, `${piece}-${k}`, "") : null;
-            })}
-          </span>
-        );
-      })}
-    </>
-  );
-}
-
-function LlmBlock({ llm }: { llm: LlmAnalysis }) {
-  const dir = { up: "Up", down: "Down", none: "No clear view" }[llm.direction];
-  return (
-    <div className="flex flex-col gap-3 rounded-[20px] bg-surface-container-low p-4 md:p-5">
-      <div className="flex flex-wrap items-center gap-2">
-        <span className="font-title-md text-title-md text-on-surface">
-          AI reading of the news
-        </span>
-        <ProvenanceBadge provenance="ai" label="AI · Not validated" />
-      </div>
-      <p className="font-body-sm text-body-sm text-on-surface">
-        {dir}
-        {llm.direction !== "none" &&
-          ` · ${llm.magnitude} · confidence ${Math.round(llm.confidence * 100)}%`}
-        <span className="text-on-surface-variant">
-          {" "}
-          · {llm.model}, {llm.as_of}. Does not change the score.
-        </span>
-      </p>
-      <ul className="flex list-disc flex-col gap-2 pl-5 font-body-sm text-body-sm text-on-surface">
-        {llm.reasons.map((x) => (
-          <li key={x}>
-            <ReasonText text={x} cited={llm.cited} />
-          </li>
-        ))}
-      </ul>
-      {llm.caveats.length > 0 && (
-        <ul className="flex list-disc flex-col gap-2 pl-5 font-body-sm text-body-sm text-on-surface-variant">
-          {llm.caveats.map((x) => (
-            <li key={x}>
-              <ReasonText text={x} cited={llm.cited} />
-            </li>
-          ))}
-        </ul>
-      )}
-    </div>
-  );
-}
-
 function IdeaCard({
   r,
   rank,
   horizon,
-  news,
   quote,
   portfolio,
   watching,
@@ -230,21 +89,16 @@ function IdeaCard({
   r: Recommendation;
   rank: number;
   horizon: Horizon;
-  news?: TickerNewsSentiment | null;
   quote?: Quote | null;
   portfolio: Portfolio | null;
   watching: boolean;
 }) {
   const trade = portfolio !== null && !r.is_example;
-  const chartInterval = CHART_INTERVAL[horizon];
+  const headlines = r.news.slice(0, 3);
 
   return (
-    <Card as="article" className="relative flex flex-col gap-6 overflow-hidden">
-      <span
-        aria-hidden
-        className={`absolute inset-x-0 top-0 h-1.5 ${ACCENT[r.ai?.agrees ?? "none"]}`}
-      />
-      <div className="flex flex-col gap-4 pt-1 md:flex-row md:items-start md:justify-between">
+    <Card as="article" className="flex flex-col gap-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
         <div className="flex items-start gap-4">
           <span className="pt-1 font-body-sm text-body-sm font-medium tabular-nums text-on-surface-variant">
             {String(rank).padStart(2, "0")}
@@ -252,19 +106,18 @@ function IdeaCard({
           <div className="flex flex-col gap-2">
             <div className="flex flex-wrap items-center gap-3">
               <h2 className="font-headline-md text-[32px] font-semibold leading-tight tracking-[-0.02em] text-on-surface">
-                <a
-                  href={tradingViewChartUrl(r.ticker, horizon)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`View ${r.ticker} chart on TradingView with ${chartInterval.label} candles (opens in a new tab)`}
+                <Link
+                  href={`/stock/${r.ticker}?h=${horizon}`}
                   className="underline-offset-4 hover:text-tertiary-accent hover:underline"
                 >
                   {r.ticker}
-                </a>
+                </Link>
               </h2>
-              <Badge tone="success" icon="trending_up">
-                {r.action}
-              </Badge>
+              {r.bigmove_p !== null && (
+                <Badge tone="neutral" icon="bolt">
+                  Big-move chance {Math.round(r.bigmove_p * 100)}%
+                </Badge>
+              )}
               {r.matches_interest && <Badge tone="info">Your sector</Badge>}
             </div>
             <p className="font-body-md text-body-md text-on-surface-variant">
@@ -272,54 +125,33 @@ function IdeaCard({
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-3 md:flex-col md:items-end">
+        <div className="flex flex-wrap items-center gap-3 md:flex-col md:items-end">
           <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
             Score {r.score}
           </span>
           <div className="flex flex-wrap items-center gap-2 md:justify-end">
-          {trade && <WatchButton ticker={r.ticker} watching={watching} />}
-          {r.is_example ? (
-            <ProvenanceBadge provenance="example" />
-          ) : r.ai ? (
-            <AiRatingBadge
-              rating={r.ai.rating}
-              label={
-                r.ai.mode === "quick" ? `AI quick · ${r.ai.rating}` : undefined
-              }
-            />
-          ) : (
-            <span
-              title="No AI review yet. This card shows the rule-based idea."
-              className="inline-flex items-center gap-1.5 rounded-full border border-dashed border-surface-container-highest px-3 py-1 font-body-sm text-body-sm text-on-surface-variant"
-            >
-              <Icon name="hourglass_top" className="text-[16px]" />
-              Rule-based · AI pending
-            </span>
-          )}
+            {trade && <WatchButton ticker={r.ticker} watching={watching} />}
+            {r.is_example && <ProvenanceBadge provenance="example" />}
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-4">
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-2">
-          <Level
-            label="Current price"
-            value={quote ? usd(quote.price) : "—"}
-            hint="Nearly real-time: Yahoo Finance quote, can be a few minutes behind"
-            note={quote ? quoteTime(quote.quote_time) : "Unavailable"}
-          />
-          <Level label="Entry" value={usd(r.entry)} />
-        </div>
+      <div className="grid grid-cols-2 gap-3">
+        <Level
+          label="Current price"
+          value={quote ? usd(quote.price) : "—"}
+          hint="Nearly real-time: Yahoo Finance quote, can be a few minutes behind"
+          note={quote ? quoteTime(quote.quote_time) : "Unavailable"}
+        />
+        <Level label="Entry" value={usd(r.entry)} />
       </div>
 
       <div className="flex flex-col gap-2 font-body-sm text-body-sm text-on-surface-variant">
         {r.bigmove_p !== null && (
           <p>
-            <span className="font-medium text-on-surface">
-              Big-move chance {Math.round(r.bigmove_p * 100)}%
-            </span>{" "}
-            (typical 20%) — chance of moving more than most S&amp;P 500 stocks
-            over the next 5 trading days, up or down. Not a direction forecast.
+            Big-move chance is the chance of moving more than most S&amp;P 500
+            stocks over the next 5 trading days, up or down (typical 20%). Not a
+            direction forecast.
           </p>
         )}
         {!r.is_example && (
@@ -329,6 +161,37 @@ function IdeaCard({
           </p>
         )}
       </div>
+
+      {headlines.length > 0 && (
+        <div className="flex flex-col gap-2 border-t border-surface-container-high pt-4">
+          <span className="font-body-sm text-body-sm font-medium text-on-surface-variant">
+            Latest news
+          </span>
+          <ul className="flex flex-col gap-2">
+            {headlines.map((n) => (
+              <li
+                key={n.url || n.title}
+                className="flex flex-wrap items-center gap-2 font-body-sm text-body-sm"
+              >
+                <SentimentBadge sentiment={n.sentiment} />
+                {n.url ? (
+                  <a
+                    href={n.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="min-w-0 text-on-surface underline-offset-2 hover:underline"
+                  >
+                    {n.title}
+                  </a>
+                ) : (
+                  <span className="min-w-0 text-on-surface">{n.title}</span>
+                )}
+                <span className="text-on-surface-variant">{n.source}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {trade && (
         <TradeRow
@@ -341,28 +204,6 @@ function IdeaCard({
           livePrice={quote?.price ?? null}
         />
       )}
-
-      <details className="group border-t border-surface-container-high pt-5">
-        <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-title-md text-title-md text-on-surface">
-          <span>Why this stock and the news</span>
-          <Icon
-            name="expand_more"
-            className="text-[22px] text-on-surface-variant transition-transform group-open:rotate-180"
-          />
-        </summary>
-        <div className="mt-6 flex flex-col gap-5">
-          <AgentPanel
-            ticker={r.ticker}
-            horizon={horizon}
-            ai={r.ai}
-            reasons={r.reasons}
-            matchReasons={r.match_reasons}
-            news={r.news}
-          />
-          {r.llm && <LlmBlock llm={r.llm} />}
-          <NewsSentiment ticker={r.ticker} data={news} />
-        </div>
-      </details>
     </Card>
   );
 }
@@ -370,8 +211,7 @@ function IdeaCard({
 export function IdeasView({
   horizon,
   items,
-  topNews,
-  newsSentiment,
+  latestNews,
   quotes,
   dataStatus,
   portfolio,
@@ -379,8 +219,7 @@ export function IdeasView({
 }: {
   horizon: Horizon;
   items: Recommendation[] | null;
-  topNews: TopNewsItem[];
-  newsSentiment: Record<string, TickerNewsSentiment>;
+  latestNews: LatestNewsData | null;
   quotes: Record<string, Quote>;
   dataStatus: DataStatusData | null;
   portfolio: Portfolio | null;
@@ -396,36 +235,53 @@ export function IdeasView({
           </h1>
           <p className="max-w-2xl font-body-lg text-body-lg text-on-surface-variant">
             S&amp;P 500 stocks, buy-only, ranked for your holding period and
-            risk profile. Open a card to see the reasons, the news, and the AI
-            reading.
+            risk profile. Open a ticker for this week&rsquo;s news, chart and
+            social read.
           </p>
         </div>
-        <nav aria-label="Holding period" className="flex flex-wrap items-center gap-2">
-          {HORIZONS.map((h) => (
-            <Link
-              key={h.value}
-              href={`/?h=${h.value}`}
-              aria-current={h.value === horizon ? "page" : undefined}
-              className={`rounded-full px-5 py-2.5 font-body-sm text-body-sm font-medium transition-colors ${
-                h.value === horizon
-                  ? "bg-on-surface text-white"
-                  : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
-              }`}
-            >
-              {h.label}
-            </Link>
-          ))}
+        <nav
+          aria-label="Holding period"
+          className="flex flex-wrap items-center gap-2"
+        >
+          {HORIZONS.map((h) =>
+            h.value === "1w" ? (
+              <Link
+                key={h.value}
+                href="/?h=1w"
+                aria-current={h.value === horizon ? "page" : undefined}
+                className={`rounded-full px-5 py-2.5 font-body-sm text-body-sm font-medium transition-colors ${
+                  h.value === horizon
+                    ? "bg-on-surface text-white"
+                    : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
+                }`}
+              >
+                {h.label}
+              </Link>
+            ) : (
+              <span
+                key={h.value}
+                aria-disabled="true"
+                title={`${h.label} is coming soon`}
+                className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-surface-container-low px-5 py-2.5 font-body-sm text-body-sm font-medium text-on-surface-variant opacity-60"
+              >
+                {h.label}
+                <span className="rounded-full border border-surface-container-high bg-white px-2 py-0.5 text-[11px] font-semibold">
+                  Coming soon
+                </span>
+              </span>
+            ),
+          )}
         </nav>
       </header>
 
-      <TopNews items={topNews} />
+      <LatestNews initial={latestNews} />
 
       {items?.some((r) => r.is_example) ? (
         <NoticeBanner icon="info" tone="neutral" title="Example prices and scores">
           Prices, scores and position sizes below are placeholders until the
           live data pipeline is connected. Headlines are real (Yahoo Finance), and
-          sentiment labels, when shown, are AI-generated and not validated. This
-          is not investment advice.
+          sentiment labels are model guesses and can be wrong. This is not
+          investment advice.
         </NoticeBanner>
       ) : (
         <NoticeBanner
@@ -436,7 +292,7 @@ export function IdeasView({
           Entry prices are Yahoo Finance end-of-day closes. The latest price on
           each card is a delayed Yahoo quote, not real-time. Ideas come from
           simple price-trend rules and have not been backtested. Headlines are
-          for context only and do not affect the score.
+          for context only and do not affect the score. Not investment advice.
         </NoticeBanner>
       )}
 
@@ -468,7 +324,6 @@ export function IdeasView({
                 r={r}
                 rank={i + 1}
                 horizon={horizon}
-                news={newsSentiment[r.ticker] ?? null}
                 quote={quotes[r.ticker] ?? null}
                 portfolio={portfolio}
                 watching={watchlist.has(r.ticker)}

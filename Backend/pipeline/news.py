@@ -19,7 +19,7 @@ from datetime import datetime, timezone
 
 import yfinance as yf
 
-from app.dbcompat import connect
+from app.dbcompat import connect, table_names
 
 DB_PATH = os.environ.get("PLANWISE_DB", os.path.join(os.path.dirname(__file__), "..", "planwise.db"))
 PER_QUERY = 20
@@ -84,6 +84,36 @@ def fetch(ticker: str, name: str) -> list[dict]:
     return out
 
 
+def save_items(conn, ticker: str, items: list[dict], now: str | None = None) -> list[int]:
+    """Archive fetched headlines for one ticker; duplicates only bump `last_seen_at`.
+
+    Also refreshes `recommendations.news` for that ticker with the newest non-noise
+    headlines of this fetch (the same card content the CLI has always written).
+    Returns the ids of the rows that were actually new.
+    """
+    now = now or datetime.now(timezone.utc).isoformat()
+    new_ids: list[int] = []
+    with conn:
+        for n in items:
+            row = conn.execute(
+                "INSERT INTO news_items (ticker, title, source, url, published_at, first_seen_at, "
+                "last_seen_at, rule_noise) VALUES (?,?,?,?,?,?,?,?) "
+                "ON CONFLICT DO NOTHING RETURNING id",
+                (ticker, n["title"], n["source"], n["url"], n["published_at"], now, now, int(n["noise"])),
+            ).fetchone()
+            if row:
+                new_ids.append(row[0])
+            else:
+                conn.execute("UPDATE news_items SET last_seen_at = ? WHERE ticker = ? AND url = ?",
+                             (now, ticker, n["url"]))
+        served = "recommendations" in table_names(conn) and conn.execute(
+            "SELECT 1 FROM recommendations WHERE ticker = ? LIMIT 1", (ticker,)).fetchone()
+        if served:
+            shown = [{k: v for k, v in n.items() if k != "noise"} for n in items if not n["noise"]][:PER_STOCK]
+            conn.execute("UPDATE recommendations SET news = ? WHERE ticker = ?", (json.dumps(shown), ticker))
+    return new_ids
+
+
 def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--all", action="store_true", help="whole universe instead of current ideas")
@@ -97,7 +127,6 @@ def main() -> None:
         pairs = conn.execute("SELECT DISTINCT ticker, name FROM recommendations").fetchall()
     if not pairs:
         raise SystemExit("nothing to fetch: run `python -m pipeline.rank` (or ingest for --all) first")
-    rec_tickers = {r[0] for r in conn.execute("SELECT DISTINCT ticker FROM recommendations")}
 
     found = failed = new_rows = 0
     for ticker, name in pairs:
@@ -107,22 +136,7 @@ def main() -> None:
             print(f"  {ticker}: failed ({e.__class__.__name__})")
             failed += 1
             continue
-        now = datetime.now(timezone.utc).isoformat()
-        with conn:
-            for n in items:
-                cur = conn.execute(
-                    "INSERT INTO news_items (ticker, title, source, url, published_at, first_seen_at, "
-                    "last_seen_at, rule_noise) VALUES (?,?,?,?,?,?,?,?) ON CONFLICT DO NOTHING",
-                    (ticker, n["title"], n["source"], n["url"], n["published_at"], now, now, int(n["noise"])),
-                )
-                if cur.rowcount:
-                    new_rows += 1
-                else:
-                    conn.execute("UPDATE news_items SET last_seen_at = ? WHERE ticker = ? AND url = ?",
-                                 (now, ticker, n["url"]))
-            if ticker in rec_tickers:
-                shown = [{k: v for k, v in n.items() if k != "noise"} for n in items if not n["noise"]][:PER_STOCK]
-                conn.execute("UPDATE recommendations SET news = ? WHERE ticker = ?", (json.dumps(shown), ticker))
+        new_rows += len(save_items(conn, ticker, items))
         found += bool(items)
         time.sleep(DELAY_S)
     total = conn.execute("SELECT COUNT(*) FROM news_items").fetchone()[0]

@@ -1,18 +1,26 @@
 import { Badge } from "@/components/ui/Badge";
+import type { Sentiment } from "@/lib/recommendations";
 
-const MAP = {
-  bullish: { label: "Positive", tone: "success", icon: "trending_up" },
-  bearish: { label: "Negative", tone: "danger", icon: "trending_down" },
+const MAP: Record<
+  Sentiment,
+  { label: string; tone: "success" | "danger" | "neutral"; icon: string }
+> = {
+  positive: { label: "Positive", tone: "success", icon: "trending_up" },
   neutral: { label: "Neutral", tone: "neutral", icon: "remove" },
-} as const;
+  negative: { label: "Negative", tone: "danger", icon: "trending_down" },
+};
 
 const TITLE =
-  "Classified by an ML model trained on positive/negative word lists. Not yet checked against human labels.";
+  "Label from the local sentiment model. It is a guess and can be wrong.";
 
-/** ML-labeled headline sentiment. Not yet validated on our own headlines, so it is display-only. */
-export function SentimentBadge({ sentiment }: { sentiment?: string | null }) {
+/** Sentiment pill for one headline. Renders nothing when the headline was not scored. */
+export function SentimentBadge({
+  sentiment,
+}: {
+  sentiment?: Sentiment | null;
+}) {
   if (!sentiment || !(sentiment in MAP)) return null;
-  const m = MAP[sentiment as keyof typeof MAP];
+  const m = MAP[sentiment];
   return (
     <span title={TITLE}>
       <Badge tone={m.tone} icon={m.icon}>

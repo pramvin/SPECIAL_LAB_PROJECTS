@@ -1,4 +1,4 @@
-"""Configuration for the AI trading-agent review.
+"""Configuration for the click-analysis engine.
 
 Keys are read from `Backend/.env` (same loader as `pipeline/llm.py`) or the
 environment. Nothing here prints or stores a secret.
@@ -10,38 +10,14 @@ import os
 HERE = os.path.dirname(__file__)
 BACKEND = os.path.dirname(HERE)
 
-PROMPT_VERSION = "ta-v1"
-TRIAGE_PROMPT_VERSION = "ta-triage-v1"  # marks a quick one-call review (see agents/triage.py)
-TRIAGE_NEWS = 5
-CONFIDENCES = ("low", "medium", "high")
-MAX_DEBATE_ROUNDS = 1
-MAX_RISK_ROUNDS = 1
-SETTLE_DAYS = 5
 MAX_NEWS = 15
 MAX_SOCIAL = 20
+NEWS_DAYS = 7
 TEMPERATURE = 0.2
-MAX_TOKENS = 14000
+MAX_TOKENS = 14000  # a reasoning model spends most of this thinking; the JSON itself is small
 REQUEST_TIMEOUT = 300
-
-RATINGS = ("Buy", "Overweight", "Hold", "Underweight", "Sell")
-REVIEW = "REVIEW"
-SIGNALS = ("bullish", "neutral", "bearish", "no_data")
-
-ROLE_LABELS = {
-    "market": "Market analyst",
-    "news": "News analyst",
-    "fundamentals": "Fundamentals analyst",
-    "social": "Social media analyst",
-    "bull": "Bull researcher",
-    "bear": "Bear researcher",
-    "research_manager": "Research manager",
-    "trader": "Trader",
-    "aggressive": "Aggressive risk analyst",
-    "conservative": "Conservative risk analyst",
-    "neutral": "Neutral risk analyst",
-    "portfolio_manager": "Portfolio manager",
-    "reflection": "Reflection",
-}
+PRIMARY_TIMEOUT = 50  # seconds the main model may stay silent before the backup model takes over
+CONNECT_TIMEOUT = 10
 
 
 def load_env() -> None:
@@ -65,18 +41,14 @@ def llm_settings() -> dict:
     base_url = os.environ.get("AGENT_LLM_BASE_URL", "").strip().rstrip("/")
     api_key = os.environ.get("AGENT_LLM_API_KEY", "").strip()
     model = os.environ.get("AGENT_LLM_MODEL", "").strip()
-    deep_model = os.environ.get("AGENT_LLM_DEEP_MODEL", "").strip() or model
-    triage_model = os.environ.get("AGENT_LLM_TRIAGE_MODEL", "").strip() or model
-    return {"base_url": base_url, "api_key": api_key, "model": model, "deep_model": deep_model,
-            "triage_model": triage_model}
+    return {"base_url": base_url, "api_key": api_key, "model": model}
 
 
-def agrees(rating: str | None) -> str:
-    """Mapping from SPEC: the card's short agreement label."""
-    if rating in ("Buy", "Overweight"):
-        return "agree"
-    if rating == "Hold":
-        return "caution"
-    if rating in ("Underweight", "Sell"):
-        return "disagree"
-    return "review"
+def llm_fallback_settings() -> dict | None:
+    """The backup model (AGENT_LLM_FALLBACK_*), or None when it is not fully configured."""
+    base_url = os.environ.get("AGENT_LLM_FALLBACK_BASE_URL", "").strip().rstrip("/")
+    api_key = os.environ.get("AGENT_LLM_FALLBACK_API_KEY", "").strip()
+    model = os.environ.get("AGENT_LLM_FALLBACK_MODEL", "").strip()
+    if not (base_url and api_key and model):
+        return None
+    return {"base_url": base_url, "api_key": api_key, "model": model}

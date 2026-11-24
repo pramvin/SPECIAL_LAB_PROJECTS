@@ -1,44 +1,34 @@
 import { IdeasView } from "@/components/ideas/IdeasView";
 import {
   getDataStatus,
-  getNewsSentiment,
+  getLatestNews,
   getQuotes,
   getRecommendations,
-  getTopNews,
   type Horizon,
 } from "@/lib/recommendations";
-import { getMe } from "@/lib/session";
 import { getWatchlist } from "@/lib/watchlist";
 import { getPortfolio } from "@/lib/wallet";
 
-const VALID: Horizon[] = ["1w", "1m", "3m"];
+// Only the 1 week view is open for now; 1 month and 3 months show "Coming soon" and cannot be picked.
+const horizon: Horizon = "1w";
 
-export default async function IdeasPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ h?: string }>;
-}) {
-  const { h } = await searchParams;
-  const me = await getMe();
-  const fallback = (me?.profile?.horizon as Horizon | undefined) ?? "1m";
-  const horizon = VALID.includes(h as Horizon) ? (h as Horizon) : fallback;
-  const [items, topNews, dataStatus] = await Promise.all([
+export default async function IdeasPage() {
+  const [items, latestNews, dataStatus] = await Promise.all([
     getRecommendations(horizon),
-    getTopNews(),
+    getLatestNews(10),
     getDataStatus(),
   ]);
-  const newsSentiment = await getNewsSentiment(
-    (items ?? []).map((r) => r.ticker),
-  );
   const quotes = await getQuotes((items ?? []).map((r) => r.ticker));
-  const [portfolio, watchlist] = await Promise.all([getPortfolio(), getWatchlist()]);
+  const [portfolio, watchlist] = await Promise.all([
+    getPortfolio(),
+    getWatchlist(),
+  ]);
   return (
     <IdeasView
       horizon={horizon}
       items={items}
+      latestNews={latestNews}
       quotes={quotes}
-      topNews={topNews}
-      newsSentiment={newsSentiment}
       dataStatus={dataStatus}
       portfolio={portfolio}
       watchlist={new Set((watchlist ?? []).map((w) => w.ticker))}

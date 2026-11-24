@@ -26,7 +26,7 @@ Run from `Backend/` in this order:
 - Run news/sentiment/llm **after every rank** (`llm_analysis` keeps old rows; the API uses the latest successful row per ticker)
 - News only accumulates if `news` runs regularly (Yahoo returns only recent headlines) · installing a cron job requires **asking the user first**
 - Automatic: `.github/workflows/refresh-news.yml` runs `news` + `sentiment` every 2 hours against Neon (needs secret `DATABASE_URL`; only runs from `main`; GitHub disables it after 60 days without repo activity) · written, not yet run on GitHub
-- Local alternative (2026-11-21, user approved): LaunchAgent `com.planwise.collect` runs `pipeline.collect_hourly` hourly (news, sentiment, price reaction, earnings calendar, intraday volume, shadow Top 5 portfolios, AI filter) against Neon while the Mac is awake · stop it with `launchctl bootout gui/$(id -u)/com.planwise.collect` · see [Hourly news routine](/architecture/news-routine.md)
+- Local alternative (2026-11-21, user approved): LaunchAgent `com.planwise.collect` runs `pipeline.collect_hourly` hourly (news, sentiment, price reaction, earnings calendar, intraday volume, shadow Top 5 portfolios) against Neon while the Mac is awake · stop it with `launchctl bootout gui/$(id -u)/com.planwise.collect` · see [Hourly news routine](/architecture/news-routine.md)
 - Manual, a few times a month: `.venv/bin/python -m pipeline.index_changes --check` refreshes the S&P 500 join/leave log and tests which removed stocks still have Yahoo prices ([Market context data](/architecture/market-context-data.md))
 - The Refresh button in the web app only re-reads the DB; it does not run the pipeline
 - Cautions: [Tech context](/architecture/tech-context.md)

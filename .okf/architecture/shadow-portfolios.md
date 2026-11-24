@@ -18,7 +18,7 @@ Built 2026-11-21 (user: "build it"). Answers "which way of picking a Top 5 works
 | `bigmove` | from the top 30, the highest big-move chance (skipped if fewer than 5 have one) |
 | `no_earnings` | like `rules`, skipping stocks that report within 5 days ([Market context data](/architecture/market-context-data.md)) |
 | `volume` | from the top 30, last daily volume vs previous 30-day average |
-| `ai_veto` | like `rules`, skipping stocks whose latest AI review is Underweight or Sell |
+| `ai_veto` | like `rules`, skipping stocks whose latest stored AI review is Underweight or Sell (no new reviews are written since 2026-11-24, so it equals `rules` from now on) |
 | `random_top30`, `random_pool` | random from the top 30 / from everything that passed the filters (controls, seeded by date) |
 
 # Measurement
@@ -31,6 +31,6 @@ Built 2026-11-21 (user: "build it"). Answers "which way of picking a Top 5 works
 
 - Plumbing checked on a scratch copy with real Yahoo prices and SPY: logging, idempotence, scoring, report · the one scoring run used picks chosen with hindsight, so its numbers mean nothing
 - Neon: ingest and rank were run by hand on 2026-11-21 (user OK) and day 1, the ranking of 2026-11-20, is logged there with earnings data (an earlier log without it was deleted and redone) · no scores yet, the first 1-day returns come after the next trading day
-- On that day `rules`, `no_earnings` and `ai_veto` picked the same five (COST DUK TSN ED VLTO; no flagged stock among them): those three differ only on days a flag hits a top pick
+- On 2026-11-21 `rules`, `no_earnings` and `ai_veto` picked the same five (COST DUK TSN ED VLTO) · `ai_veto` now has no fresh flags to use
 - Logging stops when the ranking is more than 4 days old, and ingest + rank are not in the hourly job: daily scheduling is the user's decision ([Active context](/project/active-context.md))
 - Picks are not independent (same days, same market), so even 40 days is a weak test; a recipe's edge over `rules` is the number to watch, not its raw return
