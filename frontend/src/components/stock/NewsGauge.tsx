@@ -19,9 +19,26 @@ const CX = 120;
 const CY = 120;
 const R = 92;
 
-/** Half-circle gauge: red on the left, green on the right, needle at the positive share. */
+/**
+ * Half-circle gauge: red on the left, green on the right. The needle shows positive minus negative
+ * headlines out of all headlines, so neutral ones keep it in the middle (2 positive, 3 neutral and
+ * 1 negative leans right; counting neutral as "not positive" would wrongly lean left).
+ */
+function balance(counts: NewsRead["counts"]): number | null {
+  const total = counts.positive + counts.neutral + counts.negative;
+  if (total === 0) return null;
+  return (counts.positive - counts.negative) / total; // -1 (all negative) to +1 (all positive)
+}
+
+function verdict(counts: NewsRead["counts"]): string {
+  if (counts.positive > counts.negative) return "More positive than negative";
+  if (counts.negative > counts.positive) return "More negative than positive";
+  return "Positive and negative are even";
+}
+
 export function NewsGauge({ block }: { block: NewsRead }) {
-  const share = block.positive_share;
+  const net = balance(block.counts);
+  const share = net === null ? null : (net + 1) / 2; // 0 = far left, 0.5 = centre, 1 = far right
   const direction = DIRECTION[block.direction] ?? DIRECTION.neutral;
   const angle = share === null ? null : Math.PI - share * Math.PI;
   const needleX = angle === null ? CX : CX + 62 * Math.cos(angle);
@@ -32,7 +49,7 @@ export function NewsGauge({ block }: { block: NewsRead }) {
       <CardHeader
         title="This week's news"
         icon="donut_large"
-        subtitle="Share of this week's labeled headlines that are positive."
+        subtitle="Positive minus negative headlines this week. Neutral ones stay in the middle."
         badge={<ProvenanceBadge provenance="ai" label="Model labels" />}
         action={<Badge tone={direction.tone}>{direction.label}</Badge>}
       />
@@ -51,7 +68,7 @@ export function NewsGauge({ block }: { block: NewsRead }) {
               aria-label={
                 share === null
                   ? "No headlines to show on the gauge"
-                  : `${Math.round(share * 100)} percent of this week's headlines are positive`
+                  : `${block.counts.positive} positive and ${block.counts.negative} negative headlines out of ${block.counts.positive + block.counts.neutral + block.counts.negative}`
               }
             >
               <path
@@ -98,7 +115,7 @@ export function NewsGauge({ block }: { block: NewsRead }) {
             </div>
             {share !== null && (
               <span className="font-metric-md text-metric-md tabular-nums text-on-surface">
-                {Math.round(share * 100)}% positive
+                {verdict(block.counts)}
               </span>
             )}
           </div>

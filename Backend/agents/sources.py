@@ -264,7 +264,7 @@ def _fetch_stocktwits(ticker: str) -> tuple[list[dict], str | None]:
         items.append({
             "id": f"social:stocktwits:{message.get('id')}",
             "source": "stocktwits",
-            "title": (message.get("body") or "")[:280],
+            "title": _strip_html(message.get("body") or "")[:280],
             "body": "",
             "score": message.get("likes", {}).get("total") if isinstance(message.get("likes"), dict) else None,
             "sentiment": sentiment,

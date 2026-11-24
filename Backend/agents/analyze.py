@@ -32,7 +32,16 @@ def make_llm(fake: bool = False):
     settings = config.llm_settings()
     if not settings["api_key"] or not settings["base_url"] or not settings["model"]:
         raise llm_client.LLMError("the model is not configured (AGENT_LLM_BASE_URL, _API_KEY, _MODEL)")
-    return llm_client.OpenAICompatLLM(settings["base_url"], settings["api_key"], settings["model"])
+    backup = config.llm_fallback_settings()
+    if not backup:
+        return llm_client.OpenAICompatLLM(settings["base_url"], settings["api_key"], settings["model"])
+    # With a backup configured, the main model gets one short try: silent for PRIMARY_TIMEOUT seconds
+    # (or any error) hands the call to the backup model.
+    primary = llm_client.OpenAICompatLLM(
+        settings["base_url"], settings["api_key"], settings["model"],
+        timeout=(config.CONNECT_TIMEOUT, config.PRIMARY_TIMEOUT), attempts=1)
+    return llm_client.FallbackLLM(
+        primary, llm_client.OpenAICompatLLM(backup["base_url"], backup["api_key"], backup["model"]))
 
 
 def start_run(conn, ticker: str, horizon: str) -> int:

@@ -55,11 +55,15 @@ class OpenAICompatLLM:
     RETRY_STATUSES = {429, 500, 502, 503, 504, 522, 524}
     BACKOFF = (3, 5, 10, 20, 30, 30, 30, 30)
 
-    def __init__(self, base_url: str, api_key: str, model: str, timeout: int = config.REQUEST_TIMEOUT):
+    def __init__(self, base_url: str, api_key: str, model: str,
+                 timeout: float | tuple[float, float] = config.REQUEST_TIMEOUT, attempts: int | None = None):
+        """`timeout` is passed to requests (a (connect, read) pair makes a silent model fail fast);
+        `attempts` caps the tries per call (None = retry with the full backoff list)."""
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
         self.timeout = timeout
+        self.attempts = attempts
         self._no_response_format = False
 
     def _post(self, payload: dict) -> requests.Response:
@@ -113,7 +117,8 @@ class OpenAICompatLLM:
 
         t0 = time.time()
         last_error = ""
-        for attempt in range(len(self.BACKOFF) + 1):
+        max_attempts = self.attempts or len(self.BACKOFF) + 1
+        for attempt in range(max_attempts):
             try:
                 response = self._post(body)
                 if (response.status_code == 400 and not self._no_response_format
@@ -149,13 +154,39 @@ class OpenAICompatLLM:
                 last_error = str(exc)
             except (requests.Timeout, requests.ConnectionError, requests.exceptions.ChunkedEncodingError) as exc:
                 last_error = f"{type(exc).__name__}: {scrub(str(exc), self.api_key)}"[:300]
-            if attempt < len(self.BACKOFF):
-                time.sleep(self.BACKOFF[attempt])
+            if attempt < max_attempts - 1:
+                time.sleep(self.BACKOFF[min(attempt, len(self.BACKOFF) - 1)])
         raise LLMError(last_error or "request failed")
 
 
 class _Retryable(Exception):
     pass
+
+
+class FallbackLLM:
+    """Ask the main model first; when it fails or stays silent, ask the backup model instead.
+
+    The main model should be built with a short read timeout and one attempt, so a slow or queued
+    gateway costs seconds, not minutes. Both errors are kept when the backup fails too.
+    """
+
+    def __init__(self, primary, fallback):
+        self.primary = primary
+        self.fallback = fallback
+        self.model = getattr(primary, "model", "")
+        self.fallback_calls = 0
+        self._lock = threading.Lock()
+
+    def chat_json(self, role: str, system: str, user: str) -> dict:
+        try:
+            return self.primary.chat_json(role, system, user)
+        except LLMError as first:
+            with self._lock:
+                self.fallback_calls += 1
+            try:
+                return self.fallback.chat_json(role, system, user)
+            except LLMError as second:
+                raise LLMError(f"main model failed ({first}); backup model failed ({second})") from None
 
 
 class FakeLLM:

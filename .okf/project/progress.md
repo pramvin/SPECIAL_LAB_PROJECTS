@@ -17,7 +17,7 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 | 2 | X/influencer | ❌ | |
 | 3 | Source check | ⬜ | |
 | 4 | News sentiment (local ML; replaces the Laya filter) | 🟡 trained, labels unvalidated | `pipeline/sentiment.py`, `models/news_sentiment_model.joblib` · [News sentiment](/architecture/news-sentiment.md) |
-| 5 | LLM analysis | 🟡 old single call · 🟡 click analysis (3 analysts, on click) built, not merged | `pipeline/llm.py` · `Backend/agents/` ([AI agent review](/architecture/agent-review.md)) |
+| 5 | LLM analysis | 🟡 old single call · 🟡 click analysis (3 analysts, on click) built, local only | `pipeline/llm.py` · `Backend/agents/` ([AI agent review](/architecture/agent-review.md)) |
 | 6 | Risk/size (ATR) | ✅ | `pipeline/rank.py`, `app/main.py` |
 | 7 | Idea cards UI | ✅ (`ReasonText` link bug) | `frontend/src/components/ideas/` |
 | 8 | Backtest/event study | ⬜ | |
@@ -37,7 +37,7 @@ Status: ✅ Done · 🟡 Built, unvalidated · ⬜ Todo · ⏸ Deferred (user br
 | T8 | Backtest, event study, latency (state survivorship bias) · the S&P 500 join/leave log exists but only 40% of stocks removed since 2016 still have Yahoo prices (T19) | ⬜ |
 | T11 | Numeric confirmation layer | ⬜ waiting on user approval · [Verification layer](/project/verification-layer.md) |
 | T12 | Per-stock sentiment questionnaire | 🟡 backend ready, no UI |
-| T14 | Click analysis: 3 analysts run when a stock is opened (1w), stored in `stock_analysis`; home page ML-only; old 12-agent review, quick review and hourly review job deleted · branch `feat/click-analysis` (2026-11-24): backend suite and frontend build pass, real qwen run on a scratch DB ok · next: user tests with real prices, merge | 🟡 · [AI agent review](/architecture/agent-review.md) |
+| T14 | Click analysis: 3 analysts run when a stock is opened (1w), stored in `stock_analysis`; home page ML-only and 1 week only; old 12-agent review, quick review and hourly review job deleted; backup LLM (qwen then xAI), news gauge = positive minus negative · local only (2026-11-24): backend suite 318 tests and frontend build pass, real runs ok on a scratch DB · next: user tests with real prices, push, run on Neon | 🟡 · [AI agent review](/architecture/agent-review.md) |
 | T13 | Personalized matching (branch `fais-questionire`): step 1 store all filtered stocks + `atr_pct` ✅ · step 2 matcher `app/matching.py` + `tests/test_matching.py` ✅ · step 3 API `/api/recommendations` ranks all stocks per user + UI shows match reasons ✅ · onboarding now 11 GICS sectors ✅ · real data needs `ingest` + `rank` ⬜ | 🟡 |
 | T14 | Big-move badge (chart-only model, 1w): train on Kaggle ✅ · serve in `rank.py` + API + UI badge ✅ · needs real `ingest` + `rank` to show numbers ⬜ | 🟡 |
 | T15 | Direction (up/down) prediction from news, chart, RSI/MACD, ML | ❌ dropped 2026-11-06 · [Direction prediction](/experiments/direction-prediction.md) |

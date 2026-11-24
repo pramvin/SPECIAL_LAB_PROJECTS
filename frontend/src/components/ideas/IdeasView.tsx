@@ -243,20 +243,34 @@ export function IdeasView({
           aria-label="Holding period"
           className="flex flex-wrap items-center gap-2"
         >
-          {HORIZONS.map((h) => (
-            <Link
-              key={h.value}
-              href={`/?h=${h.value}`}
-              aria-current={h.value === horizon ? "page" : undefined}
-              className={`rounded-full px-5 py-2.5 font-body-sm text-body-sm font-medium transition-colors ${
-                h.value === horizon
-                  ? "bg-on-surface text-white"
-                  : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
-              }`}
-            >
-              {h.label}
-            </Link>
-          ))}
+          {HORIZONS.map((h) =>
+            h.value === "1w" ? (
+              <Link
+                key={h.value}
+                href="/?h=1w"
+                aria-current={h.value === horizon ? "page" : undefined}
+                className={`rounded-full px-5 py-2.5 font-body-sm text-body-sm font-medium transition-colors ${
+                  h.value === horizon
+                    ? "bg-on-surface text-white"
+                    : "bg-surface-container-low text-on-surface hover:bg-surface-container-high"
+                }`}
+              >
+                {h.label}
+              </Link>
+            ) : (
+              <span
+                key={h.value}
+                aria-disabled="true"
+                title={`${h.label} is coming soon`}
+                className="inline-flex cursor-not-allowed items-center gap-2 rounded-full bg-surface-container-low px-5 py-2.5 font-body-sm text-body-sm font-medium text-on-surface-variant opacity-60"
+              >
+                {h.label}
+                <span className="rounded-full border border-surface-container-high bg-white px-2 py-0.5 text-[11px] font-semibold">
+                  Coming soon
+                </span>
+              </span>
+            ),
+          )}
         </nav>
       </header>
 

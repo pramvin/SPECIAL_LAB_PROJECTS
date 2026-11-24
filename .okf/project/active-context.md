@@ -3,10 +3,10 @@ type: Active Context
 title: Current focus
 description: Open problems, pending user decisions, and next steps (the most frequently updated file)
 tags: [active]
-generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-24T09:00:00Z }
+generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-24T10:00:00Z }
 ---
 
-**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". **New front end (user, 2026-11-24), built on local branch `feat/click-analysis`, not merged or pushed:** the home page is ML only (Top 5 per horizon, 3 newest headlines with sentiment pills, Buy/Sell, plus a Latest news box that refreshes Yahoo headlines on demand); opening a stock (1 week) starts three LLM analysts (chart, news, social) in parallel, stored in `stock_analysis` · the 12-agent review, quick review and hourly review job are deleted · see [AI agent review](/architecture/agent-review.md). Also pending: the 2-hour news refresh on GitHub (see Waiting on the user).
+**Focus:** direction (up/down) prediction is **retired** (user, 2026-11-06): no test beat "always up" or the shuffled control, see [Direction prediction](/experiments/direction-prediction.md). The app may claim only the **big-move chance** badge (chart-only, AUC 0.674 on 2023–2026) and stock matching, not "predicts up/down". **New front end (user, 2026-11-24), merged into the local `main` and polished on local branch `feat/click-analysis-polish`, nothing pushed:** the home page is ML only and 1 week only (1 month and 3 months show "Coming soon"; Top 5 per horizon, 3 newest headlines with sentiment pills, Buy/Sell, plus a Latest news box that refreshes Yahoo headlines on demand); opening a stock (1 week) starts three LLM analysts (chart, news, social) in parallel, stored in `stock_analysis` · the 12-agent review, quick review and hourly review job are deleted · see [AI agent review](/architecture/agent-review.md). Also pending: the 2-hour news refresh on GitHub (see Waiting on the user).
 
 **Hourly news routine** (2026-11-21, user): a macOS LaunchAgent runs `pipeline.collect_hourly` every hour against Neon (headlines, local sentiment, price reaction after each headline, earnings calendar, intraday volume of the curated stocks, shadow Top 5) · no AI step since 2026-11-24 · not committed or pushed (user said no) · runs only while the Mac is awake · see [Hourly news routine](/architecture/news-routine.md).
 
@@ -18,7 +18,7 @@ No Kaggle session is running (stopped 2026-11-06); a draft notebook `faislol/not
 
 # Git status
 
-- `main` = `7c87543` (PR #19 merged) · local branch `feat/click-analysis` = main + three branches (`feat/click-analysis-engine`, `feat/live-news-api`, `feat/click-analysis-frontend`) + router wiring · nothing pushed · worktrees for the three branches are in `~/Desktop/planwise-wt/` (a, b, c) · Render deploys `main` automatically · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
+- origin/`main` = `7c87543` (PR #19) · the local `main` already holds the click analysis (three branches merged: `feat/click-analysis-engine`, `feat/live-news-api`, `feat/click-analysis-frontend`) and the follow-up work (backup LLM, gauge, disabled tabs, StockTwits text fix) is on local branch `feat/click-analysis-polish` · nothing pushed · worktrees `~/Desktop/planwise-wt/{a,b,c}` still exist for the three branches (can be removed) · Render deploys `main` automatically · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
 - Render deploys `main` automatically. The first deploy after merging #13 and #15 failed (2026-11-22): the merge dropped `idempotency` from the imports in `app/main.py`, so the app crashed at startup with a `NameError`; #18 fixed it and the live service was not checked (the Render dashboard needs the user's login) · Neon Postgres is live for data, Render still lacks `DATABASE_URL`
 - Ask before committing or pushing (rule in `AGENTS.md`)
 
@@ -38,12 +38,13 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 
 # Open problems
 
-1. Click analysis was run for real only on a scratch DB with synthetic prices (qwen, 160 s, 9,183 tokens); it has not run on Neon or with real prices, and the quality of the text is not validated · see [AI agent review](/architecture/agent-review.md)
+1. Click analysis ran for real on a scratch DB with real Yahoo prices (NVDA, XOM, JPM, JNJ): qwen took 160 s to 6.6 min per stock and was down for a while (503), xAI took 18 to 29 s · it has not run on Neon, and the quality of the text is not validated · see [AI agent review](/architecture/agent-review.md)
 2. News sentiment labels are word-list copies: 64% Neutral, price words (down, slips, up) missed, no human labels yet; the page tells users labels can be wrong · see [News sentiment](/architecture/news-sentiment.md)
 3. Per-stock questionnaire: backend only (`sentiment_responses`), no UI, no answers are saved
 4. Session tokens are stored unhashed in the DB · see [Auth and security](/architecture/auth-security.md)
 5. Reddit has no keys, so the social box uses StockTwits only; `shadow.py` recipe `ai_veto` reads old `agent_runs` rows and now equals `rules`
 6. `Backend/.venv` was created 2026-11-24 with `uv` from `requirements.txt` plus `httpx2` (tests need it; add it to `requirements.txt`?)
+7. Yahoo Search returns few headlines for some stocks (XOM: 2, both older than 7 days), so the news block can be empty; `yfinance` `Ticker.news` is untried
 
 # Runtime status
 
@@ -60,13 +61,13 @@ Still to do: OpenCode left a silent `except` in `load_bundle` in `pipeline/bigmo
 1. Approve source tiers + corroboration rule (Proposal)
 2. PR #13 is merged; add the repo secret `DATABASE_URL` (Neon), then run the workflow once by hand (Actions → Run workflow) · it runs `pipeline.news` + `pipeline.sentiment` every 2 hours (cron, may lag 5–15 min, never run on GitHub yet) · prices are not refreshed by it (`pipeline.ingest` last ran for 2026-11-02) · also add `DATABASE_URL` on Render and reset the exposed Neon password
 3. Want the per-stock questionnaire back in the UI? (the UI was removed)
-4. Real LLM runs: `Backend/.env` has `AGENT_LLM_*` for `gateway.9arm.co` (qwen first; xAI `grok-4.3` only if it fails, user 2026-11-24) · the click analysis spends about 9k tokens per opened stock · real runs without `PLANWISE_DB` write to Neon and show on the live site (confirm first) · optional: `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`
+4. Real LLM runs: `Backend/.env` needs `AGENT_LLM_*` (qwen at `gateway.9arm.co`) and `AGENT_LLM_FALLBACK_*` (xAI `grok-4.3`) · the backup takes over on error or after 50 s of silence (user 2026-11-24) · `Backend/.env` does not exist on this machine now · the click analysis spends about 9k tokens per opened stock · real runs without `PLANWISE_DB` write to Neon and show on the live site (confirm first) · optional: `REDDIT_CLIENT_ID`/`REDDIT_CLIENT_SECRET`
 5. Numeric confirmation layer: [Verification layer](/project/verification-layer.md)
 6. Matching: replace the guessed ATR volatility in `app/matching.py` with `bigmove_p` (the only validated signal, 1-week only)? The user was asked and has not answered "do it" or "not yet"
 7. Schedule `pipeline.ingest` + `pipeline.rank` against Neon daily? Done once by hand on 2026-11-21 (user OK): Neon prices to 2026-11-20, ranking as of 2026-11-20 replaced all recommendations (old rows backed up in the session scratchpad only). They are not in the hourly job and `rank` replaces every recommendation on each run, so the shadow tracker stops logging after 4 days unless they are run daily
 
 # Next
 
-Review and test `feat/click-analysis` with real prices → merge to `main` when the user says → refresh `pipeline.ingest` + `pipeline.rank` on Neon · T0 (user labels) ∥ T2 → T1 → T7 when the user asks → T8 · task table: [Progress](/project/progress.md)
+Test the click analysis with real prices → push and open a PR when the user says → refresh `pipeline.ingest` + `pipeline.rank` on Neon · T0 (user labels) ∥ T2 → T1 → T7 when the user asks → T8 · task table: [Progress](/project/progress.md)
 
 Experiments with code already written: `python -m pipeline.llm_ab --arm anon` (done) · `--arm think` (failed, keep think off) · results in [Results](/experiments/results.md)
