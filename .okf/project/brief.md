@@ -12,8 +12,8 @@ generated: { by: claude-code/claude-sonnet-5-5, at: 2026-11-18T05:00:00Z }
 
 - S&P 500 only · trade ideas are **long-only**; simulated positions support **long and short** · holding periods `1w` `1m` `3m`
 - **No AI runs on the user's machine** → remote API, or Kaggle + Cloudflare tunnel ([runbook](/runbooks/kaggle-gateways.md))
-- LLM = remote OpenAI-compatible API xAI `https://api.x.ai/v1`, model `grok-4.3` (user, 2026-11-18; replaces `gateway.9arm.co` qwen3.8, too slow, and Ollama `qwen3:8b` on Kaggle) · used by the multi-agent review in [AI agent review](/architecture/agent-review.md)
-- Social data (Reddit, StockTwits) and SEC EDGAR are **allowed** for the agent review (user, 2026-11-17) · X is still not used
+- LLM = remote OpenAI-compatible API: `gateway.9arm.co` qwen3.8-27b-fp8 first, xAI `grok-4.3` only if it fails (user, 2026-11-24) · used only by the click analysis in [AI agent review](/architecture/agent-review.md), never on the home page
+- Social data (Reddit, StockTwits) is **allowed** (user, 2026-11-17) · SEC EDGAR is no longer used · X is still not used
 - Earnings trigger: deferred, the user brings it back — **do not start on your own**
 - The user prefers **English** replies · the web UI is in English
 

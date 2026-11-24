@@ -1,5 +1,9 @@
 # Update Log
 
+## 2026-11-24
+* **Replaced**: the 12-agent review, the quick review, the hourly review job and the AI news filter are superseded by the click analysis (three analysts, run when a stock is opened, stored in `stock_analysis`); the home page no longer shows any AI output — [AI agent review](/architecture/agent-review.md).
+* **Retired**: the SEC, fundamentals and macro data in the AI step, the bull/bear, trader, risk and portfolio-manager roles, and the Buy/Overweight/Hold/Underweight/Sell ratings.
+
 ## 2026-11-22
 * **Replaced**: the agent review prompts and data. The short prompts and the FMP fundamentals source are superseded by the full TradingAgents instructions and Yahoo Finance fundamentals, indicators and macro; the old tab layout of the AI panel is superseded by the verdict card with a More info area — [AI agent review](/architecture/agent-review.md).
 * **Retired**: unused frontend dashboard, sidebar and mobile top bar components with their mock data, the FMP fetchers, and `triage.is_triage`; all repository files are now in English.
