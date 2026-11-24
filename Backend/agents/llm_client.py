@@ -1,4 +1,4 @@
-"""OpenAI-compatible chat client for the agent roles.
+"""OpenAI-compatible chat client for the analyst roles.
 
 The model runs remotely (never on the user's machine). Every call asks for one
 JSON object, strips a thinking block and markdown fences, retries transient
@@ -10,7 +10,7 @@ import json
 import re
 import threading
 import time
-from typing import Any, Protocol
+from typing import Any
 
 import requests
 
@@ -23,14 +23,6 @@ class LLMError(Exception):
 
 class AuthError(LLMError):
     """401/403 from the gateway: the key is wrong or revoked, so no later call can work either."""
-
-
-class LLM(Protocol):
-    model: str
-    deep_model: str
-
-    def chat_json(self, role: str, system: str, user: str, deep: bool = False) -> dict:
-        ...
 
 
 def scrub(text: str, secret: str | None) -> str:
@@ -63,12 +55,10 @@ class OpenAICompatLLM:
     RETRY_STATUSES = {429, 500, 502, 503, 504, 522, 524}
     BACKOFF = (3, 5, 10, 20, 30, 30, 30, 30)
 
-    def __init__(self, base_url: str, api_key: str, model: str, deep_model: str | None = None,
-                 timeout: int = config.REQUEST_TIMEOUT):
+    def __init__(self, base_url: str, api_key: str, model: str, timeout: int = config.REQUEST_TIMEOUT):
         self.base_url = base_url.rstrip("/")
         self.api_key = api_key
         self.model = model
-        self.deep_model = deep_model or model
         self.timeout = timeout
         self._no_response_format = False
 
@@ -110,8 +100,8 @@ class OpenAICompatLLM:
                     parts.append(delta["content"])
         return "".join(parts), usage, model, finish
 
-    def chat_json(self, role: str, system: str, user: str, deep: bool = False) -> dict:
-        model = self.deep_model if deep else self.model
+    def chat_json(self, role: str, system: str, user: str) -> dict:
+        model = self.model
         body: dict[str, Any] = {
             "model": model,
             "messages": [{"role": "system", "content": system}, {"role": "user", "content": user}],
@@ -177,15 +167,14 @@ class FakeLLM:
     """
 
     def __init__(self, responses: dict[str, list] | None = None, auto: bool = False,
-                 model: str = "fake-quick", deep_model: str = "fake-deep"):
+                 model: str = "fake-model"):
         self.responses = {role: list(items) for role, items in (responses or {}).items()}
         self.auto = auto
         self.model = model
-        self.deep_model = deep_model
         self.calls: list[dict] = []
         self._lock = threading.Lock()
 
-    def chat_json(self, role: str, system: str, user: str, deep: bool = False) -> dict:
+    def chat_json(self, role: str, system: str, user: str) -> dict:
         with self._lock:
             queued = self.responses.get(role)
             item = queued.pop(0) if queued else None
@@ -198,9 +187,9 @@ class FakeLLM:
                 data = json.loads(raw) if isinstance(raw, str) else item
             except ValueError:
                 data = {}
-            self.calls.append({"role": role, "system": system, "user": user, "deep": deep,
+            self.calls.append({"role": role, "system": system, "user": user,
                                "data": data, "raw": raw})
-        return {"data": data, "raw": raw, "model": self.deep_model if deep else self.model,
+        return {"data": data, "raw": raw, "model": self.model,
                 "tokens_in": max(1, len(system + user) // 4), "tokens_out": max(1, len(raw) // 4),
                 "latency_ms": 1}
 
@@ -213,38 +202,16 @@ def _allowed_ids(user: str) -> list[str]:
     return [i for i in ids if i and not i.startswith("(")]
 
 
-def _point(ids: list[str], text: str = "The provided evidence supports this view.") -> dict:
-    return {"text": text, "evidence": ids[:1]}
-
-
 def _auto_output(role: str, user: str) -> dict:
     ids = _allowed_ids(user)
-    if role in ("market", "news", "fundamentals", "social"):
-        if not ids:
-            return {"signal": "no_data", "summary": "No usable data was provided.",
-                    "points": [], "data_gaps": ["No usable data was provided."]}
-        return {"signal": "neutral", "summary": "The provided evidence is limited.",
-                "points": [_point(ids)], "data_gaps": []}
-    if role in ("bull", "bear"):
-        return {"points": [_point(ids, "The evidence can be read this way."),
-                           _point(ids[1:2] or ids, "A second point rests on the same context."),
-                           _point(ids[2:3] or ids, "A third point rests on the same context.")]}
-    if role == "research_manager":
-        return {"lean": "Hold", "rationale": "The evidence is mixed.", "evidence": ids[:1]}
-    if role == "trader":
-        return {"stance": "wait", "rationale": "Wait for confirmation.", "evidence": ids[:1],
-                "suggested_stop": None, "suggested_target": None}
-    if role in ("aggressive", "conservative", "neutral"):
-        return {"view": "Keep risk small until the evidence agrees.", "suggested_position_pct": 5,
+    if role == "market":
+        return {"summary": "The price data is limited.", "evidence": ids[:1],
+                "support": [], "resistance": [],
+                "momentum": {"label": "flat", "why": ""}, "volume": {"label": "normal", "why": ""}}
+    if role == "news":
+        return {"direction": "neutral", "summary": "The headlines do not point one way.",
                 "evidence": ids[:1]}
-    if role == "portfolio_manager":
-        return {"rating": "Hold", "summary": "Balanced evidence.",
-                "key_risks": [_point(ids, "The evidence is thin.")], "evidence": ids[:1]}
-    if role == "triage":
-        return {"rating": "Hold", "confidence": "low", "summary": "The signals are mixed.",
-                "points": [_point(ids, "The rule idea is the main evidence."),
-                           _point(ids[1:2] or ids, "A second point rests on the same brief.")]}
-    if role == "reflection":
-        return {"reflection": "The alpha over the window is small and the window is short, "
-                              "so this says little about the thesis."}
+    if role == "social":
+        return {"direction": "neutral", "summary": "The posts do not point one way.",
+                "evidence": ids[:1], "items": []}
     return {}
