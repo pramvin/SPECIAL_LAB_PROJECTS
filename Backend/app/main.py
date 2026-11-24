@@ -19,7 +19,7 @@ from fastapi import Request
 from fastapi import Cookie, FastAPI, HTTPException, Response
 from pydantic import BaseModel, Field
 
-from . import idempotency, matching
+from . import analysis_api, idempotency, matching
 from .dbcompat import IntegrityError, column_names, connect, table_names
 from .seed import NEWS_SOURCE, SEED
 from .watchlist import build_router as build_watchlist_router
@@ -819,6 +819,7 @@ def ticker_prices(ticker: str, days: int = 60, session: str | None = Cookie(defa
 app.include_router(build_watchlist_router(db, current_user))
 app.include_router(build_wallet_router(db, current_user))
 app.include_router(build_trading_router(db, current_user))
+app.include_router(analysis_api.router)
 
 @app.get("/api/news-sentiment")
 def news_sentiment(tickers: str, limit: int = 3):
